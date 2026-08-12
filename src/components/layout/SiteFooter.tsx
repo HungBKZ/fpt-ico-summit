@@ -162,6 +162,48 @@ export function SiteFooter() {
                 {siteConfig.address}
               </address>
 
+              <a
+                href={siteConfig.facebookPageUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-link"
+                style={{ fontSize: "var(--text-sm)" }}
+              >
+                Facebook Page
+              </a>
+
+              <a
+                href={siteConfig.messengerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-link-accent"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.375rem",
+                  fontSize: "var(--text-sm)",
+                  fontWeight: 600,
+                }}
+              >
+                Message ICO
+                <svg
+                  aria-hidden="true"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
+                  <polyline points="15 3 21 3 21 9" />
+                  <line x1="10" y1="14" x2="21" y2="3" />
+                </svg>
+                <span className="sr-only">(opens in a new tab)</span>
+              </a>
+
               {/* 360 tour CTA */}
               <a
                 href={siteConfig.campus360Url}

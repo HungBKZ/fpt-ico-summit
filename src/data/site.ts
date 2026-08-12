@@ -27,6 +27,12 @@ export const siteConfig = {
   /** External 360 campus tour — open in new tab, no iframe for MVP. */
   campus360Url: "https://cantho.fpt.edu.vn/360-tour/",
 
+  /** Social links for ICO contact and messaging. */
+  facebookPageUrl:
+    "https://www.facebook.com/profile.php?id=61577438391152&locale=vi_VN",
+  messengerUrl:
+    "https://www.facebook.com/messages/t/61577438391152/",
+
   /**
    * Registration URL.
    * Leave as empty string until a verified URL is supplied.
