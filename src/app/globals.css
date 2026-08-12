@@ -1,26 +1,1593 @@
 @import "tailwindcss";
 
+/* ==========================================================================
+   Design tokens — FPT ICO Summit 2026
+   All colour/spacing/radius values must flow from here.
+   Do not hardcode hex values inside components.
+   ========================================================================== */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* --- Brand colours ---------------------------------------------------- */
+  /* FPT-inspired orange: warm, energetic accent */
+  --color-orange:        #E85D04;
+  --color-orange-light:  #F48C42;
+  --color-orange-subtle: #FEF0E6;
+
+  /* ICO-inspired blue: international/education accent */
+  --color-blue:          #1A5EA8;
+  --color-blue-light:    #3A7FD4;
+  --color-blue-subtle:   #EAF2FB;
+
+  /* Deep navy: institutional credibility, headings, main text */
+  --color-navy:          #0D1B3E;
+  --color-navy-muted:    #2C3E6B;
+
+  /* Neutrals */
+  --color-warm-white:    #FAFAF8;
+  --color-off-white:     #F5F4F0;
+  --color-border:        #E2E0DC;
+  --color-border-strong: #C8C5BE;
+
+  /* Text scale */
+  --color-text-primary:   var(--color-navy);
+  --color-text-secondary: #4A5568;
+  --color-text-muted:     #718096;
+  --color-text-inverse:   #FFFFFF;
+
+  /* Section backgrounds */
+  --color-bg-page:        var(--color-warm-white);
+  --color-bg-alt:         var(--color-off-white);
+  --color-bg-dark:        var(--color-navy);
+  --color-bg-accent:      var(--color-blue-subtle);
+
+  /* --- Typography -------------------------------------------------------- */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  /* Space Grotesk for display headings — loaded in layout.tsx */
+  --font-display: "Space Grotesk", "Inter", ui-sans-serif, sans-serif;
+
+  /* Type scale (fluid where useful) */
+  --text-xs:   0.75rem;   /* 12px */
+  --text-sm:   0.875rem;  /* 14px */
+  --text-base: 1rem;      /* 16px */
+  --text-lg:   1.125rem;  /* 18px */
+  --text-xl:   1.25rem;   /* 20px */
+  --text-2xl:  1.5rem;    /* 24px */
+  --text-3xl:  1.875rem;  /* 30px */
+  --text-4xl:  2.25rem;   /* 36px */
+  --text-5xl:  3rem;      /* 48px */
+  --text-6xl:  3.75rem;   /* 60px */
+
+  /* Line heights */
+  --leading-tight:  1.2;
+  --leading-snug:   1.35;
+  --leading-normal: 1.6;
+
+  /* Letter spacing */
+  --tracking-wide:   0.05em;
+  --tracking-wider:  0.1em;
+
+  /* --- Spacing ----------------------------------------------------------- */
+  --space-section: 5rem;          /* vertical padding between major sections */
+  --space-section-lg: 7rem;
+
+  /* --- Radius ------------------------------------------------------------ */
+  --radius-sm:  0.375rem;  /* 6px  — small elements */
+  --radius-md:  0.75rem;   /* 12px — cards */
+  --radius-lg:  1rem;      /* 16px — large cards */
+  --radius-xl:  1.5rem;    /* 24px — feature panels */
+  --radius-full: 9999px;   /* pills / badges */
+
+  /* --- Shadows ----------------------------------------------------------- */
+  --shadow-sm:  0 1px 3px 0 rgb(13 27 62 / 0.06), 0 1px 2px -1px rgb(13 27 62 / 0.04);
+  --shadow-md:  0 4px 16px -2px rgb(13 27 62 / 0.10), 0 2px 6px -2px rgb(13 27 62 / 0.06);
+  --shadow-lg:  0 10px 32px -4px rgb(13 27 62 / 0.14), 0 4px 10px -4px rgb(13 27 62 / 0.08);
+
+  /* --- Transitions ------------------------------------------------------- */
+  --transition-fast:   150ms ease;
+  --transition-base:   220ms ease;
+  --transition-slow:   350ms ease;
+
+  /* --- Container --------------------------------------------------------- */
+  --container-max:    1280px;
+  --container-pad-x: clamp(1rem, 5vw, 2rem);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* ==========================================================================
+   Base reset & global styles
+   ========================================================================== */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    /* Offset anchor scroll targets so sticky header does not cover them */
+    scroll-padding-top: 4.5rem;
+  }
+
+  /* Honour user motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    background-color: var(--color-bg-page);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100dvh;
+  }
+
+  /* Focus ring — visible and brand-consistent */
+  :focus-visible {
+    outline: 2px solid var(--color-orange);
+    outline-offset: 3px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Headings use display font */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    line-height: var(--leading-tight);
+    color: var(--color-text-primary);
+    font-weight: 700;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  img,
+  video {
+    max-width: 100%;
+    display: block;
+  }
+
+  /* Remove default list styles */
+  ul, ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  p {
+    margin: 0;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ==========================================================================
+   Layout utilities
+   ========================================================================== */
+
+@layer utilities {
+  /* Site-wide container */
+  .site-container {
+    width: 100%;
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--container-pad-x);
+  }
+
+  /* Consistent vertical section padding */
+  .section-padding {
+    padding-block: var(--space-section);
+  }
+
+  .section-padding-lg {
+    padding-block: var(--space-section-lg);
+  }
+
+  /* Eyebrow label above section headings */
+  .eyebrow {
+    display: inline-block;
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: var(--tracking-wider);
+    text-transform: uppercase;
+    color: var(--color-orange);
+  }
+
+  /* Orange accent underline for section headings */
+  .heading-accent {
+    position: relative;
+    display: inline-block;
+  }
+
+  .heading-accent::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -0.15em;
+    width: 2rem;
+    height: 3px;
+    background-color: var(--color-orange);
+    border-radius: var(--radius-full);
+  }
+
+  /* Visually hidden but accessible to screen readers */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* Skip link — becomes visible on focus */
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: 1rem;
+    z-index: 9999;
+    padding: 0.5rem 1rem;
+    background: var(--color-orange);
+    color: var(--color-text-inverse);
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    transition: top var(--transition-fast);
+  }
+
+  .skip-link:focus {
+    top: 1rem;
+  }
+
+  /* Alternate section background */
+  .bg-alt {
+    background-color: var(--color-bg-alt);
+  }
+
+  .bg-dark {
+    background-color: var(--color-bg-dark);
+    color: var(--color-text-inverse);
+  }
+
+  .bg-accent {
+    background-color: var(--color-bg-accent);
+  }
+}
+
+/* ==========================================================================
+   Footer link hover utilities — CSS-only, no JS handlers needed.
+   ========================================================================== */
+
+@layer utilities {
+  /* Standard footer link: white/70 → white on hover */
+  .footer-link {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+  }
+  .footer-link:hover {
+    color: #ffffff;
+  }
+
+  /* Accent footer link (orange-light → white on hover) */
+  .footer-link-accent {
+    color: var(--color-orange-light);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+  }
+  .footer-link-accent:hover {
+    color: #ffffff;
+  }
+
+  /* Nav link hover in header — used on desktop anchor items */
+  .nav-link {
+    display: block;
+    padding: 0.375rem 0.75rem;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+  }
+  .nav-link:hover {
+    color: var(--color-navy);
+    background-color: var(--color-off-white);
+  }
+
+  /* Primary CTA button (orange pill) */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1.25rem;
+    background-color: var(--color-orange);
+    color: #ffffff;
+    font-weight: 600;
+    font-size: var(--text-sm);
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    transition: background-color var(--transition-fast);
+    white-space: nowrap;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-primary:hover {
+    background-color: var(--color-orange-light);
+  }
+}
+
+/* ==========================================================================
+   Hero section utilities
+   ========================================================================== */
+
+@layer utilities {
+  /* Full-bleed hero wrapper — fills viewport height on large screens */
+  .hero-section {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: clamp(560px, 88svh, 820px);
+    overflow: hidden;
+    background-color: var(--color-navy);
+  }
+
+  /* Dark gradient over hero image — left-to-navy, right fades to transparent */
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      rgb(13 27 62 / 0.96) 0%,
+      rgb(13 27 62 / 0.80) 40%,
+      rgb(13 27 62 / 0.30) 70%,
+      rgb(13 27 62 / 0.10) 100%
+    );
+    z-index: 1;
+  }
+
+  /* On mobile the overlay is denser so text stays readable over full-width image */
+  @media (max-width: 767px) {
+    .hero-overlay {
+      background: linear-gradient(
+        180deg,
+        rgb(13 27 62 / 0.55) 0%,
+        rgb(13 27 62 / 0.92) 55%,
+        rgb(13 27 62 / 0.98) 100%
+      );
+    }
+  }
+
+  /* Content sits above the overlay */
+  .hero-content {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Hero H1 — fluid scale */
+  .hero-h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2.25rem, 5vw + 0.5rem, 4rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+  }
+
+  /* Orange word highlight inside hero H1 */
+  .hero-h1 .accent {
+    color: var(--color-orange-light);
+  }
+
+  /* Hero meta line (date · venue) */
+  .hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.65);
+    letter-spacing: 0.01em;
+  }
+
+  .hero-meta-dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background-color: var(--color-orange-light);
+    flex-shrink: 0;
+  }
+
+  /* Secondary outline button (hero only) */
+  .btn-outline-white {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    padding: 0.625rem 1.375rem;
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    transition:
+      border-color var(--transition-fast),
+      color var(--transition-fast),
+      background-color var(--transition-fast);
+    white-space: nowrap;
+  }
+  .btn-outline-white:hover {
+    border-color: rgba(255, 255, 255, 0.85);
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.08);
+  }
+
+  /* Large primary CTA inside hero */
+  .btn-primary-lg {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    padding: 0.75rem 1.75rem;
+    background-color: var(--color-orange);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: var(--text-base);
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+    white-space: nowrap;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-primary-lg:hover {
+    background-color: var(--color-orange-light);
+    transform: translateY(-1px);
+  }
+
+  /* Stats strip */
+  .stats-strip {
+    background-color: var(--color-navy);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .stats-strip--light {
+    background-color: var(--color-off-white);
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  /* Individual stat number */
+  .stat-number {
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+    font-weight: 800;
+    line-height: 1;
+    color: var(--color-orange-light);
+  }
+
+  .stats-strip--light .stat-number {
+    color: var(--color-orange);
+  }
+
+  .stat-label {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.65);
+    line-height: var(--leading-snug);
+  }
+
+  .stats-strip--light .stat-label {
+    color: var(--color-text-secondary);
+  }
+
+  /* Divider between stats (vertical rule) */
+  .stats-divider {
+    width: 1px;
+    align-self: stretch;
+    background-color: rgba(255, 255, 255, 0.12);
+    flex-shrink: 0;
+  }
+
+  .stats-strip--light .stats-divider {
+    background-color: var(--color-border);
+  }
+}
+
+/* ==========================================================================
+   Stats grid layout
+   ========================================================================== */
+
+@layer utilities {
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 768px) {
+    .stats-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .stat-item {
+    display: flex;
+    align-items: stretch;
+  }
+
+  .stat-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding: 1.75rem 1.5rem;
+    flex: 1;
+  }
+
+  /* Hide the divider before the 3rd item (index 2) on mobile
+     because it's the first item in the second row of a 2-col grid */
+  @media (max-width: 767px) {
+    .stat-divider-2 {
+      display: none;
+    }
+  }
+}
+
+/* ==========================================================================
+   Phase 3 — Pillars section
+   ========================================================================== */
+
+@layer utilities {
+  /* Two-column layout: intro text left, cards right */
+  .pillars-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  @media (min-width: 1024px) {
+    .pillars-grid {
+      grid-template-columns: 2fr 3fr;
+      gap: 5rem;
+      align-items: start;
+    }
+  }
+
+  /* Card grid: 1-col mobile → 2-col tablet+ */
+  .pillar-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .pillar-cards {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /* Individual pillar card */
+  .pillar-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    padding: 1.5rem;
+    background-color: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--transition-base), transform var(--transition-base);
+    overflow: hidden;
+  }
+
+  .pillar-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  /* Coloured top border stripe per card */
+  .pillar-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+
+  .pillar-card--orange::before { background-color: var(--color-orange); }
+  .pillar-card--blue::before   { background-color: var(--color-blue); }
+  .pillar-card--navy::before   { background-color: var(--color-navy); }
+
+  /* Icon container inside pillar card */
+  .pillar-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--radius-md);
+    flex-shrink: 0;
+  }
+
+  .pillar-icon--orange {
+    background-color: var(--color-orange-subtle);
+    color: var(--color-orange);
+  }
+
+  .pillar-icon--blue {
+    background-color: var(--color-blue-subtle);
+    color: var(--color-blue);
+  }
+
+  .pillar-icon--navy {
+    background-color: var(--color-off-white);
+    color: var(--color-navy);
+  }
+
+  .pillar-card-title {
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    font-weight: 700;
+    color: var(--color-navy);
+    line-height: var(--leading-snug);
+  }
+
+  .pillar-card-body {
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    color: var(--color-text-secondary);
+  }
+
+  /* Photo strip below cards — 3 images side by side */
+  .pillar-photo-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+}
+
+/* ==========================================================================
+   Phase 3 — Experience bento grid
+   ========================================================================== */
+
+@layer utilities {
+  /*
+   * Bento layout — desktop:
+   *   [  WIDE (span 2)  ] [ tall ]
+   *   [ card ] [ card ]   [ tall ]
+   *
+   * Falls back to a simple 2-col grid on tablet, 1-col on mobile.
+   */
+  .bento-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.875rem;
+  }
+
+  @media (min-width: 640px) {
+    .bento-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .bento-grid {
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: auto auto;
+    }
+  }
+
+  /* Base bento card */
+  .bento-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    min-height: 220px;
+    background-color: var(--color-navy);
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+  }
+
+  .bento-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Wide card spans 2 columns on desktop */
+  @media (min-width: 1024px) {
+    .bento-card--wide {
+      grid-column: span 2;
+    }
+
+    /* Tall card spans 2 rows */
+    .bento-card--tall {
+      grid-row: span 2;
+      min-height: unset;
+    }
+  }
+
+  /* Dark gradient overlay so text is always readable */
+  .bento-card__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      rgb(13 27 62 / 0.92) 0%,
+      rgb(13 27 62 / 0.55) 45%,
+      rgb(13 27 62 / 0.15) 100%
+    );
+    z-index: 1;
+  }
+
+  /* Bento card content (sits above overlay) */
+  .bento-card__content {
+    position: relative;
+    z-index: 2;
+    padding: 1.25rem 1.375rem 1.375rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  /* Small accent chip on each bento card */
+  .bento-card__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    align-self: flex-start;
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--radius-full);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    margin-bottom: 0.25rem;
+  }
+
+  .bento-card__chip--orange {
+    background-color: var(--color-orange);
+    color: #ffffff;
+  }
+
+  .bento-card__chip--blue {
+    background-color: var(--color-blue);
+    color: #ffffff;
+  }
+
+  .bento-card__chip--teal {
+    background-color: #0D7A6A;
+    color: #ffffff;
+  }
+
+  .bento-card__title {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 700;
+    color: #ffffff;
+    line-height: var(--leading-snug);
+  }
+
+  .bento-card--wide .bento-card__title,
+  .bento-card--tall .bento-card__title {
+    font-size: var(--text-xl);
+  }
+
+  .bento-card__desc {
+    font-size: var(--text-sm);
+    color: rgba(255, 255, 255, 0.75);
+    line-height: var(--leading-normal);
+    max-width: 42ch;
+  }
+
+  /* Image fills bento card background */
+  .bento-card__image {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  /* Subtle scale on hover for image */
+  .bento-card:hover .bento-card__image img {
+    transform: scale(1.04);
+    transition: transform var(--transition-slow);
+  }
+}
+
+/* ==========================================================================
+   Phase 4 — Program timeline
+   ========================================================================== */
+
+@layer utilities {
+  /* Three-column day cards on desktop, stacked on mobile */
+  .program-days-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .program-days-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* Individual day card */
+  .program-day-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background-color: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Coloured header band at top of each day card */
+  .program-day-header {
+    padding: 1.25rem 1.375rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .program-day-header--compass { background-color: var(--color-blue-subtle);   border-bottom: 2px solid var(--color-blue); }
+  .program-day-header--flag    { background-color: var(--color-orange-subtle);  border-bottom: 2px solid var(--color-orange); }
+  .program-day-header--star    { background-color: var(--color-navy);           border-bottom: 2px solid var(--color-navy-muted); }
+
+  .program-day-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    align-self: flex-start;
+    padding: 0.2rem 0.625rem;
+    border-radius: var(--radius-full);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .program-day-badge--compass { background-color: var(--color-blue);   color: #fff; }
+  .program-day-badge--flag    { background-color: var(--color-orange);  color: #fff; }
+  .program-day-badge--star    { background-color: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); }
+
+  .program-day-date {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+
+  .program-day-header--compass .program-day-date,
+  .program-day-header--flag    .program-day-date { color: var(--color-text-muted); }
+  .program-day-header--star    .program-day-date { color: rgba(255,255,255,0.6); }
+
+  .program-day-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 700;
+    line-height: var(--leading-snug);
+  }
+
+  .program-day-header--compass .program-day-title,
+  .program-day-header--flag    .program-day-title { color: var(--color-navy); }
+  .program-day-header--star    .program-day-title { color: #ffffff; }
+
+  .program-day-desc {
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+  }
+
+  .program-day-header--compass .program-day-desc,
+  .program-day-header--flag    .program-day-desc { color: var(--color-text-secondary); }
+  .program-day-header--star    .program-day-desc { color: rgba(255,255,255,0.7); }
+
+  /* Slot groups inside a day card */
+  .program-day-slots {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 1.375rem 1.375rem;
+    gap: 1rem;
+    flex: 1;
+  }
+
+  .program-slot-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .program-slot-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background-color: var(--color-border);
+  }
+
+  .program-slot-activities {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .program-activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    line-height: var(--leading-snug);
+  }
+
+  .program-activity-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: var(--color-orange);
+    flex-shrink: 0;
+    margin-top: 0.45em;
+  }
+
+  /* "Runs throughout" continuous activities strip */
+  .program-continuous {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+
+  @media (min-width: 640px) {
+    .program-continuous {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .program-continuous {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .program-continuous-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    padding: 1.125rem 1.25rem;
+    background-color: var(--color-blue-subtle);
+    border: 1px solid rgba(26, 94, 168, 0.15);
+    border-radius: var(--radius-md);
+  }
+
+  .program-continuous-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-blue);
+    color: #ffffff;
+    flex-shrink: 0;
+  }
+
+  .program-continuous-title {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    color: var(--color-navy);
+    line-height: var(--leading-snug);
+  }
+
+  .program-continuous-desc {
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    line-height: var(--leading-normal);
+  }
+}
+
+/* ==========================================================================
+   Phase 4 — Expo section
+   ========================================================================== */
+
+@layer utilities {
+  /* Zone cards: 1-col → 2-col → 3-col with the last item spanning if odd */
+  .expo-zones-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .expo-zones-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .expo-zones-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    /* Last child spans full row if it would be alone */
+    .expo-zones-grid > *:last-child:nth-child(3n - 1) {
+      grid-column: span 2;
+    }
+  }
+
+  .expo-zone-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    padding: 1.375rem 1.5rem;
+    background-color: #ffffff;
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--color-orange);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--transition-base), transform var(--transition-base);
+  }
+
+  .expo-zone-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .expo-zone-number {
+    font-family: var(--font-display);
+    font-size: var(--text-xs);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--color-orange);
+    text-transform: uppercase;
+  }
+
+  .expo-zone-title {
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    font-weight: 700;
+    color: var(--color-navy);
+    line-height: var(--leading-snug);
+  }
+
+  .expo-zone-desc {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    line-height: var(--leading-normal);
+  }
+
+  /* Expo intro layout: text left, image right */
+  .expo-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  @media (min-width: 1024px) {
+    .expo-layout {
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+    }
+  }
+}
+
+/* ==========================================================================
+   Phase 4 — Workshop section
+   ========================================================================== */
+
+@layer utilities {
+  /* Workshop layout: image left, text right */
+  .workshop-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    align-items: center;
+  }
+
+  @media (min-width: 1024px) {
+    .workshop-layout {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  /* Pill-style topic tags */
+  .workshop-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.875rem;
+    background-color: var(--color-off-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--color-navy);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+}
+
+/* ==========================================================================
+   Phase 5 — Partners section
+   ========================================================================== */
+
+@layer utilities {
+  /* Empty-state announcement box */
+  .partners-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 3rem 2rem;
+    background-color: var(--color-off-white);
+    border: 1px dashed var(--color-border-strong);
+    border-radius: var(--radius-lg);
+    text-align: center;
+  }
+
+  .partners-empty-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--radius-md);
+    background-color: var(--color-blue-subtle);
+    color: var(--color-blue);
+  }
+
+  .partners-empty-heading {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 700;
+    color: var(--color-navy);
+  }
+
+  .partners-empty-body {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    max-width: 40ch;
+    line-height: var(--leading-normal);
+  }
+
+  /* Logo grid — shown when confirmed partners exist */
+  .partners-logo-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  @media (min-width: 480px) {
+    .partners-logo-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .partners-logo-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .partners-logo-grid {
+      grid-template-columns: repeat(5, 1fr);
+    }
+  }
+
+  /* Individual partner logo tile */
+  .partner-tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem 1rem;
+    background-color: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    min-height: 5rem;
+    transition: box-shadow var(--transition-base), transform var(--transition-base);
+  }
+
+  .partner-tile:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  /* Text fallback when logo image is null */
+  .partner-tile-name {
+    font-family: var(--font-display);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    color: var(--color-navy);
+    text-align: center;
+    line-height: var(--leading-snug);
+  }
+
+  /* Group label above a set of partner tiles */
+  .partners-group-label {
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: var(--tracking-wider);
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin-bottom: 0.875rem;
+  }
+}
+
+/* ==========================================================================
+   Phase 5 — Mekong section
+   ========================================================================== */
+
+@layer utilities {
+  /* Full-bleed image panel with dark overlay */
+  .mekong-section {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--color-navy);
+  }
+
+  .mekong-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to right,
+      rgb(13 27 62 / 0.90) 0%,
+      rgb(13 27 62 / 0.65) 50%,
+      rgb(13 27 62 / 0.30) 100%
+    );
+    z-index: 1;
+  }
+
+  @media (max-width: 767px) {
+    .mekong-overlay {
+      background: linear-gradient(
+        to bottom,
+        rgb(13 27 62 / 0.40) 0%,
+        rgb(13 27 62 / 0.88) 55%,
+        rgb(13 27 62 / 0.97) 100%
+      );
+    }
+  }
+
+  .mekong-content {
+    position: relative;
+    z-index: 2;
+    padding-block: var(--space-section-lg);
+  }
+
+  .mekong-heading {
+    font-family: var(--font-display);
+    font-size: clamp(1.875rem, 4vw, 3rem);
+    font-weight: 800;
+    line-height: 1.1;
+    color: #ffffff;
+    max-width: 18ch;
+  }
+
+  .mekong-body {
+    font-size: var(--text-lg);
+    line-height: var(--leading-normal);
+    color: rgba(255, 255, 255, 0.80);
+    max-width: 52ch;
+  }
+}
+
+/* ==========================================================================
+   Phase 5 — Venue section
+   ========================================================================== */
+
+@layer utilities {
+  /* Two-column: image left, details right */
+  .venue-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    align-items: center;
+  }
+
+  @media (min-width: 1024px) {
+    .venue-layout {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .venue-address-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .venue-address-label {
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: var(--tracking-wider);
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .venue-address-text {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    line-height: var(--leading-normal);
+    font-style: normal;
+  }
+
+  /* 360 CTA button — prominent, orange */
+  .btn-venue-360 {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--color-orange);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: var(--text-sm);
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+    white-space: nowrap;
+    align-self: flex-start;
+  }
+
+  .btn-venue-360:hover {
+    background-color: var(--color-orange-light);
+    transform: translateY(-1px);
+  }
+}
+
+/* ==========================================================================
+   Phase 6 — FAQ accordion
+   ========================================================================== */
+
+@layer utilities {
+  /* Two-column layout on large screens: intro left, accordion right */
+  .faq-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  @media (min-width: 1024px) {
+    .faq-layout {
+      grid-template-columns: 2fr 3fr;
+      gap: 5rem;
+      align-items: start;
+    }
+  }
+
+  /* Accordion list */
+  .faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background-color: #ffffff;
+  }
+
+  /* Individual item — not a div, uses <details>/<summary> */
+  .faq-item {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .faq-item:last-child {
+    border-bottom: none;
+  }
+
+  /* Summary / trigger button */
+  .faq-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    padding: 1.25rem 1.375rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--color-navy);
+    line-height: var(--leading-snug);
+    transition: background-color var(--transition-fast);
+  }
+
+  .faq-trigger:hover {
+    background-color: var(--color-off-white);
+  }
+
+  /* Chevron icon — rotates when open */
+  .faq-chevron {
+    flex-shrink: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--color-text-muted);
+    transition: transform var(--transition-base), color var(--transition-fast);
+  }
+
+  .faq-item[data-open="true"] .faq-chevron {
+    transform: rotate(180deg);
+    color: var(--color-orange);
+  }
+
+  /* Active trigger highlight */
+  .faq-item[data-open="true"] .faq-trigger {
+    color: var(--color-orange);
+    background-color: var(--color-orange-subtle);
+  }
+
+  /* Answer panel */
+  .faq-panel {
+    overflow: hidden;
+    /* Height animated via JS inline style — respects reduced-motion via CSS */
+  }
+
+  .faq-panel-inner {
+    padding: 0 1.375rem 1.375rem;
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    color: var(--color-text-secondary);
+  }
+
+  /* When reduced-motion is preferred, skip the height animation */
+  @media (prefers-reduced-motion: reduce) {
+    .faq-panel {
+      transition: none !important;
+    }
+  }
+}
+
+/* ==========================================================================
+   Phase 6 — Registration CTA section
+   ========================================================================== */
+
+@layer utilities {
+  /* Full-width navy CTA band */
+  .reg-cta-section {
+    background-color: var(--color-navy);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Subtle decorative arc pattern — purely visual, aria-hidden */
+  .reg-cta-section::before {
+    content: "";
+    position: absolute;
+    top: -6rem;
+    right: -6rem;
+    width: 28rem;
+    height: 28rem;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.04);
+    pointer-events: none;
+  }
+
+  .reg-cta-section::after {
+    content: "";
+    position: absolute;
+    bottom: -8rem;
+    left: -4rem;
+    width: 22rem;
+    height: 22rem;
+    border-radius: 50%;
+    border: 2px solid rgba(232, 93, 4, 0.12);
+    pointer-events: none;
+  }
+
+  .reg-cta-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1.75rem;
+    padding-block: var(--space-section-lg);
+  }
+
+  .reg-cta-eyebrow {
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: var(--tracking-wider);
+    text-transform: uppercase;
+    color: var(--color-orange-light);
+  }
+
+  .reg-cta-heading {
+    font-family: var(--font-display);
+    font-size: clamp(1.875rem, 4vw, 3rem);
+    font-weight: 800;
+    line-height: 1.1;
+    color: #ffffff;
+    max-width: 20ch;
+  }
+
+  .reg-cta-body {
+    font-size: var(--text-lg);
+    color: rgba(255, 255, 255, 0.72);
+    max-width: 50ch;
+    line-height: var(--leading-normal);
+  }
+
+  /* "Opens soon" status badge */
+  .reg-cta-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.375rem;
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.75);
+    letter-spacing: 0.01em;
+  }
+
+  /* Pulsing dot next to status text */
+  .reg-cta-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--color-orange-light);
+    flex-shrink: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .reg-cta-dot {
+      animation: reg-pulse 2s ease-in-out infinite;
+    }
+  }
+
+  @keyframes reg-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.4; transform: scale(0.75); }
+  }
+
+  /* Contact nudge below the status */
+  .reg-cta-contact {
+    font-size: var(--text-sm);
+    color: rgba(255, 255, 255, 0.45);
+    line-height: var(--leading-normal);
+  }
+
+  .reg-cta-contact a {
+    color: rgba(255, 255, 255, 0.70);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color var(--transition-fast);
+  }
+
+  .reg-cta-contact a:hover {
+    color: #ffffff;
+  }
 }
