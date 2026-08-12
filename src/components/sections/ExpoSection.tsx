@@ -9,6 +9,7 @@
  */
 
 import Image from "next/image";
+import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { MediaPlaceholder } from "@/components/ui/MediaPlaceholder";
 import { images } from "@/data/images";
@@ -28,15 +29,17 @@ export function ExpoSection() {
 
           {/* Left — heading + intro copy */}
           <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-            <SectionHeading
-              id="expo-heading"
-              eyebrow="International Expo"
-              heading="One summit. Multiple ways to connect globally."
-              body="The International Expo is planned as the central connection space of FPT ICO Summit 2026, bringing education, culture and international engagement together on campus."
-              level="h2"
-              align="left"
-              accent={true}
-            />
+            <RevealOnScroll>
+              <SectionHeading
+                id="expo-heading"
+                eyebrow="International Expo"
+                heading="One summit. Multiple ways to connect globally."
+                body="The International Expo is planned as the central connection space of FPT ICO Summit 2026, bringing education, culture and international engagement together on campus."
+                level="h2"
+                align="left"
+                accent={true}
+              />
+            </RevealOnScroll>
 
             {/* Quick-fact chips */}
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
@@ -92,11 +95,13 @@ export function ExpoSection() {
         {/* ── Zone cards ─────────────────────────────────────────────────── */}
         <div className="expo-zones-grid" role="list" aria-label="Expo zones">
           {expoZones.map((zone, index) => (
-            <div key={zone.label} className="expo-zone-card" role="listitem">
-              <p className="expo-zone-number">Zone {String(index + 1).padStart(2, "0")}</p>
-              <h3 className="expo-zone-title">{zone.label}</h3>
-              <p className="expo-zone-desc">{zone.description}</p>
-            </div>
+            <RevealOnScroll key={zone.label} delay={index * 80}>
+              <div className="expo-zone-card" role="listitem">
+                <p className="expo-zone-number">Zone {String(index + 1).padStart(2, "0")}</p>
+                <h3 className="expo-zone-title">{zone.label}</h3>
+                <p className="expo-zone-desc">{zone.description}</p>
+              </div>
+            </RevealOnScroll>
           ))}
         </div>
 

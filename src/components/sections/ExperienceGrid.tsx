@@ -14,6 +14,7 @@
  */
 
 import Image from "next/image";
+import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { MediaPlaceholder } from "@/components/ui/MediaPlaceholder";
 import { images } from "@/data/images";
@@ -169,22 +170,26 @@ export function ExperienceGrid() {
 
         {/* Section header */}
         <div style={{ marginBottom: "2.5rem" }}>
-          <SectionHeading
-            id="experience-heading"
-            eyebrow="Experience the Summit"
-            heading="Six ways to discover, connect and grow."
-            body="FPT ICO Summit 2026 is built around experiences — each one designed to bring students, educators and global partners together in a meaningful way."
-            level="h2"
-            align="left"
-            accent={true}
-          />
+          <RevealOnScroll>
+            <SectionHeading
+              id="experience-heading"
+              eyebrow="Experience the Summit"
+              heading="Six ways to discover, connect and grow."
+              body="FPT ICO Summit 2026 is built around experiences — each one designed to bring students, educators and global partners together in a meaningful way."
+              level="h2"
+              align="left"
+              accent={true}
+            />
+          </RevealOnScroll>
         </div>
 
         {/* Bento grid */}
         <div className="bento-grid" role="list">
-          {experienceCards.map((card) => (
+          {experienceCards.map((card, index) => (
             <div key={card.title} role="listitem">
-              <BentoCard card={card} />
+              <RevealOnScroll delay={index * 80}>
+                <BentoCard card={card} />
+              </RevealOnScroll>
             </div>
           ))}
         </div>

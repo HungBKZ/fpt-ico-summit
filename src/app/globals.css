@@ -122,6 +122,37 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
     }
+
+    .reveal-panel,
+    .hero-h1,
+    .hero-meta,
+    .btn-primary-lg,
+    .btn-outline-white,
+    .hero-content > div {
+      opacity: 1 !important;
+      transform: none !important;
+      animation: none !important;
+    }
+  }
+
+  .reveal-panel {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 600ms cubic-bezier(0.22, 1, 0.36, 1), transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+
+  .reveal-panel.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .stat-item-wrapper {
+    display: block;
+  }
+
+  .stat-number-inner {
+    display: inline-block;
   }
 
   body {
@@ -303,11 +334,30 @@
     color: var(--color-text-secondary);
     border-radius: var(--radius-sm);
     text-decoration: none;
+    position: relative;
     transition: color var(--transition-fast), background-color var(--transition-fast);
   }
-  .nav-link:hover {
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 0.125rem;
+    height: 2px;
+    border-radius: 999px;
+    background-color: var(--color-orange);
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform var(--transition-fast);
+  }
+  .nav-link:hover,
+  .nav-link:focus-visible {
     color: var(--color-navy);
     background-color: var(--color-off-white);
+  }
+  .nav-link:hover::after,
+  .nav-link:focus-visible::after {
+    transform: scaleX(1);
   }
 
   /* Primary CTA button (orange pill) */
@@ -322,13 +372,16 @@
     font-size: var(--text-sm);
     border-radius: var(--radius-full);
     text-decoration: none;
-    transition: background-color var(--transition-fast);
+    transition: background-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
     white-space: nowrap;
     border: none;
     cursor: pointer;
   }
-  .btn-primary:hover {
+  .btn-primary:hover,
+  .btn-primary:focus-visible {
     background-color: var(--color-orange-light);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
   }
 }
 
@@ -373,10 +426,44 @@
     }
   }
 
+  @keyframes hero-copy-enter {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes hero-title-enter {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes hero-meta-enter {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes hero-cta-enter {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   /* Content sits above the overlay */
   .hero-content {
     position: relative;
     z-index: 2;
+  }
+
+  .hero-content > div {
+    opacity: 0;
+    transform: translateY(18px);
+    animation: hero-copy-enter 650ms cubic-bezier(0.22, 1, 0.36, 1) 80ms forwards;
   }
 
   /* Hero H1 — fluid scale */
@@ -387,6 +474,9 @@
     line-height: 1.1;
     letter-spacing: -0.02em;
     color: #ffffff;
+    opacity: 0;
+    transform: translateY(18px);
+    animation: hero-title-enter 650ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
 
   /* Orange word highlight inside hero H1 */
@@ -404,6 +494,9 @@
     font-weight: 500;
     color: rgba(255, 255, 255, 0.65);
     letter-spacing: 0.01em;
+    opacity: 0;
+    transform: translateY(12px);
+    animation: hero-meta-enter 620ms cubic-bezier(0.22, 1, 0.36, 1) 100ms forwards;
   }
 
   .hero-meta-dot {
@@ -430,13 +523,16 @@
     transition:
       border-color var(--transition-fast),
       color var(--transition-fast),
-      background-color var(--transition-fast);
+      background-color var(--transition-fast),
+      transform var(--transition-fast);
     white-space: nowrap;
   }
-  .btn-outline-white:hover {
+  .btn-outline-white:hover,
+  .btn-outline-white:focus-visible {
     border-color: rgba(255, 255, 255, 0.85);
     color: #ffffff;
     background-color: rgba(255, 255, 255, 0.08);
+    transform: translateY(-1px);
   }
 
   /* Large primary CTA inside hero */
@@ -452,14 +548,16 @@
     font-size: var(--text-base);
     border-radius: var(--radius-full);
     text-decoration: none;
-    transition: background-color var(--transition-fast), transform var(--transition-fast);
+    transition: background-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
     white-space: nowrap;
     border: none;
     cursor: pointer;
   }
-  .btn-primary-lg:hover {
+  .btn-primary-lg:hover,
+  .btn-primary-lg:focus-visible {
     background-color: var(--color-orange-light);
     transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
   }
 
   /* Stats strip */
@@ -708,12 +806,14 @@
     overflow: hidden;
     min-height: 220px;
     background-color: var(--color-navy);
-    transition: transform var(--transition-base), box-shadow var(--transition-base);
+    border: 1px solid transparent;
+    transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
   }
 
   .bento-card:hover {
     transform: translateY(-3px);
     box-shadow: var(--shadow-lg);
+    border-color: rgba(26, 94, 168, 0.18);
   }
 
   /* Wide card spans 2 columns on desktop */
@@ -810,8 +910,15 @@
 
   /* Subtle scale on hover for image */
   .bento-card:hover .bento-card__image img {
-    transform: scale(1.04);
+    transform: scale(1.03);
     transition: transform var(--transition-slow);
+  }
+
+  @media (hover: none) {
+    .bento-card:hover,
+    .bento-card:hover .bento-card__image img {
+      transform: none;
+    }
   }
 }
 

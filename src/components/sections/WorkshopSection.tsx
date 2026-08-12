@@ -9,6 +9,7 @@
  */
 
 import Image from "next/image";
+import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { MediaPlaceholder } from "@/components/ui/MediaPlaceholder";
 import { images } from "@/data/images";
@@ -59,15 +60,17 @@ export function WorkshopSection() {
 
           {/* Right — text content */}
           <div style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>
-            <SectionHeading
-              id="workshop-heading"
-              eyebrow="Workshop"
-              heading="Cross-Cultural Communication in the AI Era"
-              body="The workshop program explores how students can communicate across cultures, adapt to international environments and use AI thoughtfully in multicultural study and work."
-              level="h2"
-              align="left"
-              accent={true}
-            />
+            <RevealOnScroll>
+              <SectionHeading
+                id="workshop-heading"
+                eyebrow="Workshop"
+                heading="Cross-Cultural Communication in the AI Era"
+                body="The workshop program explores how students can communicate across cultures, adapt to international environments and use AI thoughtfully in multicultural study and work."
+                level="h2"
+                align="left"
+                accent={true}
+              />
+            </RevealOnScroll>
 
             {/* Topic list */}
             <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>

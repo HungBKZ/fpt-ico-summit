@@ -12,6 +12,7 @@
  * Server Component.
  */
 
+import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import {
   programDays,
@@ -149,21 +150,25 @@ export function ProgramOverview() {
 
         {/* Heading */}
         <div style={{ marginBottom: "2.5rem" }}>
-          <SectionHeading
-            id="program-heading"
-            eyebrow="The Program"
-            heading="Three days of discovery, connection and exchange."
-            body="FPT ICO Summit 2026 runs across three days — each with its own character, from cultural discovery to international exchange, performances and a closing celebration."
-            level="h2"
-            align="left"
-            accent={true}
-          />
+          <RevealOnScroll>
+            <SectionHeading
+              id="program-heading"
+              eyebrow="The Program"
+              heading="Three days of discovery, connection and exchange."
+              body="FPT ICO Summit 2026 runs across three days — each with its own character, from cultural discovery to international exchange, performances and a closing celebration."
+              level="h2"
+              align="left"
+              accent={true}
+            />
+          </RevealOnScroll>
         </div>
 
         {/* Day cards */}
         <div className="program-days-grid">
-          {programDays.map((day) => (
-            <DayCard key={day.date} day={day} />
+          {programDays.map((day, index) => (
+            <RevealOnScroll key={day.date} delay={index * 90}>
+              <DayCard day={day} />
+            </RevealOnScroll>
           ))}
         </div>
 

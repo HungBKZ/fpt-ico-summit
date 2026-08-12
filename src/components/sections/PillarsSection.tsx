@@ -7,6 +7,7 @@
  * Server Component.
  */
 
+import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 
 /* ── Pillar data ─────────────────────────────────────────────────────────── */
@@ -82,15 +83,17 @@ export function PillarsSection() {
 
           {/* Left — intro text */}
           <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-            <SectionHeading
-              id="pillars-heading"
-              eyebrow="Why FPT ICO Summit"
-              heading="Where international education becomes an experience."
-              body="FPT ICO Summit 2026 is designed as more than an exhibition. It creates a shared space where students can discover global study pathways, experience cultures directly, build cross-cultural confidence and connect with the international education community."
-              level="h2"
-              align="left"
-              accent={true}
-            />
+            <RevealOnScroll>
+              <SectionHeading
+                id="pillars-heading"
+                eyebrow="Why FPT ICO Summit"
+                heading="Where international education becomes an experience."
+                body="FPT ICO Summit 2026 is designed as more than an exhibition. It creates a shared space where students can discover global study pathways, experience cultures directly, build cross-cultural confidence and connect with the international education community."
+                level="h2"
+                align="left"
+                accent={true}
+              />
+            </RevealOnScroll>
 
             {/* Decorative world-motif detail */}
             <div
@@ -127,17 +130,18 @@ export function PillarsSection() {
           {/* Right — pillar cards */}
           <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
             <div className="pillar-cards">
-              {pillars.map((pillar) => (
-                <article
-                  key={pillar.title}
-                  className={`pillar-card pillar-card--${pillar.accent}`}
-                >
-                  <div className={`pillar-icon pillar-icon--${pillar.accent}`}>
-                    {pillar.icon}
-                  </div>
-                  <h3 className="pillar-card-title">{pillar.title}</h3>
-                  <p className="pillar-card-body">{pillar.body}</p>
-                </article>
+              {pillars.map((pillar, index) => (
+                <RevealOnScroll key={pillar.title} delay={index * 90}>
+                  <article
+                    className={`pillar-card pillar-card--${pillar.accent}`}
+                  >
+                    <div className={`pillar-icon pillar-icon--${pillar.accent}`}>
+                      {pillar.icon}
+                    </div>
+                    <h3 className="pillar-card-title">{pillar.title}</h3>
+                    <p className="pillar-card-body">{pillar.body}</p>
+                  </article>
+                </RevealOnScroll>
               ))}
             </div>
           </div>

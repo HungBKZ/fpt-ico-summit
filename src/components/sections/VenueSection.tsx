@@ -10,6 +10,7 @@
  */
 
 import Image from "next/image";
+import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { MediaPlaceholder } from "@/components/ui/MediaPlaceholder";
 import { images } from "@/data/images";
@@ -54,15 +55,17 @@ export function VenueSection() {
 
           {/* Right — venue details */}
           <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
-            <SectionHeading
-              id="venue-heading"
-              eyebrow="The Venue"
-              heading="FPT University Can Tho Campus"
-              body="Explore the campus before you arrive and get familiar with the environment that will host FPT ICO Summit 2026."
-              level="h2"
-              align="left"
-              accent={true}
-            />
+            <RevealOnScroll>
+              <SectionHeading
+                id="venue-heading"
+                eyebrow="The Venue"
+                heading="FPT University Can Tho Campus"
+                body="Explore the campus before you arrive and get familiar with the environment that will host FPT ICO Summit 2026."
+                level="h2"
+                align="left"
+                accent={true}
+              />
+            </RevealOnScroll>
 
             {/* Address */}
             <div className="venue-address-block">

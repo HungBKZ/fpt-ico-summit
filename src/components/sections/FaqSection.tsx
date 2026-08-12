@@ -16,6 +16,7 @@
  */
 
 import { useRef, useState } from "react";
+import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { faqItems, type FaqItem } from "@/data/faq";
 import { mailtoHref } from "@/lib/utils";
@@ -145,14 +146,16 @@ export function FaqSection() {
 
           {/* Left — intro */}
           <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-            <SectionHeading
-              id="faq-heading"
-              eyebrow="FAQ"
-              heading="Common questions about the summit."
-              level="h2"
-              align="left"
-              accent={true}
-            />
+            <RevealOnScroll>
+              <SectionHeading
+                id="faq-heading"
+                eyebrow="FAQ"
+                heading="Common questions about the summit."
+                level="h2"
+                align="left"
+                accent={true}
+              />
+            </RevealOnScroll>
 
             <p style={{
               fontSize: "var(--text-sm)",
@@ -201,14 +204,16 @@ export function FaqSection() {
             className="faq-list"
             role="list"
           >
-            {faqItems.map((item) => (
-              <div key={item.id} role="listitem">
-                <FaqItem
-                  item={item}
-                  isOpen={openId === item.id}
-                  onToggle={() => toggle(item.id)}
-                />
-              </div>
+            {faqItems.map((item, index) => (
+              <RevealOnScroll key={item.id} delay={index * 70}>
+                <div role="listitem">
+                  <FaqItem
+                    item={item}
+                    isOpen={openId === item.id}
+                    onToggle={() => toggle(item.id)}
+                  />
+                </div>
+              </RevealOnScroll>
             ))}
           </div>
 
