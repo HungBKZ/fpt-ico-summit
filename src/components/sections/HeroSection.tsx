@@ -125,7 +125,7 @@ export function HeroSection() {
             }}
           >
             {/* Primary — scroll to about / program */}
-            <a href="#about" className="btn-primary-lg">
+            <a href="#explore" className="btn-primary-lg">
               Explore the Summit
             </a>
 

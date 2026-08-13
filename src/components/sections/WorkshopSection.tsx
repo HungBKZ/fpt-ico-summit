@@ -1,10 +1,7 @@
 /**
- * WorkshopSection — Cross-Cultural Communication in the AI Era workshop.
+ * WorkshopSection — workshop overview built from centralized workshop data.
  *
- * Layout (desktop): image left (A07), text content right.
- * No speaker names — none confirmed yet.
- *
- * Content source: docs/CONTENT.md §9, src/data/program.ts continuousActivities.
+ * Data source: src/data/workshops.ts.
  * Server Component.
  */
 
@@ -13,6 +10,7 @@ import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { MediaPlaceholder } from "@/components/ui/MediaPlaceholder";
 import { images } from "@/data/images";
+import { getConfirmedWorkshops } from "@/data/workshops";
 
 const topics = [
   "Cross-cultural communication strategies",
@@ -22,16 +20,17 @@ const topics = [
 ];
 
 export function WorkshopSection() {
+  const confirmedWorkshops = getConfirmedWorkshops();
+  const workshop = confirmedWorkshops[0];
+
   return (
     <section
       id="workshop"
       aria-labelledby="workshop-heading"
-      style={{ backgroundColor: "var(--color-warm-white)" }}
+      className="section--navy workshop-section"
     >
       <div className="site-container section-padding">
         <div className="workshop-layout">
-
-          {/* Left — A07 image */}
           <div
             style={{
               position: "relative",
@@ -58,21 +57,23 @@ export function WorkshopSection() {
             )}
           </div>
 
-          {/* Right — text content */}
           <div style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>
             <RevealOnScroll>
               <SectionHeading
                 id="workshop-heading"
+                className="section-heading--invert"
                 eyebrow="Workshop"
-                heading="Cross-Cultural Communication in the AI Era"
-                body="The workshop program explores how students can communicate across cultures, adapt to international environments and use AI thoughtfully in multicultural study and work."
+                heading={workshop?.title ?? "Workshop to be announced"}
+                body={
+                  workshop?.description ??
+                  "Confirmed workshop details will be announced soon."
+                }
                 level="h2"
                 align="left"
                 accent={true}
               />
             </RevealOnScroll>
 
-            {/* Topic list */}
             <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
               <p
                 style={{
@@ -80,7 +81,7 @@ export function WorkshopSection() {
                   fontWeight: 700,
                   letterSpacing: "var(--tracking-wider)",
                   textTransform: "uppercase",
-                  color: "var(--color-text-muted)",
+                  color: "rgba(255,255,255,0.72)",
                   marginBottom: "0.25rem",
                 }}
               >
@@ -94,11 +95,10 @@ export function WorkshopSection() {
                     alignItems: "flex-start",
                     gap: "0.625rem",
                     fontSize: "var(--text-sm)",
-                    color: "var(--color-text-secondary)",
+                    color: "rgba(255,255,255,0.82)",
                     lineHeight: "var(--leading-snug)",
                   }}
                 >
-                  {/* Check icon */}
                   <svg
                     aria-hidden="true"
                     width="16"
@@ -122,18 +122,16 @@ export function WorkshopSection() {
               ))}
             </div>
 
-            {/* When / tag row */}
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", paddingTop: "0.25rem" }}>
               <span className="workshop-tag">21–22 November 2026</span>
               <span className="workshop-tag">FPT University Can Tho Campus</span>
             </div>
 
-            {/* Speaker note */}
             <p
               style={{
                 fontSize: "var(--text-xs)",
-                color: "var(--color-text-muted)",
-                borderLeft: "2px solid var(--color-border)",
+                color: "rgba(255,255,255,0.72)",
+                borderLeft: "2px solid rgba(255,255,255,0.22)",
                 paddingLeft: "0.75rem",
                 lineHeight: "var(--leading-normal)",
               }}
@@ -141,7 +139,6 @@ export function WorkshopSection() {
               Speaker details will be announced as participation is confirmed.
             </p>
           </div>
-
         </div>
       </div>
     </section>

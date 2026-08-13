@@ -1,79 +1,46 @@
-/**
- * PartnersSection — Global Community / Participating Partners.
- *
- * Rules (AGENTS.md §4, §9):
- *  - Only renders entries where status === "confirmed" via getConfirmedPartners().
- *  - If zero confirmed partners exist, renders a clean neutral announcement state.
- *  - Never fabricates, downloads, or searches for logos.
- *  - If a confirmed partner has logo: null, renders a text-name tile instead.
- *  - Groups by type only when more than one type is present.
- *
- * Content source: docs/CONTENT.md §10, src/data/partners.ts.
- * Server Component.
- */
+"use client";
 
-import Image from "next/image";
+import { useMemo, useState } from "react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import {
-  getConfirmedPartners,
-  getConfirmedPartnersByType,
-  type Partner,
-  type PartnerType,
-} from "@/data/partners";
+import { getConfirmedConsulates } from "@/data/consulates";
+import { getConfirmedUniversities, universityCountries } from "@/data/universities";
 
-/* ── Type label map ──────────────────────────────────────────────────────── */
+const tabs = ["Consulates", "Universities"] as const;
+type PartnerTab = (typeof tabs)[number];
 
-const typeLabels: Record<PartnerType, string> = {
-  university:   "Universities & Education Partners",
-  consulate:    "Consulates & Institutional Partners",
-  organization: "Organizations",
-  sponsor:      "Sponsors",
-};
-
-/* ── Individual partner tile ─────────────────────────────────────────────── */
-
-function PartnerTile({ partner }: { partner: Partner }) {
-  const tile = (
-    <div className="partner-tile">
-      {partner.logo ? (
-        <Image
-          src={partner.logo}
-          alt={partner.name}
-          width={120}
-          height={60}
-          style={{ objectFit: "contain", maxHeight: "3rem", width: "auto" }}
-        />
-      ) : (
-        <span className="partner-tile-name">{partner.name}</span>
-      )}
-    </div>
-  );
-
-  if (partner.website) {
-    return (
-      <a
-        href={partner.website}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={`${partner.name} (opens in a new tab)`}
-      >
-        {tile}
-      </a>
-    );
-  }
-
-  return <div aria-label={partner.name}>{tile}</div>;
-}
-
-/* ── Empty state ─────────────────────────────────────────────────────────── */
-
-function EmptyState() {
+function EmptyState({ tab }: { tab: PartnerTab }) {
   return (
-    <div className="partners-empty" role="status" aria-live="polite">
-      <div className="partners-empty-icon" aria-hidden="true">
+    <div
+      role="status"
+      aria-live="polite"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "1rem",
+        padding: "2rem 1.25rem",
+        backgroundColor: "var(--color-off-white)",
+        border: "1px dashed var(--color-border-strong)",
+        borderRadius: "var(--radius-lg)",
+        textAlign: "center",
+      }}
+    >
+      <div
+        aria-hidden="true"
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "3rem",
+          height: "3rem",
+          borderRadius: "var(--radius-md)",
+          backgroundColor: "var(--color-blue-subtle)",
+          color: "var(--color-blue)",
+        }}
+      >
         <svg
-          width="22"
-          height="22"
+          width="20"
+          height="20"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -86,70 +53,268 @@ function EmptyState() {
           <path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20" />
         </svg>
       </div>
-      <p className="partners-empty-heading">A growing global community.</p>
-      <p className="partners-empty-body">
-        Participating institutions and organizations will be announced as their
-        involvement is confirmed.
+      <p
+        style={{
+          fontFamily: "var(--font-display)",
+          fontSize: "var(--text-lg)",
+          fontWeight: 700,
+          color: "var(--color-navy)",
+        }}
+      >
+        {tab} to be announced.
+      </p>
+      <p
+        style={{
+          maxWidth: "42ch",
+          fontSize: "var(--text-sm)",
+          color: "var(--color-text-muted)",
+          lineHeight: "var(--leading-normal)",
+        }}
+      >
+        Confirmed institutions and universities will appear here as participation is verified.
       </p>
     </div>
   );
 }
 
-/* ── Section ─────────────────────────────────────────────────────────────── */
+function PartnerTile({
+  name,
+  website,
+}: {
+  name: string;
+  website?: string;
+}) {
+  const tile = (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "5rem",
+        padding: "1.25rem 1rem",
+        backgroundColor: "#fff",
+        border: "1px solid var(--color-border)",
+        borderRadius: "var(--radius-md)",
+        textAlign: "center",
+      }}
+    >
+      <span
+        style={{
+          fontFamily: "var(--font-display)",
+          fontSize: "var(--text-xs)",
+          fontWeight: 700,
+          color: "var(--color-navy)",
+          lineHeight: "var(--leading-snug)",
+        }}
+      >
+        {name}
+      </span>
+    </div>
+  );
+
+  if (website) {
+    return (
+      <a
+        href={website}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`${name} (opens in a new tab)`}
+        style={{ display: "block" }}
+      >
+        {tile}
+      </a>
+    );
+  }
+
+  return tile;
+}
 
 export function PartnersSection() {
-  const confirmed = getConfirmedPartners();
-  const byType = getConfirmedPartnersByType();
-  const hasMultipleTypes =
-    Object.values(byType).filter((group) => group.length > 0).length > 1;
+  const [activeTab, setActiveTab] = useState<PartnerTab>("Consulates");
+  const [selectedCountry, setSelectedCountry] = useState("All");
+
+  const confirmedConsulates = useMemo(() => getConfirmedConsulates(), []);
+  const confirmedUniversities = useMemo(() => getConfirmedUniversities(), []);
+
+  const visibleUniversities =
+    selectedCountry === "All"
+      ? confirmedUniversities
+      : confirmedUniversities.filter((item) => item.country === selectedCountry);
 
   return (
     <section
       id="partners"
       aria-labelledby="partners-heading"
-      style={{ backgroundColor: "var(--color-off-white)" }}
+      className="section--navy section--partners"
     >
       <div className="site-container section-padding">
-        <div style={{ marginBottom: "2.5rem" }}>
+        <div style={{ marginBottom: "2rem" }}>
           <SectionHeading
             id="partners-heading"
-            eyebrow="Global Community"
-            heading="Participating Partners"
-            body={
-              confirmed.length > 0
-                ? "Universities, education organizations and consulates joining FPT ICO Summit 2026."
-                : undefined
-            }
+            className="section-heading--invert"
+            eyebrow="Global community"
+            heading="Participating consulates and universities."
+            body="Only confirmed institutions are shown publicly."
             level="h2"
             align="center"
             accent={true}
           />
         </div>
 
-        {confirmed.length === 0 ? (
-          <EmptyState />
-        ) : hasMultipleTypes ? (
-          /* Grouped by type */
-          <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
-            {(Object.entries(byType) as [PartnerType, Partner[]][])
-              .filter(([, group]) => group.length > 0)
-              .map(([type, group]) => (
-                <div key={type}>
-                  <p className="partners-group-label">{typeLabels[type]}</p>
-                  <div className="partners-logo-grid">
-                    {group.map((p) => (
-                      <PartnerTile key={p.name} partner={p} />
-                    ))}
-                  </div>
-                </div>
-              ))}
+        <div
+          role="tablist"
+          aria-label="Partner categories"
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            flexWrap: "wrap",
+            gap: "0.75rem",
+            marginBottom: "2rem",
+          }}
+        >
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab;
+            return (
+              <button
+                key={tab}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                aria-controls={`${tab.toLowerCase()}-panel`}
+                id={`${tab.toLowerCase()}-tab`}
+                onClick={() => {
+                  setActiveTab(tab);
+                  if (tab === "Universities") setSelectedCountry("All");
+                }}
+                style={{
+                  border: isActive ? "1px solid transparent" : "1px solid rgba(255,255,255,0.18)",
+                  backgroundColor: isActive ? "var(--color-orange)" : "rgba(255,255,255,0.06)",
+                  color: isActive ? "#fff" : "#edf4ff",
+                  borderRadius: "var(--radius-full)",
+                  fontWeight: 600,
+                  padding: "0.75rem 1.25rem",
+                  cursor: "pointer",
+                }}
+              >
+                {tab}
+              </button>
+            );
+          })}
+        </div>
+
+        {activeTab === "Consulates" ? (
+          <div id="consulates-panel" role="tabpanel" aria-labelledby="consulates-tab">
+            {confirmedConsulates.length === 0 ? (
+              <EmptyState tab="Consulates" />
+            ) : (
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                  gap: "1rem",
+                }}
+              >
+                {confirmedConsulates.map((partner) => (
+                  <PartnerTile key={partner.id} name={partner.name} website={partner.website} />
+                ))}
+              </div>
+            )}
           </div>
         ) : (
-          /* Flat grid — only one type present */
-          <div className="partners-logo-grid">
-            {confirmed.map((p) => (
-              <PartnerTile key={p.name} partner={p} />
-            ))}
+          <div id="universities-panel" role="tabpanel" aria-labelledby="universities-tab">
+            {confirmedUniversities.length === 0 ? (
+              <EmptyState tab="Universities" />
+            ) : (
+              <>
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: "0.75rem",
+                    justifyContent: "center",
+                    marginBottom: "2rem",
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCountry("All")}
+                    style={{
+                      border: selectedCountry === "All" ? "1px solid transparent" : "1px solid rgba(255,255,255,0.18)",
+                      backgroundColor: selectedCountry === "All" ? "var(--color-orange)" : "rgba(255,255,255,0.06)",
+                      color: selectedCountry === "All" ? "#fff" : "#edf4ff",
+                      borderRadius: "var(--radius-full)",
+                      padding: "0.5rem 0.875rem",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                    }}
+                  >
+                    All countries
+                  </button>
+
+                  {universityCountries.map((country) => (
+                    <button
+                      key={country}
+                      type="button"
+                      onClick={() => setSelectedCountry(country)}
+                      style={{
+                        border:
+                          selectedCountry === country ? "1px solid transparent" : "1px solid rgba(255,255,255,0.18)",
+                        backgroundColor: selectedCountry === country ? "var(--color-orange)" : "rgba(255,255,255,0.06)",
+                        color: selectedCountry === country ? "#fff" : "#edf4ff",
+                        borderRadius: "var(--radius-full)",
+                        padding: "0.5rem 0.875rem",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                      }}
+                    >
+                      {country}
+                    </button>
+                  ))}
+                </div>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                    gap: "1rem",
+                  }}
+                >
+                  {visibleUniversities.map((partner) => (
+                    <div key={partner.id}>
+                      <p
+                        style={{
+                          marginBottom: "0.5rem",
+                          fontSize: "var(--text-xs)",
+                          fontWeight: 700,
+                          letterSpacing: "0.04em",
+                          textTransform: "uppercase",
+                          color: "rgba(255,255,255,0.72)",
+                        }}
+                      >
+                        {partner.country}
+                      </p>
+                      <PartnerTile name={partner.name} website={partner.website} />
+                    </div>
+                  ))}
+                </div>
+
+                {selectedCountry !== "All" && visibleUniversities.length === 0 && (
+                  <div
+                    style={{
+                      marginTop: "1rem",
+                      padding: "1.5rem",
+                      textAlign: "center",
+                      backgroundColor: "#fff",
+                      borderRadius: "var(--radius-md)",
+                      border: "1px dashed var(--color-border-strong)",
+                      color: "var(--color-text-muted)",
+                    }}
+                  >
+                    No confirmed universities are available for {selectedCountry} yet.
+                  </div>
+                )}
+              </>
+            )}
           </div>
         )}
       </div>

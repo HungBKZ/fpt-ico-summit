@@ -19,6 +19,7 @@ import { ProgramOverview } from "@/components/sections/ProgramOverview";
 import { ExpoSection } from "@/components/sections/ExpoSection";
 import { WorkshopSection } from "@/components/sections/WorkshopSection";
 import { PartnersSection } from "@/components/sections/PartnersSection";
+import { ScholarshipsSection } from "@/components/sections/ScholarshipsSection";
 import { MekongSection } from "@/components/sections/MekongSection";
 import { VenueSection } from "@/components/sections/VenueSection";
 import { FaqSection } from "@/components/sections/FaqSection";
@@ -45,6 +46,7 @@ export default function HomePage() {
 
         {/* Phase 5 */}
         <PartnersSection />
+        <ScholarshipsSection />
         <MekongSection />
         <VenueSection />
 

@@ -74,7 +74,7 @@ export function PillarsSection() {
     <section
       id="about"
       aria-labelledby="pillars-heading"
-      style={{ backgroundColor: "var(--color-warm-white)" }}
+      className="section--tinted"
     >
       <div className="site-container section-padding">
 
@@ -86,6 +86,7 @@ export function PillarsSection() {
             <RevealOnScroll>
               <SectionHeading
                 id="pillars-heading"
+                className="section-heading--tinted"
                 eyebrow="Why FPT ICO Summit"
                 heading="Where international education becomes an experience."
                 body="FPT ICO Summit 2026 is designed as more than an exhibition. It creates a shared space where students can discover global study pathways, experience cultures directly, build cross-cultural confidence and connect with the international education community."

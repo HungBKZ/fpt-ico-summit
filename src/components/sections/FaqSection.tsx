@@ -139,7 +139,7 @@ export function FaqSection() {
     <section
       id="faq"
       aria-labelledby="faq-heading"
-      style={{ backgroundColor: "var(--color-off-white)" }}
+      className="section--tinted"
     >
       <div className="site-container section-padding">
         <div className="faq-layout">

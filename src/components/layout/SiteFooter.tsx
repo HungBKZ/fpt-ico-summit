@@ -9,9 +9,10 @@ import { mailtoHref } from "@/lib/utils";
 
 const footerLinks = [
   { label: "About",        href: "#about" },
-  { label: "Experience",   href: "#experience" },
   { label: "Program",      href: "#program" },
+  { label: "Explore",      href: "#explore" },
   { label: "Partners",     href: "#partners" },
+  { label: "Scholarships", href: "#scholarships" },
   { label: "Venue",        href: "#venue" },
   { label: "FAQ",          href: "#faq" },
   { label: "Registration", href: "#register" },

@@ -13,12 +13,13 @@ import { siteConfig } from "@/data/site";
 import { isRegistrationOpen } from "@/lib/utils";
 
 const navLinks = [
-  { label: "About",      href: "#about" },
-  { label: "Experience", href: "#experience" },
-  { label: "Program",    href: "#program" },
-  { label: "Partners",   href: "#partners" },
-  { label: "Venue",      href: "#venue" },
-  { label: "FAQ",        href: "#faq" },
+  { label: "About",       href: "#about" },
+  { label: "Program",     href: "#program" },
+  { label: "Explore",     href: "#explore" },
+  { label: "Partners",    href: "#partners" },
+  { label: "Scholarships", href: "#scholarships" },
+  { label: "Venue",       href: "#venue" },
+  { label: "FAQ",         href: "#faq" },
 ];
 
 export function SiteHeader() {

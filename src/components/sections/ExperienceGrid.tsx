@@ -162,17 +162,18 @@ function BentoCard({ card }: { card: ExperienceCard }) {
 export function ExperienceGrid() {
   return (
     <section
-      id="experience"
+      id="explore"
       aria-labelledby="experience-heading"
-      style={{ backgroundColor: "var(--color-off-white)" }}
+      className="section--navy"
     >
       <div className="site-container section-padding">
 
         {/* Section header */}
-        <div style={{ marginBottom: "2.5rem" }}>
+        <div style={{ marginBottom: "3rem" }}>
           <RevealOnScroll>
             <SectionHeading
               id="experience-heading"
+              className="section-heading--invert"
               eyebrow="Experience the Summit"
               heading="Six ways to discover, connect and grow."
               body="FPT ICO Summit 2026 is built around experiences — each one designed to bring students, educators and global partners together in a meaningful way."
