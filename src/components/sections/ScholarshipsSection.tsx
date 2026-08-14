@@ -133,8 +133,8 @@ function ScholarshipCard({
             alignItems: "center",
             padding: "0.25rem 0.625rem",
             borderRadius: "var(--radius-full)",
-            backgroundColor: "var(--color-orange-subtle)",
-            color: "var(--color-orange)",
+            backgroundColor: "var(--color-blue-subtle)",
+            color: "var(--color-blue)",
             fontSize: "var(--text-xs)",
             fontWeight: 700,
             letterSpacing: "0.04em",
@@ -213,7 +213,7 @@ function ScholarshipCard({
           href={applicationUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="btn-primary"
+          className="btn-blue"
           style={{ alignSelf: "flex-start" }}
         >
           View details
@@ -291,8 +291,8 @@ export function ScholarshipsSection() {
                 id={`${tab.toLowerCase().replace(/\s+/g, "-")}-tab`}
                 onClick={() => setActiveTab(tab)}
                 style={{
-                  border: isActive ? "1px solid transparent" : "1px solid rgba(11,23,54,0.12)",
-                  backgroundColor: isActive ? "var(--color-orange)" : "rgba(255,255,255,0.7)",
+                  border: isActive ? "1px solid transparent" : "1px solid rgba(26, 94, 168, 0.20)",
+                  backgroundColor: isActive ? "var(--color-blue)" : "rgba(26, 94, 168, 0.08)",
                   color: isActive ? "#fff" : "var(--color-navy)",
                   borderRadius: "var(--radius-full)",
                   fontWeight: 600,
@@ -311,6 +311,8 @@ export function ScholarshipsSection() {
           id={`${activeTab.toLowerCase().replace(/\s+/g, "-")}-panel`}
           role="tabpanel"
           aria-labelledby={`${activeTab.toLowerCase().replace(/\s+/g, "-")}-tab`}
+          className="tab-panel-animated"
+          key={activeTab}
         >
           {currentItems.length === 0 ? (
             <EmptyState tab={activeTab} />

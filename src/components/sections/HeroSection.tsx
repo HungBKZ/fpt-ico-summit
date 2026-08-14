@@ -1,17 +1,6 @@
-/**
- * HeroSection — Above-the-fold hero for FPT ICO Summit 2026.
- *
- * Layout:
- *  - Full-bleed navy background with a dark gradient overlay.
- *  - Right-side hero image (A01) rendered with next/image fill + priority.
- *  - Left: eyebrow · H1 · support copy · meta line · two CTAs.
- *  - Gracefully handles src: null via MediaPlaceholder.
- *  - Registration CTA shows "Registration opens soon" state when URL is empty.
- *  - Server Component — no interactivity needed here.
- *
- * Content source: docs/CONTENT.md §2.
- */
+"use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { images } from "@/data/images";
 import { siteConfig } from "@/data/site";
@@ -20,6 +9,29 @@ import { MediaPlaceholder } from "@/components/ui/MediaPlaceholder";
 
 export function HeroSection() {
   const hasRegistration = isRegistrationOpen(siteConfig.registrationUrl);
+  const [parallaxY, setParallaxY] = useState(0);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.innerWidth < 768) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          if (window.scrollY <= 900) {
+            setParallaxY(window.scrollY * 0.14);
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <section
@@ -30,10 +42,13 @@ export function HeroSection() {
       {/* ── Background image (right-aligned, fades left into navy) ──────── */}
       <div
         aria-hidden="true"
+        className="hero-bg-layer"
         style={{
           position: "absolute",
           inset: 0,
           zIndex: 0,
+          transform: `translate3d(0, ${parallaxY}px, 0)`,
+          willChange: "transform",
         }}
       >
         {images.hero.src ? (
@@ -73,20 +88,21 @@ export function HeroSection() {
         >
           {/* Eyebrow */}
           <p
+            className="hero-eyebrow-animate"
             style={{
               fontFamily: "var(--font-sans)",
               fontSize: "var(--text-xs)",
               fontWeight: 600,
               letterSpacing: "var(--tracking-wider)",
               textTransform: "uppercase",
-              color: "var(--color-orange-light)",
+              color: "var(--color-blue-light)",
             }}
           >
             FPT University Can Tho · International Cooperation Office
           </p>
 
           {/* H1 */}
-          <h1 className="hero-h1">
+          <h1 className="hero-h1 hero-h1-animate">
             Connecting{" "}
             <span className="accent">Cultures.</span>
             <br />
@@ -96,6 +112,7 @@ export function HeroSection() {
 
           {/* Support copy */}
           <p
+            className="hero-desc-animate"
             style={{
               fontSize: "var(--text-lg)",
               lineHeight: "var(--leading-normal)",
@@ -109,7 +126,7 @@ export function HeroSection() {
           </p>
 
           {/* Meta line — date · venue */}
-          <div className="hero-meta">
+          <div className="hero-meta hero-meta-animate">
             <span>{siteConfig.dates}</span>
             <span className="hero-meta-dot" aria-hidden="true" />
             <span>{siteConfig.venue}, Vietnam</span>
@@ -117,6 +134,7 @@ export function HeroSection() {
 
           {/* CTAs */}
           <div
+            className="hero-cta-animate"
             style={{
               display: "flex",
               flexWrap: "wrap",
@@ -125,7 +143,7 @@ export function HeroSection() {
             }}
           >
             {/* Primary — scroll to about / program */}
-            <a href="#explore" className="btn-primary-lg">
+            <a href="#explore" className="btn-blue-lg">
               Explore the Summit
             </a>
 
@@ -162,7 +180,7 @@ export function HeroSection() {
                 href={siteConfig.registrationUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-outline-white"
+                className="btn-orange-lg"
               >
                 Register Now
               </a>

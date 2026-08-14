@@ -15,6 +15,7 @@
 import Image from "next/image";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { images } from "@/data/images";
+import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 
 const highlights = [
   {
@@ -70,7 +71,8 @@ export function SouvenirSection() {
         <div className="souvenir-layout">
 
           {/* Text column */}
-          <div className="souvenir-text" style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>
+          <RevealOnScroll className="souvenir-text" delay={0}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>
             <SectionHeading
               id="souvenir-heading"
               eyebrow="Souvenirs & Food"
@@ -132,10 +134,11 @@ export function SouvenirSection() {
             >
               Merchandise details and availability will be confirmed closer to the event date.
             </p>
-          </div>
+            </div>
+          </RevealOnScroll>
 
           {/* Image column — tote bag mockup (C2) */}
-          <div className="souvenir-image">
+          <RevealOnScroll className="souvenir-image" delay={100}>
             <Image
               src={images.toteMockup.src!}
               alt={images.toteMockup.alt}
@@ -147,11 +150,10 @@ export function SouvenirSection() {
                 height: "auto",
                 objectFit: "contain",
                 display: "block",
-                /* Lift mockup off the light section background */
                 filter: "drop-shadow(0 20px 40px rgba(11,23,54,0.18))",
               }}
             />
-          </div>
+          </RevealOnScroll>
 
         </div>
       </div>

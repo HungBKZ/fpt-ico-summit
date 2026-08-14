@@ -27,16 +27,44 @@ const navLinks = [
 export function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>("");
   const menuRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
 
   const hasRegistration = isRegistrationOpen(siteConfig.registrationUrl);
 
-  // Sticky shadow on scroll
+  // Sticky header transition on scroll
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 12);
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Lightweight IntersectionObserver scrollspy
+  useEffect(() => {
+    const sectionIds = navLinks.map((l) => l.href.replace("#", ""));
+    const elements = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+
+    if (elements.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      {
+        rootMargin: "-20% 0px -55% 0px",
+        threshold: 0.1,
+      }
+    );
+
+    elements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
   }, []);
 
   // Close mobile menu on Escape
@@ -71,10 +99,12 @@ export function SiteHeader() {
         position: "sticky",
         top: 0,
         zIndex: 50,
-        backgroundColor: "var(--color-warm-white)",
-        borderBottom: `1px solid ${scrolled ? "var(--color-border)" : "transparent"}`,
-        boxShadow: scrolled ? "0 1px 12px -4px rgb(11 23 54 / 0.10)" : "none",
-        transition: "box-shadow var(--transition-base), border-color var(--transition-base)",
+        backgroundColor: scrolled ? "rgba(250, 250, 248, 0.88)" : "rgba(250, 250, 248, 0.98)",
+        backdropFilter: "blur(14px)",
+        WebkitBackdropFilter: "blur(14px)",
+        borderBottom: scrolled ? "1px solid rgba(26, 94, 168, 0.15)" : "1px solid transparent",
+        boxShadow: scrolled ? "0 8px 24px -4px rgb(11 23 54 / 0.12)" : "none",
+        transition: "height 250ms ease, background-color 250ms ease, border-color 250ms ease, box-shadow 250ms ease",
       }}
     >
       <div className="site-container" ref={menuRef}>
@@ -83,8 +113,9 @@ export function SiteHeader() {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            height: "var(--header-height)",
+            height: scrolled ? "3.875rem" : "4.5rem",
             gap: "2rem",
+            transition: "height 250ms ease",
           }}
         >
           {/* ── Logo ──────────────────────────────────────────────────── */}
@@ -105,17 +136,17 @@ export function SiteHeader() {
               height={60}
               priority
               style={{
-                /* 32px mobile → 48px desktop, fluid */
-                height: "clamp(2rem, 4vw, 3rem)",
+                height: scrolled ? "2.25rem" : "2.625rem",
                 width: "auto",
                 maxWidth: "220px",
                 objectFit: "contain",
                 display: "block",
+                transition: "height 250ms ease",
               }}
             />
           </Link>
 
-          {/* ── Desktop nav ───────────────────────────────────────────── */}
+          {/* ── Desktop nav with scrollspy ───────────────────────────── */}
           <nav aria-label="Main navigation" className="hidden md:flex" style={{ flex: 1, justifyContent: "center" }}>
             <ul
               style={{
@@ -124,13 +155,21 @@ export function SiteHeader() {
                 gap: "0.25rem",
               }}
             >
-              {navLinks.map(({ label, href }) => (
-                <li key={href}>
-                  <a href={href} className="nav-link">
-                    {label}
-                  </a>
-                </li>
-              ))}
+              {navLinks.map(({ label, href }) => {
+                const sectionId = href.replace("#", "");
+                const isActive = activeSection === sectionId;
+                return (
+                  <li key={href}>
+                    <a
+                      href={href}
+                      className="nav-link"
+                      data-active={isActive ? "true" : "false"}
+                    >
+                      {label}
+                    </a>
+                  </li>
+                );
+              })}
             </ul>
           </nav>
 
@@ -141,9 +180,25 @@ export function SiteHeader() {
                 href={siteConfig.registrationUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-primary"
+                className="btn-primary group"
+                style={{ gap: "0.375rem" }}
               >
                 Register Now
+                <svg
+                  aria-hidden="true"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{ transition: "transform 200ms ease" }}
+                >
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
               </a>
             ) : (
               <span
@@ -186,6 +241,7 @@ export function SiteHeader() {
               cursor: "pointer",
               color: "var(--color-navy)",
               flexShrink: 0,
+              transition: "border-color 150ms ease, background-color 150ms ease",
             }}
           >
             <span aria-hidden="true">
@@ -211,25 +267,34 @@ export function SiteHeader() {
           role="navigation"
           aria-label="Mobile navigation"
           hidden={!menuOpen}
+          className="mobile-menu-panel"
           style={{
             display: menuOpen ? "block" : "none",
-            borderTop: "1px solid var(--color-border)",
+            borderTop: "1px solid rgba(26, 94, 168, 0.12)",
             paddingBlock: "1rem",
+            backgroundColor: "rgba(250, 250, 248, 0.98)",
+            borderRadius: "0 0 var(--radius-md) var(--radius-md)",
+            boxShadow: "0 12px 32px -8px rgb(11 23 54 / 0.16)",
           }}
         >
           <ul style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-            {navLinks.map(({ label, href }) => (
-              <li key={href}>
-                <a
-                  href={href}
-                  onClick={() => setMenuOpen(false)}
-                  className="nav-link"
-                  style={{ fontSize: "var(--text-base)", padding: "0.625rem 0.75rem" }}
-                >
-                  {label}
-                </a>
-              </li>
-            ))}
+            {navLinks.map(({ label, href }) => {
+              const sectionId = href.replace("#", "");
+              const isActive = activeSection === sectionId;
+              return (
+                <li key={href}>
+                  <a
+                    href={href}
+                    onClick={() => setMenuOpen(false)}
+                    className="nav-link"
+                    data-active={isActive ? "true" : "false"}
+                    style={{ fontSize: "var(--text-base)", padding: "0.625rem 0.75rem" }}
+                  >
+                    {label}
+                  </a>
+                </li>
+              );
+            })}
           </ul>
 
           <div style={{ marginTop: "1rem", paddingInline: "0.75rem" }}>
@@ -239,9 +304,23 @@ export function SiteHeader() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-primary"
-                style={{ width: "100%", fontSize: "var(--text-base)", padding: "0.75rem" }}
+                style={{ width: "100%", fontSize: "var(--text-base)", padding: "0.75rem", gap: "0.5rem" }}
               >
                 Register Now
+                <svg
+                  aria-hidden="true"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
               </a>
             ) : (
               <p

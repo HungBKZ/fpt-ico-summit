@@ -175,7 +175,7 @@ export function FaqSection() {
                 gap: "0.375rem",
                 fontSize: "var(--text-sm)",
                 fontWeight: 600,
-                color: "var(--color-orange)",
+                color: "var(--color-blue)",
                 textDecoration: "none",
                 transition: "color var(--transition-fast)",
               }}

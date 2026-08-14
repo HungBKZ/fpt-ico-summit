@@ -110,7 +110,7 @@ export function WorkshopSection() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     style={{
-                      color: "var(--color-orange)",
+                      color: "var(--color-blue-light)",
                       flexShrink: 0,
                       marginTop: "0.1em",
                     }}

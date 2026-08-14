@@ -67,7 +67,7 @@ export function MekongSection() {
               fontWeight: 600,
               letterSpacing: "var(--tracking-wider)",
               textTransform: "uppercase",
-              color: "var(--color-orange-light)",
+              color: "#34D399",
             }}
           >
             The Mekong Experience
@@ -108,7 +108,7 @@ export function MekongSection() {
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              style={{ color: "var(--color-orange-light)", flexShrink: 0 }}
+              style={{ color: "#34D399", flexShrink: 0 }}
             >
               <circle cx="12" cy="12" r="10" />
               <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />

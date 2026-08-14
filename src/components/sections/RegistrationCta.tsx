@@ -17,6 +17,7 @@ import Image from "next/image";
 import { siteConfig } from "@/data/site";
 import { images } from "@/data/images";
 import { isRegistrationOpen, mailtoHref } from "@/lib/utils";
+import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 
 export function RegistrationCta() {
   const open = isRegistrationOpen(siteConfig.registrationUrl);
@@ -37,7 +38,8 @@ export function RegistrationCta() {
         >
 
           {/* ── LEFT: content column ───────────────────────────────────── */}
-          <div className="reg-left">
+          <RevealOnScroll className="reg-left" delay={0}>
+            <div>
 
             {/* Eyebrow */}
             <p className="reg-cta-eyebrow">
@@ -64,7 +66,7 @@ export function RegistrationCta() {
             </p>
 
             {/* Date + venue */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", marginTop: "1.25rem" }}>
               <p style={{
                 fontSize: "var(--text-sm)",
                 fontWeight: 600,
@@ -92,12 +94,12 @@ export function RegistrationCta() {
 
             {/* CTA */}
             {open ? (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", alignItems: "center" }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", alignItems: "center", marginTop: "1.5rem" }}>
                 <a
                   href={siteConfig.registrationUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn-primary-lg"
+                  className="btn-orange-lg cta-attention-once"
                 >
                   Register Now
                   <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -108,7 +110,7 @@ export function RegistrationCta() {
                 </a>
               </div>
             ) : (
-              <div className="reg-cta-status" style={{ alignSelf: "flex-start" }}>
+              <div className="reg-cta-status" style={{ alignSelf: "flex-start", marginTop: "1.5rem" }}>
                 <span className="reg-cta-dot" aria-hidden="true" />
                 Registration opens soon
               </div>
@@ -116,7 +118,7 @@ export function RegistrationCta() {
 
             {/* QR — shown when open; white padding keeps it scannable */}
             {open && (
-              <div className="reg-qr-block">
+              <div className="reg-qr-block" style={{ marginTop: "1.5rem" }}>
                 <p className="reg-qr-label">Scan to register</p>
                 <div className="reg-qr-image">
                   <Image
@@ -131,21 +133,17 @@ export function RegistrationCta() {
             )}
 
             {/* Contact nudge */}
-            <p className="reg-cta-contact">
+            <p className="reg-cta-contact" style={{ marginTop: "1.5rem" }}>
               Questions about participation or partnership?{" "}
               <a href={mailtoHref(siteConfig.email, "FPT ICO Summit 2026 Enquiry")}>
                 {siteConfig.email}
               </a>
             </p>
-          </div>
+            </div>
+          </RevealOnScroll>
 
           {/* ── RIGHT: hanging badge mockup (C1) ──────────────────────── */}
-          <div className="reg-right">
-            {/*
-             * The hanging badge mockup has a transparent background.
-             * No border-radius container — let the badge shape breathe naturally
-             * against the navy section background.
-             */}
+          <RevealOnScroll className="reg-right" delay={120}>
             <Image
               src={images.badgeHanging.src!}
               alt={images.badgeHanging.alt}
@@ -157,11 +155,10 @@ export function RegistrationCta() {
                 height: "auto",
                 display: "block",
                 objectFit: "contain",
-                /* Lift the badge visually off the dark background */
                 filter: "drop-shadow(0 24px 48px rgba(0,0,0,0.50))",
               }}
             />
-          </div>
+          </RevealOnScroll>
 
         </div>
       </div>

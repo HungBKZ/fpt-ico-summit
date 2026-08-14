@@ -220,7 +220,7 @@ export function PartnersSection() {
         </div>
 
         {activeTab === "Consulates" ? (
-          <div id="consulates-panel" role="tabpanel" aria-labelledby="consulates-tab">
+          <div id="consulates-panel" role="tabpanel" aria-labelledby="consulates-tab" className="tab-panel-animated" key="consulates">
             {confirmedConsulates.length === 0 ? (
               <EmptyState tab="Consulates" />
             ) : (
@@ -238,7 +238,7 @@ export function PartnersSection() {
             )}
           </div>
         ) : (
-          <div id="universities-panel" role="tabpanel" aria-labelledby="universities-tab">
+          <div id="universities-panel" role="tabpanel" aria-labelledby="universities-tab" className="tab-panel-animated" key="universities">
             {confirmedUniversities.length === 0 ? (
               <EmptyState tab="Universities" />
             ) : (
