@@ -184,6 +184,111 @@ export const images = {
     alt: "Mekong Delta cultural discovery experience",
     placeholderLabel: "B02 · Mekong Discovery",
   } satisfies SiteImage,
+
+  // ---------------------------------------------------------------------------
+  // Official brand assets
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Summit color logo — transparent background PNG
+   * Usage: SiteHeader (white/light background)
+   * Do not use on dark backgrounds — use summitLogoWhite instead.
+   */
+  summitLogoColor: {
+    src: "https://res.cloudinary.com/dvucotc8z/image/upload/v1786700475/FPT_ICO_SUMMIT_3_ej5w3m.png",
+    alt: "FPT ICO Summit 2026 official logo",
+  } satisfies SiteImage,
+
+  /**
+   * Summit white logo — transparent background PNG
+   * Usage: dark/navy backgrounds (footer, dark sections).
+   */
+  summitLogoWhite: {
+    src: "https://res.cloudinary.com/dvucotc8z/image/upload/v1786700428/FPT_ICO_SUMMIT_2_i4ahzx.png",
+    alt: "FPT ICO Summit 2026 official logo (white version)",
+  } satisfies SiteImage,
+
+  /**
+   * Event attendee pass / badge visual
+   * Usage: Registration section — right column on desktop
+   */
+  attendeePass: {
+    src: "https://res.cloudinary.com/dvucotc8z/image/upload/v1786697995/5_wnhl2y.png",
+    alt: "FPT ICO Summit 2026 official event attendee pass",
+  } satisfies SiteImage,
+
+  /**
+   * Official Summit tote bag / souvenir visual
+   * Usage: Food & Souvenirs section — primary supporting visual
+   */
+  souvenirTote: {
+    src: "https://res.cloudinary.com/dvucotc8z/image/upload/v1786697995/6_iejysu.png",
+    alt: "FPT ICO Summit 2026 official tote bag souvenir",
+  } satisfies SiteImage,
+
+  /**
+   * Official Key Visual (KV)
+   * Usage: Secondary brand identity — used once near/above the registration section.
+   * Do NOT replace the Hero with this.
+   */
+  summitKeyVisual: {
+    src: "https://res.cloudinary.com/dvucotc8z/image/upload/v1786697995/KV_gbps3v.png",
+    alt: "FPT ICO Summit 2026 official key visual",
+  } satisfies SiteImage,
+
+  /**
+   * Registration QR code
+   * Usage: Registration section — always fully visible, never cropped or overlaid.
+   * Render with object-fit: contain.
+   */
+  registrationQr: {
+    src: "https://res.cloudinary.com/dvucotc8z/image/upload/v1786698313/QR_pbytrr.jpg",
+    alt: "QR code to register for FPT ICO Summit 2026",
+  } satisfies SiteImage,
+
+  // ---------------------------------------------------------------------------
+  // Merchandise / registration mockup visuals  (C1–C4)
+  // ---------------------------------------------------------------------------
+
+  /**
+   * C1 — Hanging attendee badge mockup
+   * Usage: Registration section — primary right-column visual.
+   * Transparent background PNG — place directly on dark backgrounds.
+   */
+  badgeHanging: {
+    src: "https://res.cloudinary.com/dvucotc8z/image/upload/v1786703011/FPT_ICO_SUMMIT_6_if6wzx.png",
+    alt: "FPT ICO Summit 2026 official attendee badge hanging mockup",
+  } satisfies SiteImage,
+
+  /**
+   * C2 — Tote bag mockup
+   * Usage: Souvenirs & Food section — primary right-column visual.
+   * Transparent background PNG.
+   */
+  toteMockup: {
+    src: "https://res.cloudinary.com/dvucotc8z/image/upload/v1786703011/FPT_ICO_SUMMIT_4_dyiail.png",
+    alt: "FPT ICO Summit 2026 official Summit tote bag",
+  } satisfies SiteImage,
+
+  /**
+   * C3 — Flat attendee badge artwork
+   * Usage: Supporting visual only — media kit, gallery, or download area.
+   * Not suitable as a primary section mockup.
+   */
+  badgeFlat: {
+    src: "https://res.cloudinary.com/dvucotc8z/image/upload/v1786703011/FPT_ICO_SUMMIT_5_pii5ks.png",
+    alt: "FPT ICO Summit 2026 attendee badge flat artwork",
+  } satisfies SiteImage,
+
+  /**
+   * C4 — Poster / flat event visual
+   * Usage: Supporting visual only — media kit, gallery, or download area.
+   * Not suitable as a primary section mockup.
+   */
+  eventPoster: {
+    src: "https://res.cloudinary.com/dvucotc8z/image/upload/v1786703010/FPT_ICO_SUMMIT_7_tw2pa7.png",
+    alt: "FPT ICO Summit 2026 official event poster",
+  } satisfies SiteImage,
 } as const;
 
 export type Images = typeof images;

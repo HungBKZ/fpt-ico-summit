@@ -7,6 +7,7 @@
  * Phase 4: ProgramOverview + ExpoSection + WorkshopSection.
  * Phase 5: PartnersSection + MekongSection + VenueSection.
  * Phase 6: FaqSection + RegistrationCta.
+ * Brand: SouvenirSection added; RegistrationCta updated with KV + two-column layout.
  */
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -22,6 +23,7 @@ import { PartnersSection } from "@/components/sections/PartnersSection";
 import { ScholarshipsSection } from "@/components/sections/ScholarshipsSection";
 import { MekongSection } from "@/components/sections/MekongSection";
 import { VenueSection } from "@/components/sections/VenueSection";
+import { SouvenirSection } from "@/components/sections/SouvenirSection";
 import { FaqSection } from "@/components/sections/FaqSection";
 import { RegistrationCta } from "@/components/sections/RegistrationCta";
 
@@ -49,6 +51,9 @@ export default function HomePage() {
         <ScholarshipsSection />
         <MekongSection />
         <VenueSection />
+
+        {/* Brand */}
+        <SouvenirSection />
 
         {/* Phase 6 */}
         <FaqSection />

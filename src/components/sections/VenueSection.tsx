@@ -21,7 +21,7 @@ export function VenueSection() {
     <section
       id="venue"
       aria-labelledby="venue-heading"
-      style={{ backgroundColor: "var(--color-warm-white)" }}
+      className="section--tinted"
     >
       <div className="site-container section-padding">
         <div className="venue-layout">

@@ -8,8 +8,10 @@
  */
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { siteConfig } from "@/data/site";
+import { images } from "@/data/images";
 import { isRegistrationOpen } from "@/lib/utils";
 
 const navLinks = [
@@ -71,7 +73,7 @@ export function SiteHeader() {
         zIndex: 50,
         backgroundColor: "var(--color-warm-white)",
         borderBottom: `1px solid ${scrolled ? "var(--color-border)" : "transparent"}`,
-        boxShadow: scrolled ? "var(--shadow-sm)" : "none",
+        boxShadow: scrolled ? "0 1px 12px -4px rgb(11 23 54 / 0.10)" : "none",
         transition: "box-shadow var(--transition-base), border-color var(--transition-base)",
       }}
     >
@@ -81,8 +83,8 @@ export function SiteHeader() {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            height: "4rem",
-            gap: "1.5rem",
+            height: "var(--header-height)",
+            gap: "2rem",
           }}
         >
           {/* ── Logo ──────────────────────────────────────────────────── */}
@@ -92,52 +94,34 @@ export function SiteHeader() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "0.625rem",
               flexShrink: 0,
               textDecoration: "none",
             }}
           >
-            <span
-              aria-hidden="true"
+            <Image
+              src={images.summitLogoColor.src!}
+              alt={images.summitLogoColor.alt}
+              width={220}
+              height={60}
+              priority
               style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "2rem",
-                height: "2rem",
-                borderRadius: "var(--radius-sm)",
-                backgroundColor: "var(--color-orange)",
-                color: "#fff",
-                fontSize: "0.75rem",
-                fontWeight: 700,
-                fontFamily: "var(--font-display)",
-                letterSpacing: "0.02em",
-                flexShrink: 0,
+                /* 32px mobile → 48px desktop, fluid */
+                height: "clamp(2rem, 4vw, 3rem)",
+                width: "auto",
+                maxWidth: "220px",
+                objectFit: "contain",
+                display: "block",
               }}
-            >
-              FPT
-            </span>
-            <span
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 700,
-                fontSize: "0.9375rem",
-                color: "var(--color-navy)",
-                lineHeight: 1.2,
-              }}
-            >
-              ICO Summit{" "}
-              <span style={{ color: "var(--color-orange)" }}>2026</span>
-            </span>
+            />
           </Link>
 
           {/* ── Desktop nav ───────────────────────────────────────────── */}
-          <nav aria-label="Main navigation" className="hidden md:flex">
+          <nav aria-label="Main navigation" className="hidden md:flex" style={{ flex: 1, justifyContent: "center" }}>
             <ul
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "0.125rem",
+                gap: "0.25rem",
               }}
             >
               {navLinks.map(({ label, href }) => (

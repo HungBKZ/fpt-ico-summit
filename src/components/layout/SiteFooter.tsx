@@ -3,8 +3,10 @@
  * Hover effects use CSS classes (footer-link, footer-link-accent) — no JS handlers.
  */
 
+import Image from "next/image";
 import Link from "next/link";
 import { siteConfig } from "@/data/site";
+import { images } from "@/data/images";
 import { mailtoHref } from "@/lib/utils";
 
 const footerLinks = [
@@ -46,40 +48,21 @@ export function SiteFooter() {
             <Link
               href="/"
               aria-label={`${siteConfig.name} — home`}
-              className="footer-link"
-              style={{ display: "inline-flex", alignItems: "center", gap: "0.625rem" }}
+              style={{ display: "inline-flex", alignItems: "center" }}
             >
-              <span
-                aria-hidden="true"
+              <Image
+                src={images.summitLogoWhite.src!}
+                alt={images.summitLogoWhite.alt}
+                width={160}
+                height={48}
                 style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: "2rem",
-                  height: "2rem",
-                  borderRadius: "var(--radius-sm)",
-                  backgroundColor: "var(--color-orange)",
-                  color: "#fff",
-                  fontSize: "0.75rem",
-                  fontWeight: 700,
-                  fontFamily: "var(--font-display)",
-                  flexShrink: 0,
+                  height: "2.75rem",
+                  width: "auto",
+                  maxWidth: "160px",
+                  objectFit: "contain",
+                  display: "block",
                 }}
-              >
-                FPT
-              </span>
-              <span
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontWeight: 700,
-                  fontSize: "0.9375rem",
-                  color: "#fff",
-                  lineHeight: 1.2,
-                }}
-              >
-                ICO Summit{" "}
-                <span style={{ color: "var(--color-orange-light)" }}>2026</span>
-              </span>
+              />
             </Link>
 
             <p

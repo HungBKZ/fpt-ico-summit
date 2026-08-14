@@ -14,40 +14,49 @@ function EmptyState({ tab }: { tab: PartnerTab }) {
       role="status"
       aria-live="polite"
       style={{
+        position: "relative",
+        overflow: "hidden",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        gap: "1rem",
-        padding: "2rem 1.25rem",
-        backgroundColor: "var(--color-off-white)",
-        border: "1px dashed var(--color-border-strong)",
+        gap: "0.625rem",
+        padding: "2rem 1.5rem",
+        backgroundColor: "rgba(26, 94, 168, 0.12)",
+        border: "1px solid rgba(58, 127, 212, 0.22)",
         borderRadius: "var(--radius-lg)",
         textAlign: "center",
       }}
     >
+      {/* Subtle corner motif — one diagonal stripe group, top-right */}
+      <span
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          top: 0,
+          right: 0,
+          width: "6rem",
+          height: "6rem",
+          pointerEvents: "none",
+          backgroundImage: "repeating-linear-gradient(-55deg, rgba(58,127,212,0.18) 0px, rgba(58,127,212,0.18) 1.5px, transparent 1.5px, transparent 18px)",
+          borderRadius: "0 var(--radius-lg) 0 0",
+        }}
+      />
       <div
         aria-hidden="true"
         style={{
           display: "inline-flex",
           alignItems: "center",
           justifyContent: "center",
-          width: "3rem",
-          height: "3rem",
+          width: "2.5rem",
+          height: "2.5rem",
           borderRadius: "var(--radius-md)",
-          backgroundColor: "var(--color-blue-subtle)",
-          color: "var(--color-blue)",
+          backgroundColor: "rgba(58, 127, 212, 0.18)",
+          color: "var(--color-blue-light)",
+          position: "relative",
+          zIndex: 1,
         }}
       >
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10" />
           <line x1="2" y1="12" x2="22" y2="12" />
           <path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20" />
@@ -56,22 +65,26 @@ function EmptyState({ tab }: { tab: PartnerTab }) {
       <p
         style={{
           fontFamily: "var(--font-display)",
-          fontSize: "var(--text-lg)",
+          fontSize: "var(--text-base)",
           fontWeight: 700,
-          color: "var(--color-navy)",
+          color: "#ffffff",
+          position: "relative",
+          zIndex: 1,
         }}
       >
         {tab} to be announced.
       </p>
       <p
         style={{
-          maxWidth: "42ch",
+          maxWidth: "38ch",
           fontSize: "var(--text-sm)",
-          color: "var(--color-text-muted)",
+          color: "rgba(255,255,255,0.60)",
           lineHeight: "var(--leading-normal)",
+          position: "relative",
+          zIndex: 1,
         }}
       >
-        Confirmed institutions and universities will appear here as participation is verified.
+        Confirmed institutions will appear here as participation is verified.
       </p>
     </div>
   );
@@ -92,10 +105,11 @@ function PartnerTile({
         justifyContent: "center",
         minHeight: "5rem",
         padding: "1.25rem 1rem",
-        backgroundColor: "#fff",
-        border: "1px solid var(--color-border)",
+        backgroundColor: "rgba(255,255,255,0.07)",
+        border: "1px solid rgba(255,255,255,0.12)",
         borderRadius: "var(--radius-md)",
         textAlign: "center",
+        transition: "background-color 150ms ease, border-color 150ms ease",
       }}
     >
       <span
@@ -103,7 +117,7 @@ function PartnerTile({
           fontFamily: "var(--font-display)",
           fontSize: "var(--text-xs)",
           fontWeight: 700,
-          color: "var(--color-navy)",
+          color: "rgba(255,255,255,0.88)",
           lineHeight: "var(--leading-snug)",
         }}
       >
@@ -188,12 +202,15 @@ export function PartnersSection() {
                 }}
                 style={{
                   border: isActive ? "1px solid transparent" : "1px solid rgba(255,255,255,0.18)",
-                  backgroundColor: isActive ? "var(--color-orange)" : "rgba(255,255,255,0.06)",
+                  backgroundColor: isActive ? "var(--color-blue)" : "rgba(255,255,255,0.06)",
                   color: isActive ? "#fff" : "#edf4ff",
-                  borderRadius: "var(--radius-full)",
+                  borderRadius: "var(--radius-sm)",
                   fontWeight: 600,
-                  padding: "0.75rem 1.25rem",
+                  fontSize: "var(--text-sm)",
+                  padding: "0.625rem 1.5rem",
                   cursor: "pointer",
+                  letterSpacing: "0.01em",
+                  transition: "background-color 150ms ease, color 150ms ease",
                 }}
               >
                 {tab}
@@ -240,12 +257,14 @@ export function PartnersSection() {
                     onClick={() => setSelectedCountry("All")}
                     style={{
                       border: selectedCountry === "All" ? "1px solid transparent" : "1px solid rgba(255,255,255,0.18)",
-                      backgroundColor: selectedCountry === "All" ? "var(--color-orange)" : "rgba(255,255,255,0.06)",
+                      backgroundColor: selectedCountry === "All" ? "var(--color-blue)" : "rgba(255,255,255,0.06)",
                       color: selectedCountry === "All" ? "#fff" : "#edf4ff",
-                      borderRadius: "var(--radius-full)",
-                      padding: "0.5rem 0.875rem",
+                      borderRadius: "var(--radius-sm)",
+                      padding: "0.4rem 0.875rem",
                       fontWeight: 600,
+                      fontSize: "var(--text-sm)",
                       cursor: "pointer",
+                      transition: "background-color 150ms ease, color 150ms ease",
                     }}
                   >
                     All countries
@@ -259,12 +278,14 @@ export function PartnersSection() {
                       style={{
                         border:
                           selectedCountry === country ? "1px solid transparent" : "1px solid rgba(255,255,255,0.18)",
-                        backgroundColor: selectedCountry === country ? "var(--color-orange)" : "rgba(255,255,255,0.06)",
+                        backgroundColor: selectedCountry === country ? "var(--color-blue)" : "rgba(255,255,255,0.06)",
                         color: selectedCountry === country ? "#fff" : "#edf4ff",
-                        borderRadius: "var(--radius-full)",
-                        padding: "0.5rem 0.875rem",
+                        borderRadius: "var(--radius-sm)",
+                        padding: "0.4rem 0.875rem",
                         fontWeight: 600,
+                        fontSize: "var(--text-sm)",
                         cursor: "pointer",
+                        transition: "background-color 150ms ease, color 150ms ease",
                       }}
                     >
                       {country}
@@ -302,15 +323,16 @@ export function PartnersSection() {
                   <div
                     style={{
                       marginTop: "1rem",
-                      padding: "1.5rem",
+                      padding: "1.25rem",
                       textAlign: "center",
-                      backgroundColor: "#fff",
+                      backgroundColor: "rgba(26, 94, 168, 0.12)",
                       borderRadius: "var(--radius-md)",
-                      border: "1px dashed var(--color-border-strong)",
-                      color: "var(--color-text-muted)",
+                      border: "1px solid rgba(58, 127, 212, 0.20)",
+                      color: "rgba(255,255,255,0.65)",
+                      fontSize: "var(--text-sm)",
                     }}
                   >
-                    No confirmed universities are available for {selectedCountry} yet.
+                    No confirmed universities for {selectedCountry} yet.
                   </div>
                 )}
               </>

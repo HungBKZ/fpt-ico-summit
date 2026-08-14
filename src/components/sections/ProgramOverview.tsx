@@ -144,7 +144,7 @@ export function ProgramOverview() {
     <section
       id="program"
       aria-labelledby="program-heading"
-      style={{ backgroundColor: "var(--color-warm-white)" }}
+      className="section--tinted"
     >
       <div className="site-container section-padding">
 
@@ -182,8 +182,21 @@ export function ProgramOverview() {
               textTransform: "uppercase",
               color: "var(--color-blue)",
               marginBottom: "1rem",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
             }}
           >
+            <span
+              style={{
+                display: "inline-block",
+                width: "1.5rem",
+                height: "2px",
+                backgroundColor: "var(--color-blue)",
+                borderRadius: "999px",
+              }}
+              aria-hidden="true"
+            />
             Running throughout 21–22 November
           </p>
           <div className="program-continuous">

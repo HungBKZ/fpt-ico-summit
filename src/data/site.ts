@@ -34,11 +34,11 @@ export const siteConfig = {
     "https://www.facebook.com/messages/t/61577438391152/",
 
   /**
-   * Registration URL.
-   * Leave as empty string until a verified URL is supplied.
-   * Components should check: registrationUrl || null → show "opens soon" state.
+   * Registration URL — verified Google Form, registration is OPEN.
+   * Components check isRegistrationOpen(registrationUrl) to switch between
+   * "Register Now" and "Registration opens soon" states automatically.
    */
-  registrationUrl: "",
+  registrationUrl: "https://docs.google.com/forms/d/e/1FAIpQLSe9hxiepFkN2hutpK0iqGX0w_eL3OAoWhij32MvKysZH-rtdQ/viewform?usp=sharing&ouid=104117891867085264024",
 
   /** Page metadata used in layout.tsx. */
   meta: {
