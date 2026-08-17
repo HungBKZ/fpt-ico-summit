@@ -75,7 +75,7 @@ export function MekongSection() {
 
           {/* Heading */}
           <h2 id="mekong-heading" className="mekong-heading">
-            Meet the Mekong beyond the conference hall.
+            Meet the Mekong beyond the conference hall
           </h2>
 
           {/* Body */}
@@ -85,7 +85,7 @@ export function MekongSection() {
             Mekong Delta through the program&apos;s cultural discovery journey.
           </p>
 
-          {/* Day 1 callout chip */}
+          {/* PRE-EVENT callout chip */}
           <div
             style={{
               display: "inline-flex",
@@ -121,7 +121,7 @@ export function MekongSection() {
                 letterSpacing: "0.03em",
               }}
             >
-              Day 1 · 20 November 2026
+              PRE-EVENT · 20 November 2026
             </span>
           </div>
         </div>

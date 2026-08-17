@@ -119,7 +119,7 @@ function DayCard({ day }: { day: ProgramDay }) {
         </div>
       )}
 
-      {/* Day 1 has no published slots yet — show a placeholder note */}
+      {/* Placeholder note if a day has no published slots */}
       {!hasSlots && (
         <div className="program-day-slots">
           <p
@@ -155,7 +155,7 @@ export function ProgramOverview() {
               id="program-heading"
               eyebrow="The Program"
               heading="Three days of discovery, connection and exchange."
-              body="FPT ICO Summit 2026 runs across three days — each with its own character, from cultural discovery to international exchange, performances and a closing celebration."
+              body="FPT ICO Summit 2026 runs across three days — each with its own character, from cultural discovery to international exchange, performances and a grand closing celebration."
               level="h2"
               align="left"
               accent={true}

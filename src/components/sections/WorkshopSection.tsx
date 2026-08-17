@@ -136,7 +136,7 @@ export function WorkshopSection() {
                 lineHeight: "var(--leading-normal)",
               }}
             >
-              Speaker details will be announced as participation is confirmed.
+              Speaker details will be announced upon confirmation.
             </p>
           </div>
         </div>

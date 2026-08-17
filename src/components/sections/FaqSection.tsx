@@ -150,7 +150,7 @@ export function FaqSection() {
               <SectionHeading
                 id="faq-heading"
                 eyebrow="FAQ"
-                heading="Common questions about the summit."
+                heading="Frequently Asked Questions"
                 level="h2"
                 align="left"
                 accent={true}

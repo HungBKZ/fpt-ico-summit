@@ -75,9 +75,9 @@ export function SouvenirSection() {
             <div style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>
             <SectionHeading
               id="souvenir-heading"
-              eyebrow="Souvenirs & Food"
+              eyebrow="Food & Souvenirs"
               heading="Take a piece of the summit home."
-              body="FPT ICO Summit 2026 will feature official event merchandise and a range of food and refreshment options on campus throughout the event."
+              body="FPT ICO Summit 2026 will feature official merchandise alongside a variety of food and refreshment options on campus throughout the summit."
               level="h2"
               align="left"
               accent={true}

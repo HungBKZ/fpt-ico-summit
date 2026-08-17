@@ -262,7 +262,7 @@ export const images = {
 
   /**
    * C2 — Tote bag mockup
-   * Usage: Souvenirs & Food section — primary right-column visual.
+   * Usage: Food & Souvenirs section — primary right-column visual.
    * Transparent background PNG.
    */
   toteMockup: {

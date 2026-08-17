@@ -27,8 +27,8 @@ const stats = [
   {
     number: 1,
     suffix: "",
-    label: "Global Community of universities, organisations & consulates",
-    ariaLabel: "Global community of universities, organisations and consulates",
+    label: "Global Community of universities, organizations & consulates",
+    ariaLabel: "Global community of universities, organizations and consulates",
     staticValue: "Global",
   },
   {

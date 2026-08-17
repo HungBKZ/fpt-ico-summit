@@ -21,8 +21,6 @@ const footerLinks = [
 ];
 
 export function SiteFooter() {
-  const year = new Date().getFullYear();
-
   return (
     <footer
       role="contentinfo"
@@ -237,7 +235,7 @@ export function SiteFooter() {
           }}
         >
           <p style={{ fontSize: "var(--text-xs)", color: "rgba(255,255,255,0.4)" }}>
-            &copy; {year} {siteConfig.name}. FPT University Can Tho Campus — International Cooperation Office.
+            &copy; 2026 FPT ICO Summit — International Cooperation Office, FPT University Can Tho Campus.
           </p>
           <p style={{ fontSize: "var(--text-xs)", color: "rgba(255,255,255,0.3)" }}>
             {siteConfig.venue}, Vietnam

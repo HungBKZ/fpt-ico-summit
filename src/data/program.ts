@@ -39,21 +39,30 @@ export interface ProgramDay {
 export const programDays: ProgramDay[] = [
   {
     date: "20 November 2026",
-    dayLabel: "Day 1",
+    dayLabel: "PRE-EVENT",
     title: "Mekong Discovery",
     description:
       "Welcome activities and cultural experiences introduce international guests to Can Tho and the Mekong Delta.",
     icon: "compass",
     slots: {
-      // Full-day experience — no morning/afternoon split published yet.
+      morning: [
+        { title: "Welcome & Registration" },
+      ],
+      afternoon: [
+        { title: "Traditional Craft Villages" },
+        { title: "Southern Cultural Experience" },
+      ],
+      evening: [
+        { title: "Welcome Dinner" },
+      ],
     },
   },
   {
     date: "21 November 2026",
-    dayLabel: "Day 2",
+    dayLabel: "DAY 1",
     title: "Summit Day 1",
     description:
-      "The official summit opens with ceremony and cultural performance, followed by networking, activities and the International Expo.",
+      "The official summit opens with an opening ceremony and cultural performances, followed by networking, activities and the International Expo.",
     icon: "flag",
     slots: {
       morning: [
@@ -71,7 +80,7 @@ export const programDays: ProgramDay[] = [
   },
   {
     date: "22 November 2026",
-    dayLabel: "Day 3",
+    dayLabel: "DAY 2",
     title: "Summit Day 2",
     description:
       "The summit concludes with performances, networking, an awards ceremony, Friendship Concert and International Fashion Show.",

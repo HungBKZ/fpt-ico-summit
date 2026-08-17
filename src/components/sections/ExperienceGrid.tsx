@@ -80,7 +80,7 @@ const experienceCards: ExperienceCard[] = [
   {
     title: "Live Performances",
     description:
-      "Celebrate cultural expression through music, traditional performance, fashion and student-led showcases.",
+      "Celebrate cultural expression through music, traditional performances, fashion and student-led showcases.",
     chip: "Performances",
     chipVariant: "orange",
     variant: "wide",

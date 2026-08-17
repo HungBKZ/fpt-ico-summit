@@ -12,7 +12,7 @@ export const workshops: Workshop[] = [
     id: "cross-cultural-communication-ai-era",
     title: "Cross-Cultural Communication in the AI Era",
     description:
-      "The workshop explores how students can communicate across cultures, adapt to international environments, and use AI thoughtfully in multicultural study and work.",
+      "The workshop explores how students can communicate across cultures, adapt to international environments, and leverage AI effectively in multicultural study and work.",
     status: "confirmed",
   },
 ];

@@ -46,7 +46,7 @@ export const faqItems: FaqItem[] = [
   },
   {
     id: "event-dates",
-    question: "What are the event dates?",
+    question: "When will the summit take place?",
     answer:
       "FPT ICO Summit 2026 runs from 20 to 22 November 2026 at FPT University Can Tho Campus.",
   },

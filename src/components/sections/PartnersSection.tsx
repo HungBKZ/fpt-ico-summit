@@ -84,7 +84,7 @@ function EmptyState({ tab }: { tab: PartnerTab }) {
           zIndex: 1,
         }}
       >
-        Confirmed institutions will appear here as participation is verified.
+        Confirmed partners will appear here as participation is verified.
       </p>
     </div>
   );
@@ -168,7 +168,7 @@ export function PartnersSection() {
             className="section-heading--invert"
             eyebrow="Global community"
             heading="Participating consulates and universities."
-            body="Only confirmed institutions are shown publicly."
+            body="Confirmed partners will appear here as participation is verified."
             level="h2"
             align="center"
             accent={true}
