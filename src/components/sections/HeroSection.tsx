@@ -6,8 +6,15 @@ import { images } from "@/data/images";
 import { siteConfig } from "@/data/site";
 import { isRegistrationOpen } from "@/lib/utils";
 import { MediaPlaceholder } from "@/components/ui/MediaPlaceholder";
+import { Locale } from "@/i18n/config";
+import type { Dictionary } from "@/i18n/types";
 
-export function HeroSection() {
+interface HeroSectionProps {
+  locale: Locale;
+  dict: Dictionary;
+}
+
+export function HeroSection({ dict }: HeroSectionProps) {
   const hasRegistration = isRegistrationOpen(siteConfig.registrationUrl);
   const [parallaxY, setParallaxY] = useState(0);
 
@@ -39,7 +46,7 @@ export function HeroSection() {
       aria-label="FPT ICO Summit 2026 introduction"
       className="hero-section"
     >
-      {/* ── Background image (right-aligned, fades left into navy) ──────── */}
+      {/* ── Background image ──────── */}
       <div
         aria-hidden="true"
         className="hero-bg-layer"
@@ -54,14 +61,13 @@ export function HeroSection() {
         {images.hero.src ? (
           <Image
             src={images.hero.src}
-            alt=""               /* decorative; real alt is in the section heading */
+            alt=""
             fill
-            priority             /* LCP image — preload */
+            priority
             sizes="100vw"
             style={{ objectFit: "cover", objectPosition: "center 40%" }}
           />
         ) : (
-          /* Placeholder fills the hero background when image is null */
           <div style={{ position: "absolute", inset: 0 }}>
             <MediaPlaceholder
               label={images.hero.placeholderLabel}
@@ -73,7 +79,7 @@ export function HeroSection() {
         )}
       </div>
 
-      {/* ── Gradient overlay — ensures text contrast on any image ────────── */}
+      {/* ── Gradient overlay ────────── */}
       <div className="hero-overlay" aria-hidden="true" />
 
       {/* ── Content ─────────────────────────────────────────────────────── */}
@@ -98,16 +104,16 @@ export function HeroSection() {
               color: "var(--color-blue-light)",
             }}
           >
-            FPT University Can Tho · International Cooperation Office
+            {dict.hero.eyebrow}
           </p>
 
           {/* H1 */}
           <h1 className="hero-h1 hero-h1-animate">
-            Connecting{" "}
-            <span className="accent">Cultures.</span>
+            {dict.hero.titleLine1}{" "}
+            <span className="accent">{dict.hero.titleAccent1}</span>
             <br />
-            Creating Global{" "}
-            <span className="accent">Opportunities.</span>
+            {dict.hero.titleLine2}{" "}
+            <span className="accent">{dict.hero.titleAccent2}</span>
           </h1>
 
           {/* Support copy */}
@@ -120,16 +126,14 @@ export function HeroSection() {
               maxWidth: "52ch",
             }}
           >
-            FPT ICO Summit 2026 brings students, universities, consulates and
-            global partners together for international education, cultural
-            exchange and future-ready learning.
+            {dict.hero.description}
           </p>
 
           {/* Meta line — date · venue */}
           <div className="hero-meta hero-meta-animate">
-            <span>{siteConfig.dates}</span>
+            <span>{dict.hero.datesValue}</span>
             <span className="hero-meta-dot" aria-hidden="true" />
-            <span>{siteConfig.venue}, Vietnam</span>
+            <span>{dict.hero.venueValue}</span>
           </div>
 
           {/* CTAs */}
@@ -142,9 +146,9 @@ export function HeroSection() {
               alignItems: "center",
             }}
           >
-            {/* Primary — scroll to about / program */}
+            {/* Primary — scroll to explore */}
             <a href="#explore" className="btn-blue-lg">
-              Explore the Summit
+              {dict.hero.ctaExplore}
             </a>
 
             {/* Secondary — 360 campus tour */}
@@ -154,7 +158,6 @@ export function HeroSection() {
               rel="noopener noreferrer"
               className="btn-outline-white"
             >
-              {/* Globe icon */}
               <svg
                 aria-hidden="true"
                 width="15"
@@ -170,7 +173,7 @@ export function HeroSection() {
                 <line x1="2" y1="12" x2="22" y2="12" />
                 <path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20" />
               </svg>
-              Explore Campus in 360°
+              {dict.hero.cta360}
               <span className="sr-only">(opens in a new tab)</span>
             </a>
 
@@ -182,7 +185,7 @@ export function HeroSection() {
                 rel="noopener noreferrer"
                 className="btn-orange-lg"
               >
-                Register Now
+                {dict.hero.ctaRegister}
               </a>
             ) : (
               <span
@@ -192,16 +195,16 @@ export function HeroSection() {
                   fontWeight: 500,
                   paddingInline: "0.25rem",
                 }}
-                aria-label="Registration opens soon"
+                aria-label={dict.nav.registrationOpensSoon}
               >
-                Registration opens soon
+                {dict.nav.registrationOpensSoon}
               </span>
             )}
           </div>
         </div>
       </div>
 
-      {/* ── Bottom fade into page background ────────────────────────────── */}
+      {/* ── Bottom fade ────────────── */}
       <div
         aria-hidden="true"
         style={{

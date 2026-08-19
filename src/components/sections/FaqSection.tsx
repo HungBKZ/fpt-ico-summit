@@ -1,52 +1,45 @@
 "use client";
 
-/**
- * FaqSection — Accessible FAQ accordion.
- *
- * Accessibility:
- *  - Each trigger is a <button> with aria-expanded and aria-controls.
- *  - Answer panel has matching id and role="region" with aria-labelledby.
- *  - Keyboard: Enter/Space toggle; no arrow-key navigation needed for simple list.
- *  - Focus ring inherits the global :focus-visible rule.
- *  - Panel height animated via requestAnimationFrame for smooth open/close.
- *  - Respects prefers-reduced-motion — animation skipped via CSS override.
- *
- * Content source: src/data/faq.ts — no answers invented.
- * "use client" required only for open/close state and animation.
- */
-
 import { useRef, useState } from "react";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { faqItems, type FaqItem } from "@/data/faq";
+import { faqItems } from "@/data/faq";
 import { mailtoHref } from "@/lib/utils";
 import { siteConfig } from "@/data/site";
+import { Locale } from "@/i18n/config";
+import type { Dictionary } from "@/i18n/types";
+import { getLocalizedText } from "@/i18n/types";
 
-/* ── Single accordion item ───────────────────────────────────────────────── */
+interface FaqSectionProps {
+  locale: Locale;
+  dict: Dictionary;
+}
 
-function FaqItem({
-  item,
+function FaqAccordionItem({
+  questionStr,
+  answerStr,
+  id,
   isOpen,
   onToggle,
 }: {
-  item: FaqItem;
+  questionStr: string;
+  answerStr: string;
+  id: string;
   isOpen: boolean;
   onToggle: () => void;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
-  const triggerId = `faq-trigger-${item.id}`;
-  const panelId  = `faq-panel-${item.id}`;
+  const triggerId = `faq-trigger-${id}`;
+  const panelId  = `faq-panel-${id}`;
 
-  /* Animate height: 0 → scrollHeight on open, reverse on close */
   const handleToggle = () => {
     const panel = panelRef.current;
     if (!panel) { onToggle(); return; }
 
-    // Check reduced-motion preference at runtime to skip animation if needed
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (!isOpen) {
-      onToggle(); // flip state first so React removes height:0 inline style
+      onToggle();
       if (reduced) return;
       requestAnimationFrame(() => {
         const target = panel.scrollHeight;
@@ -74,7 +67,7 @@ function FaqItem({
           const cleanup = () => {
             panel.removeEventListener("transitionend", cleanup);
             panel.style.cssText = "";
-            onToggle(); // flip state after animation so panel collapses visually first
+            onToggle();
           };
           panel.addEventListener("transitionend", cleanup);
         });
@@ -95,8 +88,7 @@ function FaqItem({
         className="faq-trigger"
         onClick={handleToggle}
       >
-        <span>{item.question}</span>
-        {/* Chevron icon */}
+        <span>{questionStr}</span>
         <svg
           className="faq-chevron"
           aria-hidden="true"
@@ -120,16 +112,14 @@ function FaqItem({
         style={isOpen ? undefined : { height: 0, overflow: "hidden" }}
       >
         <div className="faq-panel-inner">
-          {item.answer}
+          {answerStr}
         </div>
       </div>
     </div>
   );
 }
 
-/* ── Section ─────────────────────────────────────────────────────────────── */
-
-export function FaqSection() {
+export function FaqSection({ locale, dict }: FaqSectionProps) {
   const [openId, setOpenId] = useState<string | null>(null);
 
   const toggle = (id: string) =>
@@ -149,8 +139,8 @@ export function FaqSection() {
             <RevealOnScroll>
               <SectionHeading
                 id="faq-heading"
-                eyebrow="FAQ"
-                heading="Frequently Asked Questions"
+                eyebrow={dict.faq.eyebrow}
+                heading={dict.faq.title}
                 level="h2"
                 align="left"
                 accent={true}
@@ -163,8 +153,7 @@ export function FaqSection() {
               lineHeight: "var(--leading-normal)",
               maxWidth: "36ch",
             }}>
-              Can&apos;t find what you&apos;re looking for? Reach out directly and we&apos;ll
-              get back to you.
+              {dict.faq.subtitle}
             </p>
 
             <a
@@ -181,7 +170,6 @@ export function FaqSection() {
               }}
             >
               {siteConfig.email}
-              {/* Arrow icon */}
               <svg
                 aria-hidden="true"
                 width="14"
@@ -204,17 +192,23 @@ export function FaqSection() {
             className="faq-list"
             role="list"
           >
-            {faqItems.map((item, index) => (
-              <RevealOnScroll key={item.id} delay={index * 70}>
-                <div role="listitem">
-                  <FaqItem
-                    item={item}
-                    isOpen={openId === item.id}
-                    onToggle={() => toggle(item.id)}
-                  />
-                </div>
-              </RevealOnScroll>
-            ))}
+            {faqItems.map((item, index) => {
+              const qStr = getLocalizedText(item.question, locale);
+              const aStr = getLocalizedText(item.answer, locale);
+              return (
+                <RevealOnScroll key={item.id} delay={index * 70}>
+                  <div role="listitem">
+                    <FaqAccordionItem
+                      id={item.id}
+                      questionStr={qStr}
+                      answerStr={aStr}
+                      isOpen={openId === item.id}
+                      onToggle={() => toggle(item.id)}
+                    />
+                  </div>
+                </RevealOnScroll>
+              );
+            })}
           </div>
 
         </div>

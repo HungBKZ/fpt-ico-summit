@@ -1,22 +1,18 @@
-/**
- * VenueSection — FPT University Can Tho Campus venue details.
- *
- * Layout (desktop): campus image left (A10), details right.
- * Includes the external 360° campus tour CTA (new tab, no iframe).
- * MediaPlaceholder when A10 is null.
- *
- * Content source: docs/CONTENT.md §12, src/data/site.ts.
- * Server Component.
- */
-
 import Image from "next/image";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { MediaPlaceholder } from "@/components/ui/MediaPlaceholder";
 import { images } from "@/data/images";
 import { siteConfig } from "@/data/site";
+import { Locale } from "@/i18n/config";
+import type { Dictionary } from "@/i18n/types";
 
-export function VenueSection() {
+interface VenueSectionProps {
+  locale: Locale;
+  dict: Dictionary;
+}
+
+export function VenueSection({ dict }: VenueSectionProps) {
   return (
     <section
       id="venue"
@@ -58,9 +54,9 @@ export function VenueSection() {
             <RevealOnScroll>
               <SectionHeading
                 id="venue-heading"
-                eyebrow="The Venue"
-                heading="FPT University Can Tho Campus"
-                body="Explore the campus before you arrive and get familiar with the environment that will host FPT ICO Summit 2026."
+                eyebrow={dict.venue.eyebrow}
+                heading={dict.venue.title}
+                body={dict.venue.subtitle}
                 level="h2"
                 align="left"
                 accent={true}
@@ -69,7 +65,7 @@ export function VenueSection() {
 
             {/* Address */}
             <div className="venue-address-block">
-              <p className="venue-address-label">Address</p>
+              <p className="venue-address-label">{dict.venue.addressLabel}</p>
               <address className="venue-address-text">
                 {siteConfig.address}
               </address>
@@ -77,8 +73,8 @@ export function VenueSection() {
 
             {/* Dates */}
             <div className="venue-address-block">
-              <p className="venue-address-label">Event dates</p>
-              <p className="venue-address-text">{siteConfig.dates}</p>
+              <p className="venue-address-label">{dict.venue.dateLabel}</p>
+              <p className="venue-address-text">{dict.hero.datesValue}</p>
             </div>
 
             {/* 360 tour CTA */}
@@ -89,7 +85,6 @@ export function VenueSection() {
                 rel="noopener noreferrer"
                 className="btn-venue-360"
               >
-                {/* 360 / camera icon */}
                 <svg
                   aria-hidden="true"
                   width="16"
@@ -104,8 +99,7 @@ export function VenueSection() {
                   <path d="M23 7l-7 5 7 5V7z" />
                   <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
                 </svg>
-                Explore Campus in 360°
-                {/* External link indicator */}
+                {dict.hero.cta360}
                 <svg
                   aria-hidden="true"
                   width="12"

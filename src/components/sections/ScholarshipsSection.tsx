@@ -3,12 +3,17 @@
 import { useMemo, useState } from "react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { getConfirmedScholarshipsByType } from "@/data/scholarships";
+import { Locale } from "@/i18n/config";
+import type { Dictionary } from "@/i18n/types";
 
-const tabs = ["Consulate Scholarships", "University Scholarships"] as const;
+interface ScholarshipsSectionProps {
+  locale: Locale;
+  dict: Dictionary;
+}
 
-type ScholarshipTab = (typeof tabs)[number];
+type ScholarshipTabKey = "Consulate" | "University";
 
-function EmptyState({ tab }: { tab: ScholarshipTab }) {
+function EmptyState({ tabName, dict }: { tabName: string; dict: Dictionary }) {
   return (
     <div
       role="status"
@@ -27,7 +32,6 @@ function EmptyState({ tab }: { tab: ScholarshipTab }) {
         textAlign: "center",
       }}
     >
-      {/* Subtle corner motif */}
       <span
         aria-hidden="true"
         style={{
@@ -37,7 +41,8 @@ function EmptyState({ tab }: { tab: ScholarshipTab }) {
           width: "6rem",
           height: "6rem",
           pointerEvents: "none",
-          backgroundImage: "repeating-linear-gradient(-55deg, rgba(58,127,212,0.15) 0px, rgba(58,127,212,0.15) 1.5px, transparent 1.5px, transparent 18px)",
+          backgroundImage:
+            "repeating-linear-gradient(-55deg, rgba(58,127,212,0.15) 0px, rgba(58,127,212,0.15) 1.5px, transparent 1.5px, transparent 18px)",
           borderRadius: "0 var(--radius-lg) 0 0",
         }}
       />
@@ -67,24 +72,24 @@ function EmptyState({ tab }: { tab: ScholarshipTab }) {
           fontFamily: "var(--font-display)",
           fontSize: "var(--text-base)",
           fontWeight: 700,
-          color: "#ffffff",
+          color: "var(--color-navy)",
           position: "relative",
           zIndex: 1,
         }}
       >
-        {tab} coming soon.
+        {tabName}
       </p>
       <p
         style={{
           maxWidth: "38ch",
           fontSize: "var(--text-sm)",
-          color: "rgba(255,255,255,0.60)",
+          color: "var(--color-text-muted)",
           lineHeight: "var(--leading-normal)",
           position: "relative",
           zIndex: 1,
         }}
       >
-        Confirmed scholarship information will be published here as it becomes available.
+        {dict.scholarships.emptyState}
       </p>
     </div>
   );
@@ -97,6 +102,7 @@ function ScholarshipCard({
   eligibility,
   value,
   applicationUrl,
+  locale,
 }: {
   title: string;
   provider: string;
@@ -104,6 +110,7 @@ function ScholarshipCard({
   eligibility: string;
   value: string;
   applicationUrl?: string;
+  locale: Locale;
 }) {
   return (
     <article
@@ -187,7 +194,7 @@ function ScholarshipCard({
               marginBottom: "0.2rem",
             }}
           >
-            Eligibility
+            {locale === "vi" ? "Điều kiện ứng tuyển" : "Eligibility"}
           </dt>
           <dd style={{ margin: 0 }}>{eligibility}</dd>
         </div>
@@ -202,7 +209,7 @@ function ScholarshipCard({
               marginBottom: "0.2rem",
             }}
           >
-            Value / Benefit
+            {locale === "vi" ? "Giá trị học bổng" : "Value / Benefit"}
           </dt>
           <dd style={{ margin: 0 }}>{value}</dd>
         </div>
@@ -216,7 +223,7 @@ function ScholarshipCard({
           className="btn-blue"
           style={{ alignSelf: "flex-start" }}
         >
-          View details
+          {locale === "vi" ? "Xem chi tiết" : "View details"}
         </a>
       ) : (
         <span
@@ -228,25 +235,30 @@ function ScholarshipCard({
             color: "var(--color-text-muted)",
           }}
         >
-          Application details to be announced
+          {locale === "vi" ? "Thông tin ứng tuyển sẽ sớm cập nhật" : "Application details to be announced"}
         </span>
       )}
     </article>
   );
 }
 
-export function ScholarshipsSection() {
-  const [activeTab, setActiveTab] = useState<ScholarshipTab>("Consulate Scholarships");
+export function ScholarshipsSection({ locale, dict }: ScholarshipsSectionProps) {
+  const [activeTab, setActiveTab] = useState<ScholarshipTabKey>("Consulate");
 
   const tabsData = useMemo(
     () => ({
-      "Consulate Scholarships": getConfirmedScholarshipsByType("Consulate"),
-      "University Scholarships": getConfirmedScholarshipsByType("University"),
+      Consulate: getConfirmedScholarshipsByType("Consulate"),
+      University: getConfirmedScholarshipsByType("University"),
     }),
     []
   );
 
   const currentItems = tabsData[activeTab];
+
+  const tabs: { key: ScholarshipTabKey; label: string }[] = [
+    { key: "Consulate", label: dict.scholarships.tabs.consulate },
+    { key: "University", label: dict.scholarships.tabs.university },
+  ];
 
   return (
     <section
@@ -259,9 +271,9 @@ export function ScholarshipsSection() {
           <SectionHeading
             id="scholarships-heading"
             className="section-heading--tinted"
-            eyebrow="Scholarships"
-            heading="Funding pathways for international study and exchange."
-            body="Explore confirmed scholarship opportunities shared through participating consulates and universities."
+            eyebrow={dict.scholarships.eyebrow}
+            heading={dict.scholarships.title}
+            body={dict.scholarships.subtitle}
             level="h2"
             align="center"
             accent={true}
@@ -280,16 +292,16 @@ export function ScholarshipsSection() {
           }}
         >
           {tabs.map((tab) => {
-            const isActive = activeTab === tab;
+            const isActive = activeTab === tab.key;
             return (
               <button
-                key={tab}
+                key={tab.key}
                 type="button"
                 role="tab"
                 aria-selected={isActive}
-                aria-controls={`${tab.toLowerCase().replace(/\s+/g, "-")}-panel`}
-                id={`${tab.toLowerCase().replace(/\s+/g, "-")}-tab`}
-                onClick={() => setActiveTab(tab)}
+                aria-controls={`${tab.key.toLowerCase()}-panel`}
+                id={`${tab.key.toLowerCase()}-tab`}
+                onClick={() => setActiveTab(tab.key)}
                 style={{
                   border: isActive ? "1px solid transparent" : "1px solid rgba(26, 94, 168, 0.20)",
                   backgroundColor: isActive ? "var(--color-blue)" : "rgba(26, 94, 168, 0.08)",
@@ -301,21 +313,24 @@ export function ScholarshipsSection() {
                   transition: "all var(--transition-base)",
                 }}
               >
-                {tab}
+                {tab.label}
               </button>
             );
           })}
         </div>
 
         <div
-          id={`${activeTab.toLowerCase().replace(/\s+/g, "-")}-panel`}
+          id={`${activeTab.toLowerCase()}-panel`}
           role="tabpanel"
-          aria-labelledby={`${activeTab.toLowerCase().replace(/\s+/g, "-")}-tab`}
+          aria-labelledby={`${activeTab.toLowerCase()}-tab`}
           className="tab-panel-animated"
           key={activeTab}
         >
           {currentItems.length === 0 ? (
-            <EmptyState tab={activeTab} />
+            <EmptyState
+              tabName={activeTab === "Consulate" ? dict.scholarships.tabs.consulate : dict.scholarships.tabs.university}
+              dict={dict}
+            />
           ) : (
             <div
               style={{
@@ -333,6 +348,7 @@ export function ScholarshipsSection() {
                   eligibility={scholarship.eligibility}
                   value={scholarship.value}
                   applicationUrl={scholarship.applicationUrl}
+                  locale={locale}
                 />
               ))}
             </div>

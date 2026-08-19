@@ -1,50 +1,47 @@
-/**
- * StatsStrip — Compact statistics bar below the hero.
- *
- * Rules (docs/CONTENT.md §3, docs/PROJECT.md §3):
- *  - Use cautious labels: "Expected", "Planned" — not guaranteed attendance.
- *  - No photos in this section (docs/ASSETS.md §5).
- *  - Figures come from approved copy; do not change wording without user approval.
- *  - Server Component — no interactivity.
- */
-
 import { CountUpNumber } from "@/components/ui/CountUpNumber";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
+import { Locale } from "@/i18n/config";
+import type { Dictionary } from "@/i18n/types";
 
-const stats = [
-  {
-    number: 4000,
-    suffix: "+",
-    label: "Expected student participants",
-    ariaLabel: "4,000 or more expected student participants",
-  },
-  {
-    number: 42,
-    suffix: "",
-    label: "Planned booths & experience areas",
-    ariaLabel: "42 planned booths and experience areas",
-  },
-  {
-    number: 1,
-    suffix: "",
-    label: "Global Community of universities, organizations & consulates",
-    ariaLabel: "Global community of universities, organizations and consulates",
-    staticValue: "Global",
-  },
-  {
-    number: 3,
-    suffix: " Days",
-    label: "Education · Culture · Connections",
-    ariaLabel: "3-day event covering education, culture and connections",
-  },
-] as const;
+interface StatsStripProps {
+  locale: Locale;
+  dict: Dictionary;
+}
 
-export function StatsStrip() {
+export function StatsStrip({ dict }: StatsStripProps) {
+  const statsList = [
+    {
+      number: 4000,
+      suffix: "+",
+      label: dict.stats.stat1.label,
+      ariaLabel: dict.stats.stat1.desc,
+    },
+    {
+      number: 42,
+      suffix: "",
+      label: dict.stats.stat2.label,
+      ariaLabel: dict.stats.stat2.desc,
+    },
+    {
+      number: 1,
+      suffix: "",
+      staticValue: "Global",
+      label: dict.stats.stat3.label,
+      ariaLabel: dict.stats.stat3.desc,
+    },
+    {
+      number: 3,
+      suffix: " Days",
+      label: dict.stats.stat4.label,
+      ariaLabel: dict.stats.stat4.desc,
+    },
+  ];
+
   return (
     <div className="stats-strip" role="region" aria-label="Event at a glance">
       <div className="site-container">
         <dl className="stats-grid">
-          {stats.map((stat, index) => (
+          {statsList.map((stat, index) => (
             <RevealOnScroll key={`${stat.label}-${index}`} delay={index * 80} className="stat-item-wrapper">
               <div className="stat-item">
                 {index > 0 && (
@@ -55,7 +52,7 @@ export function StatsStrip() {
                 )}
                 <div className="stat-inner">
                   <dt className="stat-number" aria-label={stat.ariaLabel}>
-                    {"staticValue" in stat ? (
+                    {"staticValue" in stat && stat.staticValue ? (
                       <span>{stat.staticValue}</span>
                     ) : (
                       <CountUpNumber

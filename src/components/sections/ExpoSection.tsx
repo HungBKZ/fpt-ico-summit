@@ -1,18 +1,19 @@
-/**
- * ExpoSection — International Expo overview.
- *
- * Data source: src/data/expo.ts.
- * Server Component.
- */
-
 import Image from "next/image";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { MediaPlaceholder } from "@/components/ui/MediaPlaceholder";
 import { images } from "@/data/images";
 import { getConfirmedExpoItems } from "@/data/expo";
+import { Locale } from "@/i18n/config";
+import type { Dictionary } from "@/i18n/types";
+import { getLocalizedText } from "@/i18n/types";
 
-export function ExpoSection() {
+interface ExpoSectionProps {
+  locale: Locale;
+  dict: Dictionary;
+}
+
+export function ExpoSection({ locale, dict }: ExpoSectionProps) {
   const expoItems = getConfirmedExpoItems();
 
   return (
@@ -28,9 +29,9 @@ export function ExpoSection() {
               <SectionHeading
                 id="expo-heading"
                 className="section-heading--invert"
-                eyebrow="International Expo"
-                heading="One summit. Multiple ways to connect globally."
-                body="The International Expo is planned as the central connection space of FPT ICO Summit 2026, bringing education, culture and international engagement together on campus."
+                eyebrow={dict.expo.eyebrow}
+                heading={dict.expo.title}
+                body={dict.expo.subtitle}
                 level="h2"
                 align="left"
                 accent={true}
@@ -38,7 +39,7 @@ export function ExpoSection() {
             </RevealOnScroll>
 
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-              {["42 planned areas", "21–22 November"].map((fact) => (
+              {["42 planned areas", dict.hero.datesValue].map((fact) => (
                 <span
                   key={fact}
                   style={{
@@ -87,15 +88,19 @@ export function ExpoSection() {
         </div>
 
         <div className="expo-zones-grid" role="list" aria-label="Expo zones">
-          {expoItems.map((zone, index) => (
-            <RevealOnScroll key={zone.id} delay={index * 80}>
-              <div className="expo-zone-card" role="listitem">
-                <p className="expo-zone-number">Zone {String(index + 1).padStart(2, "0")}</p>
-                <h3 className="expo-zone-title">{zone.title}</h3>
-                <p className="expo-zone-desc">{zone.description}</p>
-              </div>
-            </RevealOnScroll>
-          ))}
+          {expoItems.map((zone, index) => {
+            const titleStr = getLocalizedText(zone.title, locale);
+            const descStr = getLocalizedText(zone.description, locale);
+            return (
+              <RevealOnScroll key={zone.id} delay={index * 80}>
+                <div className="expo-zone-card" role="listitem">
+                  <p className="expo-zone-number">Zone {String(index + 1).padStart(2, "0")}</p>
+                  <h3 className="expo-zone-title">{titleStr}</h3>
+                  <p className="expo-zone-desc">{descStr}</p>
+                </div>
+              </RevealOnScroll>
+            );
+          })}
         </div>
       </div>
     </section>

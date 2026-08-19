@@ -1,6 +1,5 @@
 /**
  * SiteFooter — Server Component.
- * Hover effects use CSS classes (footer-link, footer-link-accent) — no JS handlers.
  */
 
 import Image from "next/image";
@@ -8,19 +7,26 @@ import Link from "next/link";
 import { siteConfig } from "@/data/site";
 import { images } from "@/data/images";
 import { mailtoHref } from "@/lib/utils";
+import { Locale } from "@/i18n/config";
+import type { Dictionary } from "@/i18n/types";
 
-const footerLinks = [
-  { label: "About",        href: "#about" },
-  { label: "Program",      href: "#program" },
-  { label: "Explore",      href: "#explore" },
-  { label: "Partners",     href: "#partners" },
-  { label: "Scholarships", href: "#scholarships" },
-  { label: "Venue",        href: "#venue" },
-  { label: "FAQ",          href: "#faq" },
-  { label: "Registration", href: "#register" },
-];
+interface SiteFooterProps {
+  locale: Locale;
+  dict: Dictionary;
+}
 
-export function SiteFooter() {
+export function SiteFooter({ locale, dict }: SiteFooterProps) {
+  const footerLinks = [
+    { label: dict.nav.about,        href: "#about" },
+    { label: dict.nav.program,      href: "#program" },
+    { label: dict.nav.explore,      href: "#explore" },
+    { label: dict.nav.partners,     href: "#partners" },
+    { label: dict.nav.scholarships, href: "#scholarships" },
+    { label: dict.nav.venue,        href: "#venue" },
+    { label: dict.nav.faq,          href: "#faq" },
+    { label: dict.nav.registerNow,  href: "#register" },
+  ];
+
   return (
     <footer
       role="contentinfo"
@@ -44,7 +50,7 @@ export function SiteFooter() {
           {/* Brand column */}
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             <Link
-              href="/"
+              href={`/${locale}`}
               aria-label={`${siteConfig.name} — home`}
               style={{ display: "inline-flex", alignItems: "center" }}
             >
@@ -68,16 +74,14 @@ export function SiteFooter() {
                 fontSize: "var(--text-sm)",
                 color: "rgba(255,255,255,0.6)",
                 lineHeight: "var(--leading-normal)",
-                maxWidth: "22ch",
+                maxWidth: "28ch",
               }}
             >
-              FPT University Can Tho Campus
-              <br />
-              International Cooperation Office
+              {dict.footer.description}
             </p>
 
             <p style={{ fontSize: "var(--text-sm)", color: "rgba(255,255,255,0.5)" }}>
-              {siteConfig.dates}
+              {dict.hero.datesValue}
             </p>
           </div>
 
@@ -93,7 +97,7 @@ export function SiteFooter() {
                 marginBottom: "0.875rem",
               }}
             >
-              Navigate
+              {dict.footer.quickLinks}
             </p>
             <ul style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
               {footerLinks.map(({ label, href }) => (
@@ -122,7 +126,7 @@ export function SiteFooter() {
                 marginBottom: "0.875rem",
               }}
             >
-              Contact
+              {dict.footer.contact}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
               <a
@@ -151,7 +155,7 @@ export function SiteFooter() {
                 className="footer-link"
                 style={{ fontSize: "var(--text-sm)" }}
               >
-                Facebook Page
+                {dict.footer.facebook}
               </a>
 
               <a
@@ -167,7 +171,7 @@ export function SiteFooter() {
                   fontWeight: 600,
                 }}
               >
-                Message ICO
+                {dict.footer.messenger}
                 <svg
                   aria-hidden="true"
                   width="12"
@@ -200,7 +204,7 @@ export function SiteFooter() {
                   fontWeight: 600,
                 }}
               >
-                Explore Campus in 360°
+                {dict.hero.cta360}
                 <svg
                   aria-hidden="true"
                   width="12"
@@ -235,10 +239,10 @@ export function SiteFooter() {
           }}
         >
           <p style={{ fontSize: "var(--text-xs)", color: "rgba(255,255,255,0.4)" }}>
-            &copy; 2026 FPT ICO Summit — International Cooperation Office, FPT University Can Tho Campus.
+            {dict.footer.copyright}
           </p>
           <p style={{ fontSize: "var(--text-xs)", color: "rgba(255,255,255,0.3)" }}>
-            {siteConfig.venue}, Vietnam
+            {dict.hero.venueValue}
           </p>
         </div>
 

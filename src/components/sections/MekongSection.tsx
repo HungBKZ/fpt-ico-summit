@@ -1,22 +1,15 @@
-/**
- * MekongSection — Mekong / Can Tho storytelling section.
- *
- * Full-bleed image panel (A09) with dark overlay and editorial copy.
- * MediaPlaceholder fills the background when A09 is null.
- *
- * Rules (AGENTS.md §7, docs/CONTENT.md §11):
- *  - Do not caption a generic Mekong photo as a specific Can Tho landmark.
- *  - Do not make tourist claims not supported by the current program.
- *  - Copy comes from CONTENT.md §11 only.
- *
- * Server Component.
- */
-
 import Image from "next/image";
 import { MediaPlaceholder } from "@/components/ui/MediaPlaceholder";
 import { images } from "@/data/images";
+import { Locale } from "@/i18n/config";
+import type { Dictionary } from "@/i18n/types";
 
-export function MekongSection() {
+interface MekongSectionProps {
+  locale: Locale;
+  dict: Dictionary;
+}
+
+export function MekongSection({ dict }: MekongSectionProps) {
   return (
     <section
       id="mekong"
@@ -31,7 +24,7 @@ export function MekongSection() {
         {images.mekong.src ? (
           <Image
             src={images.mekong.src}
-            alt=""          /* decorative — readable content is in the section */
+            alt=""
             fill
             sizes="100vw"
             style={{ objectFit: "cover", objectPosition: "center center" }}
@@ -70,19 +63,17 @@ export function MekongSection() {
               color: "#34D399",
             }}
           >
-            The Mekong Experience
+            {dict.mekong.eyebrow}
           </p>
 
           {/* Heading */}
           <h2 id="mekong-heading" className="mekong-heading">
-            Meet the Mekong beyond the conference hall
+            {dict.mekong.title}
           </h2>
 
           {/* Body */}
           <p className="mekong-body">
-            The summit also creates space for international guests to encounter
-            the culture, people and river-based character of Can Tho and the
-            Mekong Delta through the program&apos;s cultural discovery journey.
+            {dict.mekong.subtitle}
           </p>
 
           {/* PRE-EVENT callout chip */}

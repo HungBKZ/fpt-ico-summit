@@ -4,32 +4,25 @@
  * SOURCE OF TRUTH: This file reflects the confirmed schedule.
  * Do not revert to any earlier Word planning document.
  * Do not publish session times until confirmed.
- *
- * Structure:
- *  - programDays: the 3-day schedule (date, label, sessions per time slot)
- *  - continuousActivities: activities running across both Summit days (21–22 Nov)
- *  - expoZones: the International Expo zone categories
  */
 
-// ---------------------------------------------------------------------------
-// Day schedule
-// ---------------------------------------------------------------------------
+import type { LocalizedText } from "@/i18n/types";
 
 export type TimeSlot = "morning" | "afternoon" | "evening";
 
 export interface ProgramActivity {
-  title: string;
+  title: string | LocalizedText;
 }
 
 export interface ProgramDay {
   /** ISO date string — used for display only, not for logic. */
-  date: string;
+  date: string | LocalizedText;
   /** Short label rendered as a badge/eyebrow. */
-  dayLabel: string;
+  dayLabel: string | LocalizedText;
   /** Day theme title. */
-  title: string;
+  title: string | LocalizedText;
   /** One-sentence description of the day's character. */
-  description: string;
+  description: string | LocalizedText;
   /** Thematic icon key — resolved to an SVG in the component. */
   icon: "compass" | "flag" | "star";
   /** Activities grouped by time slot. Only include slots that have content. */
@@ -38,67 +31,195 @@ export interface ProgramDay {
 
 export const programDays: ProgramDay[] = [
   {
-    date: "20 November 2026",
-    dayLabel: "PRE-EVENT",
-    title: "Mekong Discovery",
-    description:
-      "Welcome activities and cultural experiences introduce international guests to Can Tho and the Mekong Delta.",
+    date: {
+      en: "20 November 2026",
+      vi: "20 tháng 11, 2026",
+    },
+    dayLabel: {
+      en: "PRE-EVENT",
+      vi: "TIỀN SỰ KIỆN",
+    },
+    title: {
+      en: "Mekong Discovery",
+      vi: "Mekong Discovery",
+    },
+    description: {
+      en: "Welcome activities and cultural experiences introduce international guests to Can Tho and the Mekong Delta.",
+      vi: "Hoạt động chào mừng và trải nghiệm văn hóa giới thiệu nét đẹp Cần Thơ và vùng sông nước Mekong đến đại biểu quốc tế.",
+    },
     icon: "compass",
     slots: {
       morning: [
-        { title: "Welcome & Registration" },
+        {
+          title: {
+            en: "Welcome & Registration",
+            vi: "Đón tiếp & Đăng ký",
+          },
+        },
       ],
       afternoon: [
-        { title: "Traditional Craft Villages" },
-        { title: "Southern Cultural Experience" },
+        {
+          title: {
+            en: "Traditional Craft Villages",
+            vi: "Làng nghề truyền thống",
+          },
+        },
+        {
+          title: {
+            en: "Southern Cultural Experience",
+            vi: "Trải nghiệm văn hóa Nam Bộ",
+          },
+        },
       ],
       evening: [
-        { title: "Welcome Dinner" },
+        {
+          title: {
+            en: "Welcome Dinner",
+            vi: "Tiệc chào mừng",
+          },
+        },
       ],
     },
   },
   {
-    date: "21 November 2026",
-    dayLabel: "DAY 1",
-    title: "Summit Day 1",
-    description:
-      "The official summit opens with an opening ceremony and cultural performances, followed by networking, activities and the International Expo.",
+    date: {
+      en: "21 November 2026",
+      vi: "21 tháng 11, 2026",
+    },
+    dayLabel: {
+      en: "DAY 1",
+      vi: "NGÀY 1",
+    },
+    title: {
+      en: "Summit Day 1",
+      vi: "Summit Day 1",
+    },
+    description: {
+      en: "The official summit opens with an opening ceremony and cultural performances, followed by networking, activities and the International Expo.",
+      vi: "Sự kiện chính thức khai mạc với Lễ Khai mạc và biểu diễn nghệ thuật, tiếp nối là các hoạt động giao lưu, trải nghiệm và Triển lãm Quốc tế.",
+    },
     icon: "flag",
     slots: {
       morning: [
-        { title: "Check-in" },
-        { title: "Opening Ceremony" },
-        { title: "Opening cultural performance by FPT University" },
+        {
+          title: {
+            en: "Check-in",
+            vi: "Check-in",
+          },
+        },
+        {
+          title: {
+            en: "Opening Ceremony",
+            vi: "Lễ Khai mạc",
+          },
+        },
+        {
+          title: {
+            en: "Opening cultural performance by FPT University",
+            vi: "Biểu diễn văn hóa mở màn bởi Đại học FPT",
+          },
+        },
       ],
       afternoon: [
-        { title: "Cultural performances by participating countries and FPT University" },
-        { title: "Networking" },
-        { title: "Lucky Spin" },
-        { title: "Cultural Quiz" },
+        {
+          title: {
+            en: "Cultural performances by participating countries and FPT University",
+            vi: "Biểu diễn văn hóa từ các quốc gia tham gia và Đại học FPT",
+          },
+        },
+        {
+          title: {
+            en: "Networking",
+            vi: "Giao lưu & Kết nối",
+          },
+        },
+        {
+          title: {
+            en: "Lucky Spin",
+            vi: "Vòng quay may mắn",
+          },
+        },
+        {
+          title: {
+            en: "Cultural Quiz",
+            vi: "Đố vui văn hóa",
+          },
+        },
       ],
     },
   },
   {
-    date: "22 November 2026",
-    dayLabel: "DAY 2",
-    title: "Summit Day 2",
-    description:
-      "The summit concludes with performances, networking, an awards ceremony, Friendship Concert and International Fashion Show.",
+    date: {
+      en: "22 November 2026",
+      vi: "22 tháng 11, 2026",
+    },
+    dayLabel: {
+      en: "DAY 2",
+      vi: "NGÀY 2",
+    },
+    title: {
+      en: "Summit Day 2",
+      vi: "Summit Day 2",
+    },
+    description: {
+      en: "The summit concludes with performances, networking, an awards ceremony, Friendship Concert and International Fashion Show.",
+      vi: "Ngày hội khép lại với các hoạt động giao lưu, Lễ Bế mạc & Trao giải, Đêm nhạc Hữu nghị và Trình diễn Thời trang Quốc tế.",
+    },
     icon: "star",
     slots: {
       morning: [
-        { title: "Check-in" },
+        {
+          title: {
+            en: "Check-in",
+            vi: "Check-in",
+          },
+        },
       ],
       afternoon: [
-        { title: "Cultural performances by participating countries and FPT University" },
-        { title: "Networking" },
-        { title: "Lucky Spin" },
-        { title: "Cultural Quiz" },
+        {
+          title: {
+            en: "Cultural performances by participating countries and FPT University",
+            vi: "Biểu diễn văn hóa từ các quốc gia tham gia và Đại học FPT",
+          },
+        },
+        {
+          title: {
+            en: "Networking",
+            vi: "Giao lưu & Kết nối",
+          },
+        },
+        {
+          title: {
+            en: "Lucky Spin",
+            vi: "Vòng quay may mắn",
+          },
+        },
+        {
+          title: {
+            en: "Cultural Quiz",
+            vi: "Đố vui văn hóa",
+          },
+        },
       ],
       evening: [
-        { title: "Awards Ceremony" },
-        { title: "Friendship Concert" },
-        { title: "International Fashion Show" },
+        {
+          title: {
+            en: "Awards Ceremony",
+            vi: "Lễ Bế mạc & Trao giải",
+          },
+        },
+        {
+          title: {
+            en: "Friendship Concert",
+            vi: "Đêm nhạc Hữu nghị",
+          },
+        },
+        {
+          title: {
+            en: "International Fashion Show",
+            vi: "Trình diễn Thời trang Quốc tế",
+          },
+        },
       ],
     },
   },
@@ -109,34 +230,54 @@ export const programDays: ProgramDay[] = [
 // ---------------------------------------------------------------------------
 
 export interface ContinuousActivity {
-  title: string;
-  description: string;
+  title: string | LocalizedText;
+  description: string | LocalizedText;
   icon: "globe" | "book" | "award" | "chat";
 }
 
 export const continuousActivities: ContinuousActivity[] = [
   {
-    title: "International Expo",
-    description:
-      "Meet international education partners and explore programs, pathways and global opportunities.",
+    title: {
+      en: "International Expo",
+      vi: "Triển lãm Quốc tế",
+    },
+    description: {
+      en: "Meet international education partners and explore programs, pathways and global opportunities.",
+      vi: "Gặp gỡ các đối tác giáo dục quốc tế và khám phá các chương trình du học, lộ trình học tập toàn cầu.",
+    },
     icon: "globe",
   },
   {
-    title: "Study Abroad Consultation",
-    description:
-      "Access practical guidance on admissions, exchange programs and international study pathways.",
+    title: {
+      en: "Study Abroad Consultation",
+      vi: "Tư vấn Du học & Chuyển tiếp",
+    },
+    description: {
+      en: "Access practical guidance on admissions, exchange programs and international study pathways.",
+      vi: "Nhận hướng dẫn chi tiết về thông tin tuyển sinh, chương trình trao đổi và các lộ trình học tập quốc tế.",
+    },
     icon: "book",
   },
   {
-    title: "Scholarship Interviews",
-    description:
-      "Connect directly with partner institutions and learn about scholarship opportunities.",
+    title: {
+      en: "Scholarship Interviews",
+      vi: "Phỏng vấn & Tư vấn Học bổng",
+    },
+    description: {
+      en: "Connect directly with partner institutions and learn about scholarship opportunities.",
+      vi: "Kết nối trực tiếp với đại diện các trường đối tác và tìm hiểu các chương trình học bổng hấp dẫn.",
+    },
     icon: "award",
   },
   {
-    title: "Workshop: Cross-Cultural Communication in the AI Era",
-    description:
-      "Build communication and adaptability skills for international study and multicultural work.",
+    title: {
+      en: "Workshop: Cross-Cultural Communication in the AI Era",
+      vi: "Hội thảo: Giao tiếp Đa văn hóa trong Kỷ nguyên AI",
+    },
+    description: {
+      en: "Build communication and adaptability skills for international study and multicultural work.",
+      vi: "Trang bị kỹ năng giao tiếp và năng lực thích ứng cho môi trường học tập và làm việc quốc tế.",
+    },
     icon: "chat",
   },
 ];
@@ -146,34 +287,59 @@ export const continuousActivities: ContinuousActivity[] = [
 // ---------------------------------------------------------------------------
 
 export interface ExpoZone {
-  label: string;
-  description: string;
+  label: string | LocalizedText;
+  description: string | LocalizedText;
 }
 
 export const expoZones: ExpoZone[] = [
   {
-    label: "International Partner Zone",
-    description:
-      "Meet education partners and explore programs, pathways and global opportunities.",
+    label: {
+      en: "International Partner Zone",
+      vi: "Khu vực Đối tác Quốc tế",
+    },
+    description: {
+      en: "Meet education partners and explore programs, pathways and global opportunities.",
+      vi: "Gặp gỡ các đối tác giáo dục và khám phá các chương trình du học, trao đổi sinh viên.",
+    },
   },
   {
-    label: "Cultural Experience Zone",
-    description:
-      "Immerse in cultural traditions, crafts and performances from participating communities.",
+    label: {
+      en: "Cultural Experience Zone",
+      vi: "Khu vực Trải nghiệm Văn hóa",
+    },
+    description: {
+      en: "Immerse in cultural traditions, crafts and performances from participating communities.",
+      vi: "Hòa mình vào không gian văn hóa truyền thống, làng nghề và biểu diễn nghệ thuật.",
+    },
   },
   {
-    label: "Consulate Zone",
-    description:
-      "Connect with consulate representatives and learn about international opportunities.",
+    label: {
+      en: "Consulate Zone",
+      vi: "Khu vực Lãnh sự quán",
+    },
+    description: {
+      en: "Connect with consulate representatives and learn about international opportunities.",
+      vi: "Kết nối với đại diện các cơ quan lãnh sự và tìm hiểu các chính sách, cơ hội ngoại giao.",
+    },
   },
   {
-    label: "FPT Showcase",
-    description:
-      "Discover FPT University's international programs, research and student achievements.",
+    label: {
+      en: "FPT Showcase",
+      vi: "Khu vực Triển lãm FPT",
+    },
+    description: {
+      en: "Discover FPT University's international programs, research and student achievements.",
+      vi: "Khám phá các chương trình quốc tế, nghiên cứu và thành tựu sinh viên Đại học FPT.",
+    },
   },
   {
-    label: "Main Stage & Networking",
-    description:
-      "Attend key program moments and connect with peers, educators and partners.",
+    label: {
+      en: "Main Stage & Networking",
+      vi: "Sân khấu Chính & Giao lưu",
+    },
+    description: {
+      en: "Attend key program moments and connect with peers, educators and partners.",
+      vi: "Tham dự các điểm nhấn chương trình và kết nối cùng bạn bè, thầy cô và đại biểu đối tác.",
+    },
   },
 ];

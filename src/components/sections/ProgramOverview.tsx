@@ -1,17 +1,3 @@
-/**
- * ProgramOverview — Three-day schedule section.
- *
- * Renders:
- *  1. Section heading + intro copy.
- *  2. Three day cards (one per programDay) showing date, title, description,
- *     and per-slot activity lists where slots are defined.
- *  3. "Runs throughout 21–22 November" strip of continuousActivities.
- *
- * Content source: src/data/program.ts (confirmed schedule).
- * No times are published — only activity titles per slot.
- * Server Component.
- */
-
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import {
@@ -20,8 +6,14 @@ import {
   type ProgramDay,
   type TimeSlot,
 } from "@/data/program";
+import { Locale } from "@/i18n/config";
+import type { Dictionary } from "@/i18n/types";
+import { getLocalizedText } from "@/i18n/types";
 
-/* ── Icon map ────────────────────────────────────────────────────────────── */
+interface ProgramOverviewProps {
+  locale: Locale;
+  dict: Dictionary;
+}
 
 const DayIcons: Record<ProgramDay["icon"], React.ReactNode> = {
   compass: (
@@ -70,30 +62,32 @@ const ContinuousIcons: Record<string, React.ReactNode> = {
   ),
 };
 
-const slotLabels: Record<TimeSlot, string> = {
-  morning:   "Morning",
-  afternoon: "Afternoon",
-  evening:   "Evening",
-};
-
 const slotOrder: TimeSlot[] = ["morning", "afternoon", "evening"];
 
-/* ── Day card ────────────────────────────────────────────────────────────── */
-
-function DayCard({ day }: { day: ProgramDay }) {
+function DayCard({ day, locale, dict }: { day: ProgramDay; locale: Locale; dict: Dictionary }) {
   const hasSlots = Object.keys(day.slots).length > 0;
+  const dayLabelStr = getLocalizedText(day.dayLabel, locale);
+  const titleStr = getLocalizedText(day.title, locale);
+  const dateStr = getLocalizedText(day.date, locale);
+  const descStr = getLocalizedText(day.description, locale);
+
+  const slotLabels: Record<TimeSlot, string> = {
+    morning: dict.program.slots.morning,
+    afternoon: dict.program.slots.afternoon,
+    evening: dict.program.slots.evening,
+  };
 
   return (
-    <article className="program-day-card" aria-label={`${day.dayLabel}: ${day.title}`}>
+    <article className="program-day-card" aria-label={`${dayLabelStr}: ${titleStr}`}>
       {/* Header */}
       <div className={`program-day-header program-day-header--${day.icon}`}>
         <div className={`program-day-badge program-day-badge--${day.icon}`}>
           {DayIcons[day.icon]}
-          {day.dayLabel}
+          {dayLabelStr}
         </div>
-        <p className="program-day-date">{day.date}</p>
-        <h3 className="program-day-title">{day.title}</h3>
-        <p className="program-day-desc">{day.description}</p>
+        <p className="program-day-date">{dateStr}</p>
+        <h3 className="program-day-title">{titleStr}</h3>
+        <p className="program-day-desc">{descStr}</p>
       </div>
 
       {/* Slot activity lists */}
@@ -106,40 +100,26 @@ function DayCard({ day }: { day: ProgramDay }) {
               <div key={slot}>
                 <p className="program-slot-label">{slotLabels[slot]}</p>
                 <ul className="program-slot-activities">
-                  {activities.map((activity) => (
-                    <li key={activity.title} className="program-activity-item">
-                      <span className="program-activity-dot" aria-hidden="true" />
-                      {activity.title}
-                    </li>
-                  ))}
+                  {activities.map((activity, actIdx) => {
+                    const actTitle = getLocalizedText(activity.title, locale);
+                    return (
+                      <li key={`${actTitle}-${actIdx}`} className="program-activity-item">
+                        <span className="program-activity-dot" aria-hidden="true" />
+                        {actTitle}
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             );
           })}
         </div>
       )}
-
-      {/* Placeholder note if a day has no published slots */}
-      {!hasSlots && (
-        <div className="program-day-slots">
-          <p
-            style={{
-              fontSize: "var(--text-sm)",
-              color: "var(--color-text-muted)",
-              fontStyle: "italic",
-            }}
-          >
-            Detailed program to be announced.
-          </p>
-        </div>
-      )}
     </article>
   );
 }
 
-/* ── Section ─────────────────────────────────────────────────────────────── */
-
-export function ProgramOverview() {
+export function ProgramOverview({ locale, dict }: ProgramOverviewProps) {
   return (
     <section
       id="program"
@@ -147,15 +127,14 @@ export function ProgramOverview() {
       className="section--tinted"
     >
       <div className="site-container section-padding">
-
         {/* Heading */}
         <div style={{ marginBottom: "2.5rem" }}>
           <RevealOnScroll>
             <SectionHeading
               id="program-heading"
-              eyebrow="The Program"
-              heading="Three days of discovery, connection and exchange."
-              body="FPT ICO Summit 2026 runs across three days — each with its own character, from cultural discovery to international exchange, performances and a grand closing celebration."
+              eyebrow={dict.program.eyebrow}
+              heading={dict.program.title}
+              body={dict.program.subtitle}
               level="h2"
               align="left"
               accent={true}
@@ -166,8 +145,8 @@ export function ProgramOverview() {
         {/* Day cards */}
         <div className="program-days-grid">
           {programDays.map((day, index) => (
-            <RevealOnScroll key={day.date} delay={index * 90}>
-              <DayCard day={day} />
+            <RevealOnScroll key={index} delay={index * 90}>
+              <DayCard day={day} locale={locale} dict={dict} />
             </RevealOnScroll>
           ))}
         </div>
@@ -197,21 +176,24 @@ export function ProgramOverview() {
               }}
               aria-hidden="true"
             />
-            Running throughout 21–22 November
+            {dict.program.continuousTitle}
           </p>
           <div className="program-continuous">
-            {continuousActivities.map((activity) => (
-              <div key={activity.title} className="program-continuous-card">
-                <div className="program-continuous-icon">
-                  {ContinuousIcons[activity.icon]}
+            {continuousActivities.map((activity, idx) => {
+              const actTitle = getLocalizedText(activity.title, locale);
+              const actDesc = getLocalizedText(activity.description, locale);
+              return (
+                <div key={`${actTitle}-${idx}`} className="program-continuous-card">
+                  <div className="program-continuous-icon">
+                    {ContinuousIcons[activity.icon]}
+                  </div>
+                  <p className="program-continuous-title">{actTitle}</p>
+                  <p className="program-continuous-desc">{actDesc}</p>
                 </div>
-                <p className="program-continuous-title">{activity.title}</p>
-                <p className="program-continuous-desc">{activity.description}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
-
       </div>
     </section>
   );

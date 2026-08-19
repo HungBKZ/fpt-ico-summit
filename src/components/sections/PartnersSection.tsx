@@ -3,12 +3,23 @@
 import { useMemo, useState } from "react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { getConfirmedConsulates } from "@/data/consulates";
-import { getConfirmedUniversities, universityCountries } from "@/data/universities";
+import {
+  getConfirmedUniversities,
+  universityCountryKeys,
+  getCountryLabel,
+  CountryKey,
+} from "@/data/universities";
+import { Locale } from "@/i18n/config";
+import type { Dictionary } from "@/i18n/types";
 
-const tabs = ["Consulates", "Universities"] as const;
-type PartnerTab = (typeof tabs)[number];
+interface PartnersSectionProps {
+  locale: Locale;
+  dict: Dictionary;
+}
 
-function EmptyState({ tab }: { tab: PartnerTab }) {
+type PartnerTab = "Consulates" | "Universities";
+
+function EmptyState({ tabName, dict }: { tabName: string; dict: Dictionary }) {
   return (
     <div
       role="status"
@@ -27,7 +38,6 @@ function EmptyState({ tab }: { tab: PartnerTab }) {
         textAlign: "center",
       }}
     >
-      {/* Subtle corner motif — one diagonal stripe group, top-right */}
       <span
         aria-hidden="true"
         style={{
@@ -37,7 +47,8 @@ function EmptyState({ tab }: { tab: PartnerTab }) {
           width: "6rem",
           height: "6rem",
           pointerEvents: "none",
-          backgroundImage: "repeating-linear-gradient(-55deg, rgba(58,127,212,0.18) 0px, rgba(58,127,212,0.18) 1.5px, transparent 1.5px, transparent 18px)",
+          backgroundImage:
+            "repeating-linear-gradient(-55deg, rgba(58,127,212,0.18) 0px, rgba(58,127,212,0.18) 1.5px, transparent 1.5px, transparent 18px)",
           borderRadius: "0 var(--radius-lg) 0 0",
         }}
       />
@@ -72,7 +83,7 @@ function EmptyState({ tab }: { tab: PartnerTab }) {
           zIndex: 1,
         }}
       >
-        {tab} to be announced.
+        {tabName}
       </p>
       <p
         style={{
@@ -84,7 +95,7 @@ function EmptyState({ tab }: { tab: PartnerTab }) {
           zIndex: 1,
         }}
       >
-        Confirmed partners will appear here as participation is verified.
+        {dict.partners.emptyState}
       </p>
     </div>
   );
@@ -143,9 +154,9 @@ function PartnerTile({
   return tile;
 }
 
-export function PartnersSection() {
+export function PartnersSection({ locale, dict }: PartnersSectionProps) {
   const [activeTab, setActiveTab] = useState<PartnerTab>("Consulates");
-  const [selectedCountry, setSelectedCountry] = useState("All");
+  const [selectedCountry, setSelectedCountry] = useState<CountryKey | "All">("All");
 
   const confirmedConsulates = useMemo(() => getConfirmedConsulates(), []);
   const confirmedUniversities = useMemo(() => getConfirmedUniversities(), []);
@@ -154,6 +165,11 @@ export function PartnersSection() {
     selectedCountry === "All"
       ? confirmedUniversities
       : confirmedUniversities.filter((item) => item.country === selectedCountry);
+
+  const tabs: { key: PartnerTab; label: string }[] = [
+    { key: "Consulates", label: dict.partners.tabs.consulates },
+    { key: "Universities", label: dict.partners.tabs.universities },
+  ];
 
   return (
     <section
@@ -166,9 +182,9 @@ export function PartnersSection() {
           <SectionHeading
             id="partners-heading"
             className="section-heading--invert"
-            eyebrow="Global community"
-            heading="Participating consulates and universities."
-            body="Confirmed partners will appear here as participation is verified."
+            eyebrow={dict.partners.eyebrow}
+            heading={dict.partners.title}
+            body={dict.partners.subtitle}
             level="h2"
             align="center"
             accent={true}
@@ -187,18 +203,18 @@ export function PartnersSection() {
           }}
         >
           {tabs.map((tab) => {
-            const isActive = activeTab === tab;
+            const isActive = activeTab === tab.key;
             return (
               <button
-                key={tab}
+                key={tab.key}
                 type="button"
                 role="tab"
                 aria-selected={isActive}
-                aria-controls={`${tab.toLowerCase()}-panel`}
-                id={`${tab.toLowerCase()}-tab`}
+                aria-controls={`${tab.key.toLowerCase()}-panel`}
+                id={`${tab.key.toLowerCase()}-tab`}
                 onClick={() => {
-                  setActiveTab(tab);
-                  if (tab === "Universities") setSelectedCountry("All");
+                  setActiveTab(tab.key);
+                  if (tab.key === "Universities") setSelectedCountry("All");
                 }}
                 style={{
                   border: isActive ? "1px solid transparent" : "1px solid rgba(255,255,255,0.18)",
@@ -213,7 +229,7 @@ export function PartnersSection() {
                   transition: "background-color 150ms ease, color 150ms ease",
                 }}
               >
-                {tab}
+                {tab.label}
               </button>
             );
           })}
@@ -222,7 +238,7 @@ export function PartnersSection() {
         {activeTab === "Consulates" ? (
           <div id="consulates-panel" role="tabpanel" aria-labelledby="consulates-tab" className="tab-panel-animated" key="consulates">
             {confirmedConsulates.length === 0 ? (
-              <EmptyState tab="Consulates" />
+              <EmptyState tabName={dict.partners.tabs.consulates} dict={dict} />
             ) : (
               <div
                 style={{
@@ -240,7 +256,7 @@ export function PartnersSection() {
         ) : (
           <div id="universities-panel" role="tabpanel" aria-labelledby="universities-tab" className="tab-panel-animated" key="universities">
             {confirmedUniversities.length === 0 ? (
-              <EmptyState tab="Universities" />
+              <EmptyState tabName={dict.partners.tabs.universities} dict={dict} />
             ) : (
               <>
                 <div
@@ -267,30 +283,33 @@ export function PartnersSection() {
                       transition: "background-color 150ms ease, color 150ms ease",
                     }}
                   >
-                    All countries
+                    {locale === "vi" ? "Tất cả quốc gia" : "All countries"}
                   </button>
 
-                  {universityCountries.map((country) => (
-                    <button
-                      key={country}
-                      type="button"
-                      onClick={() => setSelectedCountry(country)}
-                      style={{
-                        border:
-                          selectedCountry === country ? "1px solid transparent" : "1px solid rgba(255,255,255,0.18)",
-                        backgroundColor: selectedCountry === country ? "var(--color-blue)" : "rgba(255,255,255,0.06)",
-                        color: selectedCountry === country ? "#fff" : "#edf4ff",
-                        borderRadius: "var(--radius-sm)",
-                        padding: "0.4rem 0.875rem",
-                        fontWeight: 600,
-                        fontSize: "var(--text-sm)",
-                        cursor: "pointer",
-                        transition: "background-color 150ms ease, color 150ms ease",
-                      }}
-                    >
-                      {country}
-                    </button>
-                  ))}
+                  {universityCountryKeys.map((cKey) => {
+                    const label = getCountryLabel(cKey, locale);
+                    const isSelected = selectedCountry === cKey;
+                    return (
+                      <button
+                        key={cKey}
+                        type="button"
+                        onClick={() => setSelectedCountry(cKey)}
+                        style={{
+                          border: isSelected ? "1px solid transparent" : "1px solid rgba(255,255,255,0.18)",
+                          backgroundColor: isSelected ? "var(--color-blue)" : "rgba(255,255,255,0.06)",
+                          color: isSelected ? "#fff" : "#edf4ff",
+                          borderRadius: "var(--radius-sm)",
+                          padding: "0.4rem 0.875rem",
+                          fontWeight: 600,
+                          fontSize: "var(--text-sm)",
+                          cursor: "pointer",
+                          transition: "background-color 150ms ease, color 150ms ease",
+                        }}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
                 </div>
 
                 <div
@@ -312,29 +331,12 @@ export function PartnersSection() {
                           color: "rgba(255,255,255,0.72)",
                         }}
                       >
-                        {partner.country}
+                        {getCountryLabel(partner.country, locale)}
                       </p>
                       <PartnerTile name={partner.name} website={partner.website} />
                     </div>
                   ))}
                 </div>
-
-                {selectedCountry !== "All" && visibleUniversities.length === 0 && (
-                  <div
-                    style={{
-                      marginTop: "1rem",
-                      padding: "1.25rem",
-                      textAlign: "center",
-                      backgroundColor: "rgba(26, 94, 168, 0.12)",
-                      borderRadius: "var(--radius-md)",
-                      border: "1px solid rgba(58, 127, 212, 0.20)",
-                      color: "rgba(255,255,255,0.65)",
-                      fontSize: "var(--text-sm)",
-                    }}
-                  >
-                    No confirmed universities for {selectedCountry} yet.
-                  </div>
-                )}
               </>
             )}
           </div>

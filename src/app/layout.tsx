@@ -54,6 +54,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
     <html
       lang="en"
       className={`${inter.variable} ${spaceGrotesk.variable}`}
+      suppressHydrationWarning
+      data-scroll-behavior="smooth"
     >
       <body className="min-h-dvh flex flex-col">
         {/* Skip link — visible on keyboard focus, assists screen-reader users */}

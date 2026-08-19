@@ -1,25 +1,15 @@
-/**
- * ExperienceGrid — Bento-style "Experience the Summit" section.
- *
- * Desktop layout (3-col grid):
- *   [International Expo — wide, span 2] [Cultural Village — tall, span 2 rows]
- *   [Study Abroad]  [Cross-Cultural Workshop]
- *   [Live Performances — wide, span 2]  [Mekong Discovery]
- *
- * Tablet: 2-col, all cards equal height.
- * Mobile: single column stack.
- *
- * Content source: docs/CONTENT.md §5.
- * Server Component.
- */
-
 import Image from "next/image";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { MediaPlaceholder } from "@/components/ui/MediaPlaceholder";
 import { images } from "@/data/images";
+import { Locale } from "@/i18n/config";
+import type { Dictionary } from "@/i18n/types";
 
-/* ── Experience card data ────────────────────────────────────────────────── */
+interface ExperienceGridProps {
+  locale: Locale;
+  dict: Dictionary;
+}
 
 type ChipVariant = "orange" | "blue" | "teal";
 type BentoVariant = "wide" | "tall" | "normal";
@@ -31,77 +21,8 @@ interface ExperienceCard {
   chipVariant: ChipVariant;
   variant: BentoVariant;
   image: { src: string | null; alt: string; placeholderLabel?: string };
-  /** CSS object-position for the background image. Defaults to "center center". */
   objectPosition?: string;
-  anchorHref?: string;
 }
-
-const experienceCards: ExperienceCard[] = [
-  {
-    title: "International Expo",
-    description:
-      "Meet international education partners and explore programs, pathways and global opportunities in one place.",
-    chip: "Expo",
-    chipVariant: "orange",
-    variant: "wide",
-    image: images.experienceExpo,
-  },
-  {
-    title: "Cultural Village",
-    description:
-      "Discover traditions, languages, performances, crafts and interactive cultural experiences from participating communities.",
-    chip: "Culture",
-    chipVariant: "teal",
-    variant: "tall",
-    image: images.experienceCultural,
-  },
-  {
-    title: "Study Abroad & Scholarships",
-    description:
-      "Access practical information about admissions, scholarships, exchange opportunities and future study pathways.",
-    chip: "Education",
-    chipVariant: "blue",
-    variant: "normal",
-    image: images.bentoStudyAbroad,
-    // Consultation scene — keep faces/upper body in frame
-    objectPosition: "center 30%",
-  },
-  {
-    title: "Cross-Cultural Workshop",
-    description:
-      "Build communication and adaptability skills for international study and multicultural work in the AI era.",
-    chip: "Workshop",
-    chipVariant: "blue",
-    variant: "normal",
-    image: images.workshop,
-    // Speaker/audience — bias upward to keep faces/stage in frame
-    objectPosition: "center 30%",
-  },
-  {
-    title: "Live Performances",
-    description:
-      "Celebrate cultural expression through music, traditional performances, fashion and student-led showcases.",
-    chip: "Performances",
-    chipVariant: "orange",
-    variant: "wide",
-    image: images.performance,
-    // Performers on stage — slight upward bias preserves costumes and faces
-    objectPosition: "center 35%",
-  },
-  {
-    title: "Mekong Discovery",
-    description:
-      "Experience the culture and hospitality of Can Tho and the Mekong Delta as part of the summit journey.",
-    chip: "Mekong",
-    chipVariant: "teal",
-    variant: "normal",
-    image: images.bentoMekongDiscovery,
-    // Landscape/river scene — center keeps horizon and context visible
-    objectPosition: "center 50%",
-  },
-];
-
-/* ── Sub-component: individual bento card ───────────────────────────────── */
 
 function BentoCard({ card }: { card: ExperienceCard }) {
   const variantClass =
@@ -118,7 +39,7 @@ function BentoCard({ card }: { card: ExperienceCard }) {
         {card.image.src ? (
           <Image
             src={card.image.src}
-            alt=""           /* decorative — title/desc in content layer */
+            alt=""
             fill
             sizes={
               card.variant === "wide"
@@ -157,9 +78,62 @@ function BentoCard({ card }: { card: ExperienceCard }) {
   );
 }
 
-/* ── Section ─────────────────────────────────────────────────────────────── */
+export function ExperienceGrid({ dict }: ExperienceGridProps) {
+  const experienceCards: ExperienceCard[] = [
+    {
+      title: dict.experience.cards.expo.title,
+      description: dict.experience.cards.expo.desc,
+      chip: dict.experience.cards.expo.category,
+      chipVariant: "orange",
+      variant: "wide",
+      image: images.experienceExpo,
+    },
+    {
+      title: dict.experience.cards.cultural.title,
+      description: dict.experience.cards.cultural.desc,
+      chip: dict.experience.cards.cultural.category,
+      chipVariant: "teal",
+      variant: "tall",
+      image: images.experienceCultural,
+    },
+    {
+      title: dict.experience.cards.studyAbroad.title,
+      description: dict.experience.cards.studyAbroad.desc,
+      chip: dict.experience.cards.studyAbroad.category,
+      chipVariant: "blue",
+      variant: "normal",
+      image: images.bentoStudyAbroad,
+      objectPosition: "center 30%",
+    },
+    {
+      title: dict.experience.cards.workshop.title,
+      description: dict.experience.cards.workshop.desc,
+      chip: dict.experience.cards.workshop.category,
+      chipVariant: "blue",
+      variant: "normal",
+      image: images.workshop,
+      objectPosition: "center 30%",
+    },
+    {
+      title: dict.experience.cards.performances.title,
+      description: dict.experience.cards.performances.desc,
+      chip: dict.experience.cards.performances.category,
+      chipVariant: "orange",
+      variant: "wide",
+      image: images.performance,
+      objectPosition: "center 35%",
+    },
+    {
+      title: dict.experience.cards.mekong.title,
+      description: dict.experience.cards.mekong.desc,
+      chip: dict.experience.cards.mekong.category,
+      chipVariant: "teal",
+      variant: "normal",
+      image: images.bentoMekongDiscovery,
+      objectPosition: "center 50%",
+    },
+  ];
 
-export function ExperienceGrid() {
   return (
     <section
       id="explore"
@@ -167,16 +141,15 @@ export function ExperienceGrid() {
       className="section--navy"
     >
       <div className="site-container section-padding">
-
         {/* Section header */}
         <div style={{ marginBottom: "3rem" }}>
           <RevealOnScroll>
             <SectionHeading
               id="experience-heading"
               className="section-heading--invert"
-              eyebrow="Experience the Summit"
-              heading="Six ways to discover, connect and grow."
-              body="FPT ICO Summit 2026 is built around experiences — each one designed to bring students, educators and global partners together in a meaningful way."
+              eyebrow={dict.experience.eyebrow}
+              heading={dict.experience.title}
+              body={dict.experience.subtitle}
               level="h2"
               align="left"
               accent={true}
@@ -194,7 +167,6 @@ export function ExperienceGrid() {
             </div>
           ))}
         </div>
-
       </div>
     </section>
   );

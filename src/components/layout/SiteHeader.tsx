@@ -1,10 +1,7 @@
 "use client";
 
 /**
- * SiteHeader — Accessible, responsive site header.
- *
- * Needs "use client" only for: scroll detection, menu open state, keyboard/click handlers.
- * Hover effects use CSS classes (nav-link, btn-primary) — no onMouse* handlers.
+ * SiteHeader — Accessible, responsive site header with i18n support.
  */
 
 import { useEffect, useRef, useState } from "react";
@@ -13,18 +10,16 @@ import Link from "next/link";
 import { siteConfig } from "@/data/site";
 import { images } from "@/data/images";
 import { isRegistrationOpen } from "@/lib/utils";
+import { Locale } from "@/i18n/config";
+import type { Dictionary } from "@/i18n/types";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 
-const navLinks = [
-  { label: "About",       href: "#about" },
-  { label: "Program",     href: "#program" },
-  { label: "Explore",     href: "#explore" },
-  { label: "Partners",    href: "#partners" },
-  { label: "Scholarships", href: "#scholarships" },
-  { label: "Venue",       href: "#venue" },
-  { label: "FAQ",         href: "#faq" },
-];
+interface SiteHeaderProps {
+  locale: Locale;
+  dict: Dictionary;
+}
 
-export function SiteHeader() {
+export function SiteHeader({ locale, dict }: SiteHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("");
@@ -32,6 +27,16 @@ export function SiteHeader() {
   const toggleRef = useRef<HTMLButtonElement>(null);
 
   const hasRegistration = isRegistrationOpen(siteConfig.registrationUrl);
+
+  const navLinks = [
+    { label: dict.nav.about,        href: "#about" },
+    { label: dict.nav.program,      href: "#program" },
+    { label: dict.nav.explore,      href: "#explore" },
+    { label: dict.nav.partners,     href: "#partners" },
+    { label: dict.nav.scholarships,  href: "#scholarships" },
+    { label: dict.nav.venue,        href: "#venue" },
+    { label: dict.nav.faq,          href: "#faq" },
+  ];
 
   // Sticky header transition on scroll
   useEffect(() => {
@@ -42,7 +47,7 @@ export function SiteHeader() {
 
   // Lightweight IntersectionObserver scrollspy
   useEffect(() => {
-    const sectionIds = navLinks.map((l) => l.href.replace("#", ""));
+    const sectionIds = ["about", "program", "explore", "partners", "scholarships", "venue", "faq"];
     const elements = sectionIds
       .map((id) => document.getElementById(id))
       .filter((el): el is HTMLElement => el !== null);
@@ -114,13 +119,13 @@ export function SiteHeader() {
             alignItems: "center",
             justifyContent: "space-between",
             height: scrolled ? "3.875rem" : "4.5rem",
-            gap: "2rem",
+            gap: "1.5rem",
             transition: "height 250ms ease",
           }}
         >
           {/* ── Logo ──────────────────────────────────────────────────── */}
           <Link
-            href="/"
+            href={`/${locale}`}
             aria-label={`${siteConfig.name} — home`}
             style={{
               display: "flex",
@@ -173,8 +178,10 @@ export function SiteHeader() {
             </ul>
           </nav>
 
-          {/* ── Desktop CTA ───────────────────────────────────────────── */}
-          <div className="hidden md:flex" style={{ flexShrink: 0 }}>
+          {/* ── Desktop Controls (Switcher + CTA) ────────────────────── */}
+          <div className="hidden md:flex" style={{ flexShrink: 0, alignItems: "center", gap: "0.875rem" }}>
+            <LanguageSwitcher currentLocale={locale} ariaLabel={dict.nav.switchLanguage} />
+
             {hasRegistration ? (
               <a
                 href={siteConfig.registrationUrl}
@@ -183,7 +190,7 @@ export function SiteHeader() {
                 className="btn-primary group"
                 style={{ gap: "0.375rem" }}
               >
-                Register Now
+                {dict.nav.registerNow}
                 <svg
                   aria-hidden="true"
                   width="14"
@@ -202,7 +209,7 @@ export function SiteHeader() {
               </a>
             ) : (
               <span
-                aria-label="Registration opens soon"
+                aria-label={dict.nav.registrationOpensSoon}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -216,7 +223,7 @@ export function SiteHeader() {
                   whiteSpace: "nowrap",
                 }}
               >
-                Registration opens soon
+                {dict.nav.registrationOpensSoon}
               </span>
             )}
           </div>
@@ -297,7 +304,19 @@ export function SiteHeader() {
             })}
           </ul>
 
-          <div style={{ marginTop: "1rem", paddingInline: "0.75rem" }}>
+          <div
+            style={{
+              marginTop: "1rem",
+              paddingInline: "0.75rem",
+              display: "flex",
+              flexDirection: "column",
+              gap: "0.75rem",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "flex-start", paddingLeft: "0.25rem" }}>
+              <LanguageSwitcher currentLocale={locale} ariaLabel={dict.nav.switchLanguage} />
+            </div>
+
             {hasRegistration ? (
               <a
                 href={siteConfig.registrationUrl}
@@ -306,7 +325,7 @@ export function SiteHeader() {
                 className="btn-primary"
                 style={{ width: "100%", fontSize: "var(--text-base)", padding: "0.75rem", gap: "0.5rem" }}
               >
-                Register Now
+                {dict.nav.registerNow}
                 <svg
                   aria-hidden="true"
                   width="16"
@@ -332,7 +351,7 @@ export function SiteHeader() {
                   padding: "0.5rem",
                 }}
               >
-                Registration opens soon
+                {dict.nav.registrationOpensSoon}
               </p>
             )}
           </div>

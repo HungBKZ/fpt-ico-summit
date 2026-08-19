@@ -1,27 +1,43 @@
-/**
- * WorkshopSection — workshop overview built from centralized workshop data.
- *
- * Data source: src/data/workshops.ts.
- * Server Component.
- */
-
 import Image from "next/image";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { MediaPlaceholder } from "@/components/ui/MediaPlaceholder";
 import { images } from "@/data/images";
 import { getConfirmedWorkshops } from "@/data/workshops";
+import { Locale } from "@/i18n/config";
+import type { Dictionary } from "@/i18n/types";
+import { getLocalizedText } from "@/i18n/types";
 
-const topics = [
-  "Cross-cultural communication strategies",
-  "Adapting to international academic environments",
-  "Building global competence for study and work",
-  "AI as a tool in multicultural contexts",
-];
+interface WorkshopSectionProps {
+  locale: Locale;
+  dict: Dictionary;
+}
 
-export function WorkshopSection() {
+export function WorkshopSection({ locale, dict }: WorkshopSectionProps) {
   const confirmedWorkshops = getConfirmedWorkshops();
   const workshop = confirmedWorkshops[0];
+
+  const workshopTitle = workshop
+    ? getLocalizedText(workshop.title, locale)
+    : dict.workshops.title;
+
+  const workshopDesc = workshop
+    ? getLocalizedText(workshop.description, locale)
+    : dict.workshops.subtitle;
+
+  const topics = locale === "vi"
+    ? [
+        "Chiến lược giao tiếp đa văn hóa hiệu quả",
+        "Thích ứng với môi trường học thuật quốc tế",
+        "Nâng cao năng lực toàn cầu cho học tập và làm việc",
+        "Ứng dụng AI trong bối cảnh đa văn hóa",
+      ]
+    : [
+        "Cross-cultural communication strategies",
+        "Adapting to international academic environments",
+        "Building global competence for study and work",
+        "AI as a tool in multicultural contexts",
+      ];
 
   return (
     <section
@@ -62,12 +78,9 @@ export function WorkshopSection() {
               <SectionHeading
                 id="workshop-heading"
                 className="section-heading--invert"
-                eyebrow="Workshop"
-                heading={workshop?.title ?? "Workshop to be announced"}
-                body={
-                  workshop?.description ??
-                  "Confirmed workshop details will be announced soon."
-                }
+                eyebrow={dict.workshops.eyebrow}
+                heading={workshopTitle}
+                body={workshopDesc}
                 level="h2"
                 align="left"
                 accent={true}
@@ -85,7 +98,7 @@ export function WorkshopSection() {
                   marginBottom: "0.25rem",
                 }}
               >
-                Topics covered
+                {locale === "vi" ? "Chủ đề chính" : "Topics covered"}
               </p>
               {topics.map((topic) => (
                 <div
@@ -123,8 +136,8 @@ export function WorkshopSection() {
             </div>
 
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", paddingTop: "0.25rem" }}>
-              <span className="workshop-tag">21–22 November 2026</span>
-              <span className="workshop-tag">FPT University Can Tho Campus</span>
+              <span className="workshop-tag">{dict.hero.datesValue}</span>
+              <span className="workshop-tag">{dict.hero.venueValue}</span>
             </div>
 
             <p
@@ -136,7 +149,9 @@ export function WorkshopSection() {
                 lineHeight: "var(--leading-normal)",
               }}
             >
-              Speaker details will be announced upon confirmation.
+              {locale === "vi"
+                ? "Thông tin diễn giả sẽ được cập nhật khi chính thức xác nhận."
+                : "Speaker details will be announced upon confirmation."}
             </p>
           </div>
         </div>
