@@ -57,7 +57,7 @@ export function OrganizationEditorForm({
     { key: "cover", isComplete: Boolean(coverUrl) },
     { key: "website", isComplete: Boolean(draft?.websiteUrl) },
     { key: "contact", isComplete: Boolean(draft?.publicContact?.email || draft?.publicContact?.phone) },
-    { key: "content", isComplete: Boolean(draft?.content?.en?.shortDescription && draft?.content?.vi?.shortDescription) },
+    { key: "content", isComplete: Boolean(draft?.content?.en?.shortDescription?.trim()) },
   ];
   const completedCount = completionSections.filter((s) => s.isComplete).length;
   const completionPercent = Math.round((completedCount / 6) * 100);
@@ -730,9 +730,14 @@ export function OrganizationEditorForm({
 
       {/* Vietnamese Content */}
       <div className="space-y-4">
-        <h3 className="text-sm font-bold text-[var(--color-navy)] border-b pb-2">
-          Vietnamese Content (VI)
-        </h3>
+        <div className="border-b pb-2">
+          <h3 className="text-sm font-bold text-[var(--color-navy)]">
+            Vietnamese Content (VI)
+          </h3>
+          <p className="text-[11px] text-slate-500 mt-0.5">
+            {cms.viSectionNote}
+          </p>
+        </div>
 
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1">
@@ -743,7 +748,6 @@ export function OrganizationEditorForm({
             name="shortDescriptionVi"
             rows={3}
             disabled={isInReview}
-            required
             defaultValue={draft?.content?.vi?.shortDescription || ""}
             placeholder="Trường đại học công nghệ hàng đầu tọa lạc tại Bangkok..."
             className="w-full text-xs p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100"

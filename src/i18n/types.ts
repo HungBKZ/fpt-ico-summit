@@ -202,6 +202,7 @@ export type Dictionary = {
     descEnLabel: string;
     shortDescViLabel: string;
     descViLabel: string;
+    viSectionNote: string;
     saveDraftBtn: string;
     saving: string;
     submitReviewBtn: string;

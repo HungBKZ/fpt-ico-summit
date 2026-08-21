@@ -136,8 +136,8 @@ export async function submitProfileForReview(
   }
 
   const { content } = org.draftProfile;
-  if (!content?.en?.shortDescription || !content?.vi?.shortDescription) {
-    throw new Error("Both English and Vietnamese short descriptions are required for submission.");
+  if (!content?.en?.shortDescription || !content.en.shortDescription.trim()) {
+    throw new Error("English short description is required for submission.");
   }
 
   const now = new Date();
