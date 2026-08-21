@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { isValidLocale, Locale } from "@/i18n/config";
@@ -58,8 +59,23 @@ export default async function PartnerActivitiesPage({
       <main id="main-content" className="flex-1 py-12">
         <div className="site-container max-w-5xl space-y-6">
           <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 space-y-6">
-            <div>
-              <h1 className="text-2xl font-bold text-[var(--color-navy)] mb-1">
+            <div className="space-y-1 pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+                <Link href={`/${locale}/dashboard`} className="hover:text-blue-600 transition">
+                  {locale === "vi" ? "Tổng quan" : "Dashboard"}
+                </Link>
+                <span>/</span>
+                <span className="text-slate-900 font-bold">
+                  {dict.partnerActivities.title}
+                </span>
+              </div>
+              <Link
+                href={`/${locale}/dashboard`}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800 transition"
+              >
+                ← {locale === "vi" ? "Quay lại Tổng quan" : "Back to Dashboard"}
+              </Link>
+              <h1 className="text-2xl font-bold text-[var(--color-navy)] pt-1">
                 {dict.partnerActivities.title}
               </h1>
               <p className="text-xs text-slate-500">
