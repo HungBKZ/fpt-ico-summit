@@ -13,6 +13,7 @@ import { isRegistrationOpen } from "@/lib/utils";
 import { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/types";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
+import { ClientAuthControl } from "@/components/layout/ClientAuthControl";
 
 interface SiteHeaderProps {
   locale: Locale;
@@ -137,13 +138,13 @@ export function SiteHeader({ locale, dict }: SiteHeaderProps) {
             <Image
               src={images.summitLogoColor.src!}
               alt={images.summitLogoColor.alt}
-              width={220}
-              height={60}
+              width={260}
+              height={70}
               priority
               style={{
-                height: scrolled ? "2.25rem" : "2.625rem",
+                height: scrolled ? "2.65rem" : "3.15rem",
                 width: "auto",
-                maxWidth: "220px",
+                maxWidth: "260px",
                 objectFit: "contain",
                 display: "block",
                 transition: "height 250ms ease",
@@ -152,12 +153,13 @@ export function SiteHeader({ locale, dict }: SiteHeaderProps) {
           </Link>
 
           {/* ── Desktop nav with scrollspy ───────────────────────────── */}
-          <nav aria-label="Main navigation" className="hidden md:flex" style={{ flex: 1, justifyContent: "center" }}>
+          <nav aria-label="Main navigation" className="hidden lg:flex" style={{ flex: 1, justifyContent: "center" }}>
             <ul
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "0.25rem",
+                gap: "0.2rem",
+                whiteSpace: "nowrap",
               }}
             >
               {navLinks.map(({ label, href }) => {
@@ -178,9 +180,10 @@ export function SiteHeader({ locale, dict }: SiteHeaderProps) {
             </ul>
           </nav>
 
-          {/* ── Desktop Controls (Switcher + CTA) ────────────────────── */}
+          {/* ── Desktop Controls (Switcher + Auth + CTA) ────────────────────── */}
           <div className="hidden md:flex" style={{ flexShrink: 0, alignItems: "center", gap: "0.875rem" }}>
             <LanguageSwitcher currentLocale={locale} ariaLabel={dict.nav.switchLanguage} />
+            <ClientAuthControl locale={locale} dict={dict} />
 
             {hasRegistration ? (
               <a

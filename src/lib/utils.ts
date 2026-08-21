@@ -31,3 +31,10 @@ export function mailtoHref(email: string, subject?: string): string {
   }
   return `mailto:${email}`;
 }
+
+/**
+ * Safely escapes special regex metacharacters in user query string.
+ */
+export function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}

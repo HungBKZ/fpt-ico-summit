@@ -1,5 +1,6 @@
 /**
  * SiteFooter — Server Component.
+ * Supports full public marketing footer and compact dashboard portal footer.
  */
 
 import Image from "next/image";
@@ -13,9 +14,36 @@ import type { Dictionary } from "@/i18n/types";
 interface SiteFooterProps {
   locale: Locale;
   dict: Dictionary;
+  isDashboard?: boolean;
 }
 
-export function SiteFooter({ locale, dict }: SiteFooterProps) {
+export function SiteFooter({ locale, dict, isDashboard = false }: SiteFooterProps) {
+  // Compact portal footer for authenticated dashboard workspace
+  if (isDashboard) {
+    return (
+      <footer
+        role="contentinfo"
+        style={{
+          backgroundColor: "var(--color-navy)",
+          color: "rgba(255, 255, 255, 0.6)",
+          borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+          paddingBlock: "1.25rem",
+          fontSize: "var(--text-xs)",
+        }}
+      >
+        <div className="site-container max-w-5xl flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
+          <p className="font-medium text-slate-300">
+            FPT ICO Summit 2026 · International Cooperation Office
+          </p>
+          <p className="text-slate-400 font-medium">
+            FPT University Can Tho Campus
+          </p>
+        </div>
+      </footer>
+    );
+  }
+
+  // Full marketing footer for public pages
   const footerLinks = [
     { label: dict.nav.about,        href: "#about" },
     { label: dict.nav.program,      href: "#program" },
