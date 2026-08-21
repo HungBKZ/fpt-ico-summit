@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import Image from "next/image";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { getConfirmedConsulates } from "@/data/consulates";
 import {
@@ -12,164 +13,113 @@ import {
 import { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/types";
 
+interface PublicPartner {
+  id: string;
+  type: "UNIVERSITY" | "CONSULATE";
+  name: string;
+  country: string;
+  logoUrl?: string | null;
+  coverImage?: {
+    secureUrl: string;
+    width?: number;
+    height?: number;
+  } | null;
+  websiteUrl?: string | null;
+  publicContact?: { email?: string; phone?: string; address?: string } | null;
+  shortDescription: string;
+  description?: string | null;
+}
+
 interface PartnersSectionProps {
   locale: Locale;
   dict: Dictionary;
 }
 
-type PartnerTab = "Consulates" | "Universities";
+type PartnerTab = "All" | "Consulates" | "Universities";
 
-function EmptyState({ tabName, dict }: { tabName: string; dict: Dictionary }) {
-  return (
-    <div
-      role="status"
-      aria-live="polite"
-      style={{
-        position: "relative",
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: "0.625rem",
-        padding: "2rem 1.5rem",
-        backgroundColor: "rgba(26, 94, 168, 0.12)",
-        border: "1px solid rgba(58, 127, 212, 0.22)",
-        borderRadius: "var(--radius-lg)",
-        textAlign: "center",
-      }}
-    >
-      <span
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          top: 0,
-          right: 0,
-          width: "6rem",
-          height: "6rem",
-          pointerEvents: "none",
-          backgroundImage:
-            "repeating-linear-gradient(-55deg, rgba(58,127,212,0.18) 0px, rgba(58,127,212,0.18) 1.5px, transparent 1.5px, transparent 18px)",
-          borderRadius: "0 var(--radius-lg) 0 0",
-        }}
-      />
-      <div
-        aria-hidden="true"
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "2.5rem",
-          height: "2.5rem",
-          borderRadius: "var(--radius-md)",
-          backgroundColor: "rgba(58, 127, 212, 0.18)",
-          color: "var(--color-blue-light)",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10" />
-          <line x1="2" y1="12" x2="22" y2="12" />
-          <path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20" />
-        </svg>
-      </div>
-      <p
-        style={{
-          fontFamily: "var(--font-display)",
-          fontSize: "var(--text-base)",
-          fontWeight: 700,
-          color: "#ffffff",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        {tabName}
-      </p>
-      <p
-        style={{
-          maxWidth: "38ch",
-          fontSize: "var(--text-sm)",
-          color: "rgba(255,255,255,0.60)",
-          lineHeight: "var(--leading-normal)",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        {dict.partners.emptyState}
-      </p>
-    </div>
-  );
+function optimizeCloudinaryCoverUrl(url?: string | null): string {
+  if (!url) return "";
+  if (!url.includes("res.cloudinary.com")) return url;
+  if (url.includes("/upload/f_auto,q_auto")) return url;
+  return url.replace("/upload/", "/upload/f_auto,q_auto,w_600,c_fill,g_auto/");
 }
 
-function PartnerTile({
-  name,
-  website,
-}: {
-  name: string;
-  website?: string;
-}) {
-  const tile = (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: "5rem",
-        padding: "1.25rem 1rem",
-        backgroundColor: "rgba(255,255,255,0.07)",
-        border: "1px solid rgba(255,255,255,0.12)",
-        borderRadius: "var(--radius-md)",
-        textAlign: "center",
-        transition: "background-color 150ms ease, border-color 150ms ease",
-      }}
-    >
-      <span
-        style={{
-          fontFamily: "var(--font-display)",
-          fontSize: "var(--text-xs)",
-          fontWeight: 700,
-          color: "rgba(255,255,255,0.88)",
-          lineHeight: "var(--leading-snug)",
-        }}
-      >
-        {name}
-      </span>
-    </div>
-  );
-
-  if (website) {
-    return (
-      <a
-        href={website}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={`${name} (opens in a new tab)`}
-        style={{ display: "block" }}
-      >
-        {tile}
-      </a>
-    );
-  }
-
-  return tile;
+function optimizeCloudinaryLogoUrl(url?: string | null): string {
+  if (!url) return "";
+  if (!url.includes("res.cloudinary.com")) return url;
+  if (url.includes("/upload/f_auto,q_auto")) return url;
+  return url.replace("/upload/", "/upload/f_auto,q_auto,w_120,c_limit/");
 }
 
 export function PartnersSection({ locale, dict }: PartnersSectionProps) {
-  const [activeTab, setActiveTab] = useState<PartnerTab>("Consulates");
-  const [selectedCountry, setSelectedCountry] = useState<CountryKey | "All">("All");
+  const [activeTab, setActiveTab] = useState<PartnerTab>("All");
+  const [selectedCountry, setSelectedCountry] = useState<string>("All");
+  const [dbPartners, setDbPartners] = useState<PublicPartner[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const confirmedConsulates = useMemo(() => getConfirmedConsulates(), []);
-  const confirmedUniversities = useMemo(() => getConfirmedUniversities(), []);
+  useEffect(() => {
+    let isMounted = true;
+    fetch(`/api/public/partners?locale=${locale}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted && data?.success && Array.isArray(data.partners)) {
+          setDbPartners(data.partners);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
 
-  const visibleUniversities =
-    selectedCountry === "All"
-      ? confirmedUniversities
-      : confirmedUniversities.filter((item) => item.country === selectedCountry);
+    return () => {
+      isMounted = false;
+    };
+  }, [locale]);
 
-  const tabs: { key: PartnerTab; label: string }[] = [
-    { key: "Consulates", label: dict.partners.tabs.consulates },
-    { key: "Universities", label: dict.partners.tabs.universities },
+  // Combine static fallback data with published DB partners
+  const staticConsulates: PublicPartner[] = getConfirmedConsulates().map((c) => ({
+    id: `static-c-${c.name}`,
+    type: "CONSULATE" as const,
+    name: c.name,
+    country: "Vietnam",
+    logoUrl: null,
+    coverImage: null,
+    websiteUrl: c.website,
+    publicContact: null,
+    shortDescription: "",
+    description: null,
+  }));
+
+  const staticUniversities: PublicPartner[] = getConfirmedUniversities().map((u) => ({
+    id: `static-u-${u.name}`,
+    type: "UNIVERSITY" as const,
+    name: u.name,
+    country: u.country,
+    logoUrl: null,
+    coverImage: null,
+    websiteUrl: u.website,
+    publicContact: null,
+    shortDescription: "",
+    description: null,
+  }));
+
+  const allPartners: PublicPartner[] = [
+    ...dbPartners,
+    ...staticConsulates.filter((sc) => !dbPartners.some((p) => p.name === sc.name)),
+    ...staticUniversities.filter((su) => !dbPartners.some((p) => p.name === su.name)),
   ];
+
+  const filteredPartners = allPartners.filter((p) => {
+    if (activeTab === "Consulates" && p.type !== "CONSULATE") return false;
+    if (activeTab === "Universities" && p.type !== "UNIVERSITY") return false;
+    if (
+      selectedCountry !== "All" &&
+      p.country.toLowerCase() !== selectedCountry.toLowerCase()
+    ) {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <section
@@ -191,154 +141,209 @@ export function PartnersSection({ locale, dict }: PartnersSectionProps) {
           />
         </div>
 
+        {/* Category Tabs */}
         <div
           role="tablist"
           aria-label="Partner categories"
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            flexWrap: "wrap",
-            gap: "0.75rem",
-            marginBottom: "2rem",
-          }}
+          className="flex justify-center flex-wrap gap-2 mb-6"
         >
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.key;
-            return (
-              <button
-                key={tab.key}
-                type="button"
-                role="tab"
-                aria-selected={isActive}
-                aria-controls={`${tab.key.toLowerCase()}-panel`}
-                id={`${tab.key.toLowerCase()}-tab`}
-                onClick={() => {
-                  setActiveTab(tab.key);
-                  if (tab.key === "Universities") setSelectedCountry("All");
-                }}
-                style={{
-                  border: isActive ? "1px solid transparent" : "1px solid rgba(255,255,255,0.18)",
-                  backgroundColor: isActive ? "var(--color-blue)" : "rgba(255,255,255,0.06)",
-                  color: isActive ? "#fff" : "#edf4ff",
-                  borderRadius: "var(--radius-sm)",
-                  fontWeight: 600,
-                  fontSize: "var(--text-sm)",
-                  padding: "0.625rem 1.5rem",
-                  cursor: "pointer",
-                  letterSpacing: "0.01em",
-                  transition: "background-color 150ms ease, color 150ms ease",
-                }}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
+          {[
+            { key: "All", label: dict.partners.tabs.all },
+            { key: "Consulates", label: dict.partners.tabs.consulates },
+            { key: "Universities", label: dict.partners.tabs.universities },
+          ].map((t) => (
+            <button
+              key={t.key}
+              type="button"
+              onClick={() => {
+                setActiveTab(t.key as PartnerTab);
+                setSelectedCountry("All");
+              }}
+              className={`py-2 px-5 rounded-full text-xs font-bold transition shadow-xs ${
+                activeTab === t.key
+                  ? "bg-white text-[var(--color-navy)] shadow-md"
+                  : "bg-white/10 text-white hover:bg-white/20"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
 
-        {activeTab === "Consulates" ? (
-          <div id="consulates-panel" role="tabpanel" aria-labelledby="consulates-tab" className="tab-panel-animated" key="consulates">
-            {confirmedConsulates.length === 0 ? (
-              <EmptyState tabName={dict.partners.tabs.consulates} dict={dict} />
-            ) : (
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-                  gap: "1rem",
-                }}
+        {/* Country Filters (when Universities or All tab active) */}
+        {activeTab !== "Consulates" && (
+          <div className="flex justify-center flex-wrap gap-1.5 mb-10">
+            <button
+              type="button"
+              onClick={() => setSelectedCountry("All")}
+              className={`py-1 px-3 rounded-lg text-[11px] font-semibold transition ${
+                selectedCountry === "All"
+                  ? "bg-[var(--color-orange)] text-white shadow-xs"
+                  : "bg-white/5 text-slate-300 hover:text-white hover:bg-white/10"
+              }`}
+            >
+              All Countries
+            </button>
+            {universityCountryKeys.map((ck) => (
+              <button
+                key={ck}
+                type="button"
+                onClick={() => setSelectedCountry(ck)}
+                className={`py-1 px-3 rounded-lg text-[11px] font-semibold transition ${
+                  selectedCountry === ck
+                    ? "bg-[var(--color-orange)] text-white shadow-xs"
+                    : "bg-white/5 text-slate-300 hover:text-white hover:bg-white/10"
+                }`}
               >
-                {confirmedConsulates.map((partner) => (
-                  <PartnerTile key={partner.id} name={partner.name} website={partner.website} />
-                ))}
-              </div>
-            )}
+                {getCountryLabel(ck as CountryKey, locale)}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Loading Skeleton */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-80 bg-white/5 rounded-2xl border border-white/10 animate-pulse"
+              />
+            ))}
+          </div>
+        ) : filteredPartners.length === 0 ? (
+          /* Empty State */
+          <div className="text-center py-12 px-4 bg-white/5 rounded-2xl border border-white/10 max-w-md mx-auto">
+            <p className="text-sm font-semibold text-white mb-1">
+              {dict.partners.emptyState}
+            </p>
           </div>
         ) : (
-          <div id="universities-panel" role="tabpanel" aria-labelledby="universities-tab" className="tab-panel-animated" key="universities">
-            {confirmedUniversities.length === 0 ? (
-              <EmptyState tabName={dict.partners.tabs.universities} dict={dict} />
-            ) : (
-              <>
-                <div
-                  style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: "0.75rem",
-                    justifyContent: "center",
-                    marginBottom: "2rem",
-                  }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setSelectedCountry("All")}
-                    style={{
-                      border: selectedCountry === "All" ? "1px solid transparent" : "1px solid rgba(255,255,255,0.18)",
-                      backgroundColor: selectedCountry === "All" ? "var(--color-blue)" : "rgba(255,255,255,0.06)",
-                      color: selectedCountry === "All" ? "#fff" : "#edf4ff",
-                      borderRadius: "var(--radius-sm)",
-                      padding: "0.4rem 0.875rem",
-                      fontWeight: 600,
-                      fontSize: "var(--text-sm)",
-                      cursor: "pointer",
-                      transition: "background-color 150ms ease, color 150ms ease",
-                    }}
-                  >
-                    {locale === "vi" ? "Tất cả quốc gia" : "All countries"}
-                  </button>
+          /* Premium Partner Cards Grid */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredPartners.map((p) => {
+              const coverUrl = p.coverImage?.secureUrl;
+              const logoUrl = p.logoUrl;
 
-                  {universityCountryKeys.map((cKey) => {
-                    const label = getCountryLabel(cKey, locale);
-                    const isSelected = selectedCountry === cKey;
-                    return (
-                      <button
-                        key={cKey}
-                        type="button"
-                        onClick={() => setSelectedCountry(cKey)}
-                        style={{
-                          border: isSelected ? "1px solid transparent" : "1px solid rgba(255,255,255,0.18)",
-                          backgroundColor: isSelected ? "var(--color-blue)" : "rgba(255,255,255,0.06)",
-                          color: isSelected ? "#fff" : "#edf4ff",
-                          borderRadius: "var(--radius-sm)",
-                          padding: "0.4rem 0.875rem",
-                          fontWeight: 600,
-                          fontSize: "var(--text-sm)",
-                          cursor: "pointer",
-                          transition: "background-color 150ms ease, color 150ms ease",
-                        }}
-                      >
-                        {label}
-                      </button>
-                    );
-                  })}
-                </div>
-
+              return (
                 <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-                    gap: "1rem",
-                  }}
+                  key={p.id}
+                  className="bg-white rounded-2xl border border-slate-200/80 shadow-md hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 overflow-hidden flex flex-col justify-between group"
                 >
-                  {visibleUniversities.map((partner) => (
-                    <div key={partner.id}>
-                      <p
-                        style={{
-                          marginBottom: "0.5rem",
-                          fontSize: "var(--text-xs)",
-                          fontWeight: 700,
-                          letterSpacing: "0.04em",
-                          textTransform: "uppercase",
-                          color: "rgba(255,255,255,0.72)",
-                        }}
-                      >
-                        {getCountryLabel(partner.country, locale)}
-                      </p>
-                      <PartnerTile name={partner.name} website={partner.website} />
+                  {/* Top 16:9 Showcase Cover Header */}
+                  <div className="relative w-full aspect-video bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 overflow-hidden">
+                    {coverUrl ? (
+                      <Image
+                        src={optimizeCloudinaryCoverUrl(coverUrl)}
+                        alt={`${p.name} showcase`}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        unoptimized={!coverUrl.includes("res.cloudinary.com")}
+                      />
+                    ) : (
+                      /* Designed Summit Fallback Artwork */
+                      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-950 flex items-center justify-center p-4">
+                        <svg
+                          className="absolute inset-0 w-full h-full opacity-20 text-white/40 pointer-events-none"
+                          viewBox="0 0 100 100"
+                          preserveAspectRatio="none"
+                        >
+                          <path
+                            d="0 0 L100 100 M0 50 L100 150 M-50 0 L50 100"
+                            stroke="currentColor"
+                            strokeWidth="0.8"
+                            fill="none"
+                          />
+                        </svg>
+                        <div className="text-center z-10">
+                          <span className="text-[10px] font-black tracking-widest text-orange-400/80 uppercase block">
+                            FPT ICO SUMMIT 2026
+                          </span>
+                          <span className="text-xs font-bold text-white/70 block mt-0.5">
+                            International Showcase Partner
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Logo Badge Overlay & Badges */}
+                  <div className="-mt-8 px-5 flex items-end justify-between gap-3 relative z-10">
+                    {logoUrl ? (
+                      <div className="w-14 h-14 relative rounded-xl border border-slate-200 bg-white p-1.5 shadow-md flex items-center justify-center shrink-0">
+                        <Image
+                          src={optimizeCloudinaryLogoUrl(logoUrl)}
+                          alt={`${p.name} logo`}
+                          fill
+                          sizes="56px"
+                          className="object-contain p-0.5"
+                          unoptimized={!logoUrl.includes("res.cloudinary.com")}
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-14 h-14 rounded-xl bg-blue-600 text-white font-black text-xl flex items-center justify-center shrink-0 border border-white shadow-md">
+                        {p.name.charAt(0)}
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                        {p.type}
+                      </span>
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                        {p.country}
+                      </span>
                     </div>
-                  ))}
+                  </div>
+
+                  {/* Card Body */}
+                  <div className="p-5 pt-3 flex-1 flex flex-col justify-between gap-4">
+                    <div className="space-y-2">
+                      <h3 className="font-bold text-slate-900 text-base group-hover:text-blue-600 transition-colors leading-snug">
+                        {p.name}
+                      </h3>
+                      {p.shortDescription ? (
+                        <p className="text-xs text-slate-600 line-clamp-3 leading-relaxed">
+                          {p.shortDescription}
+                        </p>
+                      ) : (
+                        <p className="text-xs text-slate-400 italic">
+                          Official partner institution participating in FPT ICO Summit 2026.
+                        </p>
+                      )}
+                    </div>
+
+                    {p.websiteUrl && (
+                      <div className="pt-3 border-t border-slate-100">
+                        <a
+                          href={p.websiteUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 transition"
+                        >
+                          <span>Visit Website</span>
+                          <svg
+                            width="12"
+                            height="12"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                            <polyline points="15 3 21 3 21 9" />
+                            <line x1="10" y1="14" x2="21" y2="3" />
+                          </svg>
+                        </a>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </>
-            )}
+              );
+            })}
           </div>
         )}
       </div>
