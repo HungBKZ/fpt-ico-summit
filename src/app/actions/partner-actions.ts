@@ -234,10 +234,10 @@ export async function submitPartnerProfileAction(formData?: FormData): Promise<{
     }
 
     const { content } = org.draftProfile;
-    if (!content?.en?.shortDescription || !content?.vi?.shortDescription) {
+    if (!content?.en?.shortDescription || !content.en.shortDescription.trim()) {
       return {
         success: false,
-        error: "Both English and Vietnamese short descriptions are required before submitting for review.",
+        error: "English short description is required before submitting for review.",
       };
     }
 
