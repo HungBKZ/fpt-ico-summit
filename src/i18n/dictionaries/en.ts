@@ -565,7 +565,7 @@ export const en: Dictionary = {
     materialAccessNotice: "Please ensure that all material links are accessible to the Summit organizing team.",
     materialAccessConfirmLabel: "I confirm that the Summit organizing team can access the submitted material links.",
     dataPermissionConfirmLabel: "I confirm that I am authorized to provide the speaker/contact information and media for Summit organization purposes.",
-    unconfirmedParticipationError: "Your organization participation for this Summit edition must be confirmed before submitting activity proposals.",
+    unconfirmedParticipationError: "Your organization has not yet been confirmed to participate in FPT ICO Summit 2026. Please contact the Summit organizing team before submitting a Workshop or Performance proposal.",
     topicProposalStepTitle: "Step 1 of 2: Workshop Scope & Topic Proposal",
     topicAcceptedBadge: "Topic Accepted",
     topicPendingBadge: "Topic Review Pending",

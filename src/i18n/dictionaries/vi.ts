@@ -565,7 +565,7 @@ export const vi: Dictionary = {
     materialAccessNotice: "Vui lòng đảm bảo Ban Tổ chức Summit có quyền truy cập các liên kết tài liệu.",
     materialAccessConfirmLabel: "Tôi xác nhận Ban Tổ chức Summit có thể truy cập các liên kết tài liệu đã cung cấp.",
     dataPermissionConfirmLabel: "Tôi xác nhận mình có quyền cung cấp thông tin và tư liệu của diễn giả/người liên hệ phục vụ công tác tổ chức Summit.",
-    unconfirmedParticipationError: "Đơn vị của bạn cần có trạng thái xác nhận tham gia Summit trước khi gửi đề xuất hoạt động.",
+    unconfirmedParticipationError: "Đơn vị của bạn chưa được xác nhận tham gia FPT ICO Summit 2026. Vui lòng liên hệ Ban Tổ chức trước khi gửi đề xuất Workshop hoặc tiết mục biểu diễn.",
     topicProposalStepTitle: "Bước 1 / 2: Phạm vi & Đề xuất Chủ đề Workshop",
     topicAcceptedBadge: "Chủ đề đã duyệt",
     topicPendingBadge: "Chờ duyệt chủ đề",

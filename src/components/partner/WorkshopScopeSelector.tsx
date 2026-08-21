@@ -336,7 +336,7 @@ export function WorkshopScopeSelector({
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                {isVi ? "Tên Workshop dự kiến (Tiếng Việt)" : "Tentative Workshop Title (Vietnamese)"}
+                {isVi ? "Tiêu đề Workshop dự kiến (Tiếng Việt — Không bắt buộc)" : "Tentative Workshop Title (Vietnamese — Optional)"}
               </label>
               <input
                 type="text"
@@ -363,7 +363,7 @@ export function WorkshopScopeSelector({
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                {isVi ? "Tóm tắt Ý tưởng & Mục tiêu (Tiếng Việt)" : "Short Concept / Rationale (Vietnamese)"}
+                {isVi ? "Mô tả / Lý do đề xuất ngắn (Tiếng Việt — Không bắt buộc)" : "Short Concept / Rationale (Vietnamese — Optional)"}
               </label>
               <textarea
                 rows={3}

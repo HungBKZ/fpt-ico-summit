@@ -266,7 +266,8 @@ export async function submitTopicProposalAction(
     if (!confirmedParticipation) {
       return {
         success: false,
-        error: "Your organization does not have an active confirmed participation for this Summit edition.",
+        error:
+          "Your organization has not yet been confirmed to participate in FPT ICO Summit 2026. Please contact the Summit organizing team before submitting a Workshop or Performance proposal.",
       };
     }
 
@@ -709,7 +710,8 @@ export async function submitActivityForReviewAction(
     if (!confirmedParticipation) {
       return {
         success: false,
-        error: "Your organization participation for this Summit edition must be confirmed before submitting activity proposals.",
+        error:
+          "Your organization has not yet been confirmed to participate in FPT ICO Summit 2026. Please contact the Summit organizing team before submitting a Workshop or Performance proposal.",
       };
     }
 
