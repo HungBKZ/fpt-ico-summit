@@ -140,7 +140,7 @@ export default async function MemberRegistrationPage({
         </div>
       </main>
 
-      <SiteFooter locale={locale} dict={dict} />
+      <SiteFooter locale={locale} dict={dict} isDashboard={true} />
     </div>
   );
 }

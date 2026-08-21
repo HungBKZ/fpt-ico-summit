@@ -138,7 +138,7 @@ export default async function MemberMyActivitiesPage({
         </div>
       </main>
 
-      <SiteFooter locale={locale} dict={dict} />
+      <SiteFooter locale={locale} dict={dict} isDashboard={true} />
     </div>
   );
 }

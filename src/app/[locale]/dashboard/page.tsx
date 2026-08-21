@@ -47,20 +47,29 @@ export default async function DashboardPage({
   let organization = null;
   let publishedBooth = null;
   let publishedSchedules: import("@/lib/db/models/summit-activity").SummitActivity[] = [];
+  let partnerScholarships: import("@/lib/db/models/scholarship").Scholarship[] = [];
+  let partnerActivities: import("@/lib/db/models/summit-activity").SummitActivity[] = [];
 
   if (dbUser.organizationId) {
     organization = await getOrganizationById(dbUser.organizationId);
     const activeEdition = await import("@/lib/db/repositories/summit-editions").then((m) => m.getActiveSummitEdition());
-    if (activeEdition && activeEdition._id) {
-      const { getPublishedBoothForPartner } = await import("@/lib/db/repositories/summit-booth-assignments");
-      const { listPublishedSchedulesForPartner } = await import("@/lib/db/repositories/summit-activities");
 
-      const [booth, schedules] = await Promise.all([
-        getPublishedBoothForPartner(activeEdition._id, dbUser.organizationId),
-        listPublishedSchedulesForPartner(activeEdition._id, dbUser.organizationId),
-      ]);
-      publishedBooth = booth;
-      publishedSchedules = schedules;
+    if (dbUser.role === "PARTNER") {
+      const { listScholarshipsByOrg } = await import("@/lib/db/repositories/scholarships");
+      partnerScholarships = await listScholarshipsByOrg(dbUser.organizationId);
+
+      if (activeEdition && activeEdition._id) {
+        const { listActivitiesForPartner, listPublishedSchedulesForPartner } = await import("@/lib/db/repositories/summit-activities");
+        const { getPublishedBoothForPartner } = await import("@/lib/db/repositories/summit-booth-assignments");
+        const [booth, schedules, acts] = await Promise.all([
+          getPublishedBoothForPartner(activeEdition._id, dbUser.organizationId),
+          listPublishedSchedulesForPartner(activeEdition._id, dbUser.organizationId),
+          listActivitiesForPartner(activeEdition._id, dbUser.organizationId),
+        ]);
+        publishedBooth = booth;
+        publishedSchedules = schedules;
+        partnerActivities = acts;
+      }
     }
   }
 
@@ -123,35 +132,54 @@ export default async function DashboardPage({
     );
   };
 
+  // Compute operational counts for Partner Cards
+  const scPublished = partnerScholarships.filter((s) => s.isPublished).length;
+  const scInReview = partnerScholarships.filter((s) => s.draftStatus === "IN_REVIEW").length;
+  const scChangesRequested = partnerScholarships.filter((s) => s.draftStatus === "CHANGES_REQUESTED").length;
+  const scDraft = partnerScholarships.filter((s) => s.draftStatus === "DRAFT").length;
+
+  const actWorkshops = partnerActivities.filter((a) => a.type === "WORKSHOP").length;
+  const actPerformances = partnerActivities.filter((a) => a.type === "STAGE_PERFORMANCE").length;
+  const actApproved = partnerActivities.filter((a) => a.isContentApproved).length;
+  const actInReview = partnerActivities.filter((a) => a.draftStatus === "IN_REVIEW").length;
+
   return (
     <div className="min-h-screen flex flex-col bg-[var(--color-warm-white)]">
       <SiteHeader locale={locale} dict={dict} />
 
-      <main id="main-content" className="flex-1 py-12">
-        <div className="site-container max-w-4xl">
-          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 space-y-6">
-            {/* Header / User Info */}
+      <main id="main-content" className="flex-1 py-8 md:py-12">
+        <div className="site-container max-w-5xl space-y-6">
+          <div className="bg-white p-6 md:p-8 rounded-2xl shadow-2xs border border-slate-200 space-y-6">
+            {/* Header / Workspace Identity */}
             <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-slate-100">
               <div>
-                <h1 className="text-2xl font-bold text-[var(--color-navy)] mb-1">
-                  {dict.dashboard.welcome}, {dbUser.name}
+                <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider block">
+                  {dbUser.role === "PARTNER" ? "Partner Portal Workspace" : "Member Portal"}
+                </span>
+                <h1 className="text-2xl font-bold text-[var(--color-navy)] mt-0.5">
+                  {dict.dashboard.welcome}, {organization?.name || dbUser.name}
                 </h1>
-                <p className="text-xs text-slate-500">{dbUser.email}</p>
+                <p className="text-xs text-slate-500 mt-1">
+                  {dbUser.role === "PARTNER"
+                    ? locale === "vi"
+                      ? "Quản lý hồ sơ tổ chức, học bổng và các hoạt động Summit của đơn vị."
+                      : "Manage your institution profile, scholarships, and Summit activities."
+                    : dbUser.email}
+                </p>
               </div>
 
-              <div className="flex gap-2">
-                <span className="px-3 py-1 bg-blue-50 text-blue-700 font-semibold text-xs rounded-full border border-blue-100">
-                  {dict.dashboard.roleLabel}: {dbUser.role}
-                </span>
-                {dbUser.partnerType && (
-                  <span className="px-3 py-1 bg-orange-50 text-orange-700 font-semibold text-xs rounded-full border border-orange-100">
-                    {dbUser.partnerType}
+              <div className="flex items-center gap-2">
+                {dbUser.role === "PARTNER" ? (
+                  getStatusBadge()
+                ) : (
+                  <span className="px-3 py-1 bg-blue-50 text-blue-700 font-semibold text-xs rounded-full border border-blue-100">
+                    {dict.dashboard.roleLabel}: {dbUser.role}
                   </span>
                 )}
               </div>
             </div>
 
-            {/* PARTNER Dashboard Content */}
+            {/* PARTNER Workspace Content */}
             {dbUser.role === "PARTNER" ? (
               <div className="space-y-6">
                 {/* Admin Feedback Warning Banner */}
@@ -160,7 +188,7 @@ export default async function DashboardPage({
                     <p className="text-xs font-bold text-rose-800 flex items-center gap-1.5">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <circle cx="12" cy="12" r="10" />
-                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="8" x2="12" />
                         <line x1="12" y1="16" x2="12.01" y2="16" />
                       </svg>
                       {dict.partnerCms.statusChangesRequested}
@@ -171,152 +199,209 @@ export default async function DashboardPage({
                   </div>
                 )}
 
-                {/* Organization Details Card */}
-                {organization && (
-                  <div className="p-6 bg-slate-50 hover:bg-slate-100/80 transition rounded-xl border border-slate-200 space-y-4">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div>
-                        <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-                          {dict.dashboard.orgLabel}
-                        </p>
-                        <h2 className="text-lg font-bold text-slate-900 mt-0.5">
-                          {organization.name}
-                        </h2>
-                        <p className="text-xs text-slate-600 font-medium">
-                          {organization.country}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-2">
+                {/* 3 Operational Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                  {/* Card A: ORGANIZATION PROFILE */}
+                  <div className="p-5 bg-slate-50 hover:bg-slate-100/70 transition rounded-2xl border border-slate-200 flex flex-col justify-between space-y-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                          {dict.nav?.orgProfile || "Organization Profile"}
+                        </span>
                         {getStatusBadge()}
                       </div>
+
+                      <div>
+                        <h2 className="text-base font-bold text-slate-900 leading-snug">
+                          {organization?.name || "My Organization"}
+                        </h2>
+                        <p className="text-xs text-slate-500 mt-0.5 font-medium">
+                          {organization?.country || ""} • {organization?.type || ""}
+                        </p>
+                      </div>
                     </div>
 
-                    <p className="text-xs text-slate-600 leading-relaxed border-t border-slate-200/60 pt-3">
-                      {dict.dashboard.partnerNotice}
-                    </p>
+                    <Link
+                      href={`/${locale}/dashboard/organization`}
+                      className="inline-flex items-center justify-center gap-2 py-2.5 px-4 bg-[var(--color-navy)] text-white font-semibold text-xs rounded-xl hover:bg-slate-800 transition shadow-2xs w-full"
+                    >
+                      <span>{dict.dashboard.manageOrgBtn || "Manage Profile"}</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                      </svg>
+                    </Link>
+                  </div>
 
-                    {/* Primary CTA Buttons */}
-                    <div className="pt-2 flex flex-wrap gap-3">
-                      <Link
-                        href={`/${locale}/dashboard/organization`}
-                        className="inline-flex items-center justify-center gap-2 py-2.5 px-5 bg-[var(--color-navy)] text-white font-semibold text-xs rounded-xl hover:bg-slate-800 transition shadow-sm"
-                      >
-                        <span>{dict.dashboard.manageOrgBtn}</span>
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <line x1="5" y1="12" x2="19" y2="12" />
-                          <polyline points="12 5 19 12 12 19" />
-                        </svg>
-                      </Link>
+                  {/* Card B: SCHOLARSHIP OPPORTUNITIES */}
+                  <div className="p-5 bg-slate-50 hover:bg-slate-100/70 transition rounded-2xl border border-slate-200 flex flex-col justify-between space-y-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                          {dict.nav?.scholarshipOpportunities || "Scholarship Opportunities"}
+                        </span>
+                        <span className="text-xs font-bold text-slate-700 bg-white px-2 py-0.5 rounded-full border border-slate-200">
+                          {partnerScholarships.length} {locale === "vi" ? "mục" : "total"}
+                        </span>
+                      </div>
 
-                      <Link
-                        href={`/${locale}/dashboard/scholarships`}
-                        className="inline-flex items-center justify-center gap-2 py-2.5 px-5 bg-white text-slate-800 border border-slate-300 font-semibold text-xs rounded-xl hover:bg-slate-50 transition shadow-2xs"
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                          <path d="M6 12v5c3 3 9 3 12 0v-5" />
-                        </svg>
-                        <span>{dict.partnerScholarships.title}</span>
-                      </Link>
-
-                      <Link
-                        href={`/${locale}/dashboard/activities`}
-                        className="inline-flex items-center justify-center gap-2 py-2.5 px-5 bg-white text-slate-800 border border-slate-300 font-semibold text-xs rounded-xl hover:bg-slate-50 transition shadow-2xs"
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-                          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-                        </svg>
-                        <span>{dict.partnerActivities.title}</span>
-                      </Link>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="bg-white p-2.5 rounded-xl border border-slate-200/80">
+                          <span className="text-[10px] font-medium text-slate-500 block">Published</span>
+                          <span className="text-base font-bold text-emerald-700">{scPublished}</span>
+                        </div>
+                        <div className="bg-white p-2.5 rounded-xl border border-slate-200/80">
+                          <span className="text-[10px] font-medium text-slate-500 block">In Review</span>
+                          <span className="text-base font-bold text-blue-700">{scInReview}</span>
+                        </div>
+                        {scChangesRequested > 0 && (
+                          <div className="bg-white p-2.5 rounded-xl border border-rose-200 col-span-2">
+                            <span className="text-[10px] font-medium text-rose-600 block">Changes Requested</span>
+                            <span className="text-base font-bold text-rose-700">{scChangesRequested}</span>
+                          </div>
+                        )}
+                        {scDraft > 0 && scChangesRequested === 0 && (
+                          <div className="bg-white p-2.5 rounded-xl border border-slate-200/80 col-span-2">
+                            <span className="text-[10px] font-medium text-slate-500 block">Drafts</span>
+                            <span className="text-base font-bold text-slate-700">{scDraft}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
 
-                    {/* Partner Operational Read-Only Info (Phase 5C) */}
-                    {(publishedBooth || publishedSchedules.length > 0) && (
-                      <div className="pt-4 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Published Booth Read-Only */}
-                        {publishedBooth && (
-                          <div className="p-4 bg-amber-50/50 border border-amber-200 rounded-xl space-y-2 text-xs">
-                            <div className="flex items-center justify-between">
-                              <span className="font-bold text-amber-900 flex items-center gap-1.5">
-                                ⛺ My Summit Booth
-                              </span>
-                              <span className="px-2 py-0.5 text-[9px] font-bold rounded-full bg-amber-100 text-amber-800 border border-amber-200">
-                                Published
-                              </span>
-                            </div>
+                    <Link
+                      href={`/${locale}/dashboard/scholarships`}
+                      className="inline-flex items-center justify-center gap-2 py-2.5 px-4 bg-white text-slate-800 border border-slate-300 font-semibold text-xs rounded-xl hover:bg-slate-50 transition shadow-2xs w-full"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                        <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                      </svg>
+                      <span>{dict.partnerScholarships?.title || "Manage Scholarships"}</span>
+                    </Link>
+                  </div>
 
-                            {publishedBooth.boothLabel && (
-                              <p className="text-slate-800">
-                                <strong>Booth:</strong> {publishedBooth.boothLabel}
-                              </p>
-                            )}
+                  {/* Card C: SUMMIT ACTIVITIES */}
+                  <div className="p-5 bg-slate-50 hover:bg-slate-100/70 transition rounded-2xl border border-slate-200 flex flex-col justify-between space-y-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                          {dict.nav?.summitActivities || "Summit Activities"}
+                        </span>
+                        <span className="text-xs font-bold text-slate-700 bg-white px-2 py-0.5 rounded-full border border-slate-200">
+                          {partnerActivities.length} {locale === "vi" ? "mục" : "total"}
+                        </span>
+                      </div>
 
-                            {publishedBooth.locationText && (
-                              <p className="text-slate-800">
-                                <strong>Location:</strong> {publishedBooth.locationText}
-                              </p>
-                            )}
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="bg-white p-2.5 rounded-xl border border-slate-200/80">
+                          <span className="text-[10px] font-medium text-slate-500 block">Workshops</span>
+                          <span className="text-base font-bold text-slate-900">{actWorkshops}</span>
+                        </div>
+                        <div className="bg-white p-2.5 rounded-xl border border-slate-200/80">
+                          <span className="text-[10px] font-medium text-slate-500 block">Stage</span>
+                          <span className="text-base font-bold text-slate-900">{actPerformances}</span>
+                        </div>
+                        <div className="bg-white p-2.5 rounded-xl border border-emerald-200 col-span-2 flex items-center justify-between">
+                          <span className="text-[10px] font-medium text-emerald-800">Approved Content</span>
+                          <span className="text-xs font-bold text-emerald-700">{actApproved}</span>
+                        </div>
+                        {actInReview > 0 && (
+                          <div className="bg-white p-2.5 rounded-xl border border-blue-200 col-span-2 flex items-center justify-between">
+                            <span className="text-[10px] font-medium text-blue-800">Under Admin Review</span>
+                            <span className="text-xs font-bold text-blue-700">{actInReview}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
 
-                            {publishedBooth.note && (
-                              <p className="text-slate-600 bg-white p-2 rounded-lg border border-amber-100">
-                                {publishedBooth.note}
-                              </p>
-                            )}
+                    <Link
+                      href={`/${locale}/dashboard/activities`}
+                      className="inline-flex items-center justify-center gap-2 py-2.5 px-4 bg-white text-slate-800 border border-slate-300 font-semibold text-xs rounded-xl hover:bg-slate-50 transition shadow-2xs w-full"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                      </svg>
+                      <span>{dict.partnerActivities?.title || "Manage Activities"}</span>
+                    </Link>
+                  </div>
+                </div>
 
-                            {publishedBooth.boothPhoto?.secureUrl && (
-                              <div className="relative w-full h-32 rounded-lg overflow-hidden border border-amber-200 mt-2">
-                                <Image
-                                  src={publishedBooth.boothPhoto.secureUrl}
-                                  alt="Booth photo"
-                                  fill
-                                  className="object-cover"
-                                />
+                {/* Partner Operational Read-Only Info (Phase 5C) */}
+                {(publishedBooth || publishedSchedules.length > 0) && (
+                  <div className="pt-4 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Published Booth Read-Only */}
+                    {publishedBooth && (
+                      <div className="p-4 bg-amber-50/50 border border-amber-200 rounded-xl space-y-2 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-amber-900 flex items-center gap-1.5">
+                            ⛺ My Summit Booth
+                          </span>
+                          <span className="px-2 py-0.5 text-[9px] font-bold rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                            Published
+                          </span>
+                        </div>
+
+                        {publishedBooth.boothLabel && (
+                          <p className="text-slate-800">
+                            <strong>Booth:</strong> {publishedBooth.boothLabel}
+                          </p>
+                        )}
+
+                        {publishedBooth.locationText && (
+                          <p className="text-slate-800">
+                            <strong>Location:</strong> {publishedBooth.locationText}
+                          </p>
+                        )}
+
+                        {publishedBooth.note && (
+                          <p className="text-slate-600 bg-white p-2 rounded-lg border border-amber-100">
+                            {publishedBooth.note}
+                          </p>
+                        )}
+
+                        {publishedBooth.boothPhoto?.secureUrl && (
+                          <div className="relative w-full h-32 rounded-lg overflow-hidden border border-amber-200 mt-2">
+                            <Image
+                              src={publishedBooth.boothPhoto.secureUrl}
+                              alt="Booth photo"
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Published Schedules Read-Only */}
+                    {publishedSchedules.length > 0 && (
+                      <div className="p-4 bg-purple-50/50 border border-purple-200 rounded-xl space-y-2 text-xs">
+                        <span className="font-bold text-purple-900 flex items-center gap-1.5">
+                          📅 My Activity Schedules
+                        </span>
+
+                        <div className="space-y-2">
+                          {publishedSchedules.map((act) => {
+                            const sched = act.publishedSchedule!;
+                            const title = act.approvedSnapshot?.title?.en || "Activity";
+
+                            return (
+                              <div
+                                key={act._id!.toString()}
+                                className="p-2.5 bg-white rounded-lg border border-purple-100 space-y-0.5"
+                              >
+                                <span className="font-bold text-slate-900 block">{title}</span>
+                                <span className="text-[11px] text-purple-700 font-semibold block font-mono">
+                                  📅 {sched.dateKey} • {sched.startTime} – {sched.endTime}
+                                </span>
+                                <span className="text-[11px] text-slate-600 block">
+                                  <strong>Venue:</strong> {sched.venue}
+                                </span>
                               </div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Published Schedules Read-Only */}
-                        {publishedSchedules.length > 0 && (
-                          <div className="p-4 bg-purple-50/50 border border-purple-200 rounded-xl space-y-2 text-xs">
-                            <span className="font-bold text-purple-900 flex items-center gap-1.5">
-                              📅 My Activity Schedules
-                            </span>
-
-                            <div className="space-y-2">
-                              {publishedSchedules.map((act) => {
-                                const sched = act.publishedSchedule!;
-                                const title = act.approvedSnapshot?.title?.en || "Activity";
-
-                                return (
-                                  <div
-                                    key={act._id!.toString()}
-                                    className="p-2.5 bg-white rounded-lg border border-purple-100 space-y-0.5"
-                                  >
-                                    <span className="font-bold text-slate-900 block">{title}</span>
-                                    <span className="text-[11px] text-purple-700 font-semibold block font-mono">
-                                      📅 {sched.dateKey} • {sched.startTime} – {sched.endTime}
-                                    </span>
-                                    <span className="text-[11px] text-slate-600 block">
-                                      <strong>Venue:</strong> {sched.venue}
-                                    </span>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        )}
+                            );
+                          })}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -434,7 +519,7 @@ export default async function DashboardPage({
         </div>
       </main>
 
-      <SiteFooter locale={locale} dict={dict} />
+      <SiteFooter locale={locale} dict={dict} isDashboard={true} />
     </div>
   );
 }

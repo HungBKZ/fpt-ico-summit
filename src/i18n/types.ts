@@ -28,6 +28,9 @@ export type Dictionary = {
     admin: string;
     changePassword: string;
     signOut: string;
+    orgProfile?: string;
+    scholarshipOpportunities?: string;
+    summitActivities?: string;
   };
   hero: {
     eyebrow: string;

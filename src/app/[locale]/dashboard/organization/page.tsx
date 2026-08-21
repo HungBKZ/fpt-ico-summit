@@ -56,7 +56,7 @@ export default async function PartnerOrganizationPage({
         </div>
       </main>
 
-      <SiteFooter locale={locale} dict={dict} />
+      <SiteFooter locale={locale} dict={dict} isDashboard={true} />
     </div>
   );
 }

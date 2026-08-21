@@ -9,6 +9,7 @@ interface SessionUser {
   name?: string | null;
   email?: string | null;
   role?: string;
+  partnerType?: string;
 }
 
 interface ClientAuthControlProps {
@@ -95,6 +96,17 @@ export function ClientAuthControl({ locale, dict }: ClientAuthControlProps) {
   }
 
   const isAdmin = user.role === "ADMIN";
+  const isPartner = user.role === "PARTNER";
+
+  const getSubRoleLabel = () => {
+    if (isAdmin) return "ADMINISTRATOR";
+    if (isPartner) {
+      const typeStr = user.partnerType ? user.partnerType.toUpperCase() : "INSTITUTION";
+      return `PARTNER · ${typeStr}`;
+    }
+    if (user.role === "SUMMIT_STAFF") return "SUMMIT STAFF";
+    return "SUMMIT MEMBER";
+  };
 
   return (
     <div ref={containerRef} style={{ position: "relative" }}>
@@ -104,19 +116,21 @@ export function ClientAuthControl({ locale, dict }: ClientAuthControlProps) {
         style={{
           display: "inline-flex",
           alignItems: "center",
-          gap: "0.35rem",
+          gap: "0.4rem",
           background: "var(--color-navy)",
           color: "#FFFFFF",
           border: "none",
           borderRadius: "var(--radius-full)",
-          padding: "0.35rem 0.75rem",
+          padding: "0.35rem 0.85rem",
           fontSize: "var(--text-xs)",
           fontWeight: 600,
           cursor: "pointer",
         }}
       >
-        <span>{user.name || user.email}</span>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <span className="max-w-[130px] sm:max-w-[180px] md:max-w-[220px] truncate block text-left">
+          {user.name || user.email}
+        </span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="shrink-0">
           <polyline points="6 9 12 15 18 9" />
         </svg>
       </button>
@@ -127,42 +141,66 @@ export function ClientAuthControl({ locale, dict }: ClientAuthControlProps) {
             position: "absolute",
             right: 0,
             top: "calc(100% + 0.35rem)",
-            width: "180px",
+            width: "220px",
             backgroundColor: "#FFFFFF",
             borderRadius: "var(--radius-md)",
             boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.15)",
             border: "1px solid rgba(11, 23, 54, 0.10)",
-            padding: "0.35rem 0",
+            padding: "0.5rem 0",
             zIndex: 100,
             display: "flex",
             flexDirection: "column",
           }}
         >
+          {/* Header Info inside Dropdown */}
+          <div className="px-4 py-2 border-b border-slate-100 mb-1">
+            <p className="text-xs font-bold text-slate-900 truncate">
+              {user.name || user.email}
+            </p>
+            <p className="text-[10px] font-bold text-blue-600 uppercase tracking-wider mt-0.5">
+              {getSubRoleLabel()}
+            </p>
+          </div>
+
           <Link
             href={`/${locale}/dashboard`}
             onClick={() => setDropdownOpen(false)}
-            style={{
-              padding: "0.5rem 1rem",
-              fontSize: "var(--text-xs)",
-              color: "var(--color-navy)",
-              textDecoration: "none",
-              fontWeight: 500,
-            }}
+            className="px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 font-medium transition"
           >
             {dict.nav.dashboard}
           </Link>
+
+          {isPartner && (
+            <>
+              <Link
+                href={`/${locale}/dashboard/organization`}
+                onClick={() => setDropdownOpen(false)}
+                className="px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 font-medium transition"
+              >
+                {dict.nav?.orgProfile || "Organization Profile"}
+              </Link>
+              <Link
+                href={`/${locale}/dashboard/scholarships`}
+                onClick={() => setDropdownOpen(false)}
+                className="px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 font-medium transition"
+              >
+                {dict.nav?.scholarshipOpportunities || "Scholarship Opportunities"}
+              </Link>
+              <Link
+                href={`/${locale}/dashboard/activities`}
+                onClick={() => setDropdownOpen(false)}
+                className="px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 font-medium transition"
+              >
+                {dict.nav?.summitActivities || "Summit Activities"}
+              </Link>
+            </>
+          )}
 
           {isAdmin && (
             <Link
               href={`/${locale}/admin/users`}
               onClick={() => setDropdownOpen(false)}
-              style={{
-                padding: "0.5rem 1rem",
-                fontSize: "var(--text-xs)",
-                color: "var(--color-navy)",
-                textDecoration: "none",
-                fontWeight: 500,
-              }}
+              className="px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 font-medium transition"
             >
               {dict.nav.admin}
             </Link>
@@ -171,28 +209,16 @@ export function ClientAuthControl({ locale, dict }: ClientAuthControlProps) {
           <Link
             href={`/${locale}/account/change-password`}
             onClick={() => setDropdownOpen(false)}
-            style={{
-              padding: "0.5rem 1rem",
-              fontSize: "var(--text-xs)",
-              color: "var(--color-navy)",
-              textDecoration: "none",
-              fontWeight: 500,
-            }}
+            className="px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 font-medium transition"
           >
             {dict.nav.changePassword}
           </Link>
 
-          <hr style={{ margin: "0.25rem 0", borderColor: "rgba(0,0,0,0.06)" }} />
+          <hr style={{ margin: "0.35rem 0", borderColor: "rgba(0,0,0,0.06)" }} />
 
           <a
             href={`/api/auth/signout`}
-            style={{
-              padding: "0.5rem 1rem",
-              fontSize: "var(--text-xs)",
-              color: "var(--color-orange)",
-              textDecoration: "none",
-              fontWeight: 600,
-            }}
+            className="px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 transition"
           >
             {dict.nav.signOut}
           </a>

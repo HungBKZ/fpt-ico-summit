@@ -23,6 +23,9 @@ export const vi: Dictionary = {
     admin: "Quản trị",
     changePassword: "Đổi mật khẩu",
     signOut: "Đăng xuất",
+    orgProfile: "Hồ sơ tổ chức",
+    scholarshipOpportunities: "Cơ hội học bổng",
+    summitActivities: "Hoạt động Summit",
   },
   hero: {
     eyebrow: "TRƯỜNG ĐẠI HỌC FPT PHÂN HIỆU CẦN THƠ · PHÒNG HỢP TÁC QUỐC TẾ",

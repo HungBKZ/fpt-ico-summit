@@ -23,6 +23,9 @@ export const en: Dictionary = {
     admin: "Admin",
     changePassword: "Change Password",
     signOut: "Sign Out",
+    orgProfile: "Organization Profile",
+    scholarshipOpportunities: "Scholarship Opportunities",
+    summitActivities: "Summit Activities",
   },
   hero: {
     eyebrow: "FPT UNIVERSITY CAN THO · INTERNATIONAL COOPERATION OFFICE",
