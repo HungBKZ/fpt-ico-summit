@@ -9,6 +9,7 @@ import { getDb } from "@/lib/db/mongodb";
 import { COLLECTIONS } from "@/lib/db/collections";
 import { createAuditEntry } from "@/lib/db/repositories/audit-logs";
 import { isValidDayKey } from "@/lib/utils/edition-utils";
+import { getWorkshopSlotById } from "@/lib/config/workshop-slots";
 import {
   createCheckIn,
   findCheckIn,
@@ -23,17 +24,13 @@ import {
 import {
   findActivityById,
   checkScheduleConflict,
+  checkWorkshopSlotConflict,
   updateActivityScheduleDraft,
   publishActivitySchedule,
 } from "@/lib/db/repositories/summit-activities";
 import type { BoothAssignmentSnapshot } from "@/lib/db/models/summit-booth-assignment";
 import type { ActivityScheduleDraft } from "@/lib/db/models/summit-activity";
 
-/**
- * Server Action: SUMMIT_STAFF / ADMIN checks in a participant for a specific Summit day.
- * Implements pre-check, transaction, E11000 duplicate handling outside transaction,
- * and single audit entry logging.
- */
 export async function checkInParticipantAction(
   registrationId: string,
   dayKey: string
@@ -66,7 +63,6 @@ export async function checkInParticipantAction(
       return { success: false, error: "Active registration record not found for this edition." };
     }
 
-    // Step A: Pre-check existing check-in before transaction
     const existingCheckIn = await findCheckIn(regObjId, dayKey);
     if (existingCheckIn) {
       return { success: true, checkedInAt: existingCheckIn.checkedInAt };
@@ -83,7 +79,6 @@ export async function checkInParticipantAction(
       createdAt: now,
     };
 
-    // Step B: Transaction for insert + audit
     const client = await getMongoClient();
     const session = client.startSession();
 
@@ -105,7 +100,6 @@ export async function checkInParticipantAction(
       });
       return { success: true, checkedInAt: now };
     } catch (txErr: unknown) {
-      // Step C: Catch E11000 race condition outside transaction
       const isDuplicateKey =
         txErr &&
         typeof txErr === "object" &&
@@ -128,10 +122,6 @@ export async function checkInParticipantAction(
   }
 }
 
-/**
- * Server Action: Generates signed Cloudinary upload signature for Staff Booth photo.
- * Reuses CLOUDINARY_ACTIVITY_IMAGE_PRESET=fpt_ico_activity_image.
- */
 export async function getBoothPhotoUploadSignatureAction(
   organizationId: string
 ): Promise<{
@@ -198,9 +188,6 @@ export async function getBoothPhotoUploadSignatureAction(
   }
 }
 
-/**
- * Server Action: Save Booth assignment draft for a partner organization.
- */
 export async function saveBoothAssignmentDraftAction(
   organizationId: string,
   formData: FormData
@@ -279,7 +266,6 @@ export async function saveBoothAssignmentDraftAction(
             session
           );
         } else {
-          // Preserve photo if not updated in form
           if (!boothPhoto && existing.draftAssignment?.boothPhoto) {
             draftAssignment.boothPhoto = existing.draftAssignment.boothPhoto;
           }
@@ -306,10 +292,6 @@ export async function saveBoothAssignmentDraftAction(
   }
 }
 
-/**
- * Server Action: Publish Booth assignment for a partner organization.
- * Copies draftAssignment -> publishedAssignment, sets isPublished = true.
- */
 export async function publishBoothAssignmentAction(
   boothAssignmentId: string
 ): Promise<{ success: boolean; error?: string }> {
@@ -361,6 +343,7 @@ export async function publishBoothAssignmentAction(
 
 /**
  * Server Action: Save activity schedule draft for an approved activity.
+ * Supports predefined 20 Workshop slots (workshopSlotId) and enforces Correction #5 collision checks across DRAFT & PUBLISHED states.
  */
 export async function saveActivityScheduleAction(
   activityId: string,
@@ -368,7 +351,8 @@ export async function saveActivityScheduleAction(
   startTime: string,
   endTime: string,
   venue: string,
-  operationalNotes?: string
+  operationalNotes?: string,
+  workshopSlotId?: string
 ): Promise<{ success: boolean; scheduleDraft?: ActivityScheduleDraft; error?: string }> {
   try {
     const { dbUser } = await requireSummitOperationsAccess();
@@ -376,19 +360,6 @@ export async function saveActivityScheduleAction(
     const activeEdition = await getActiveSummitEdition();
     if (!activeEdition || !activeEdition._id) {
       return { success: false, error: "No ACTIVE Summit edition found." };
-    }
-
-    if (!isValidDayKey(dateKey, activeEdition)) {
-      return { success: false, error: "Selected date is outside the Summit edition date range." };
-    }
-
-    if (!startTime || !endTime || startTime >= endTime) {
-      return { success: false, error: "Start time must be before End time." };
-    }
-
-    const trimmedVenue = venue.trim();
-    if (!trimmedVenue) {
-      return { success: false, error: "Venue / Room / Stage is required." };
     }
 
     let actObjId: ObjectId;
@@ -403,14 +374,51 @@ export async function saveActivityScheduleAction(
       return { success: false, error: "Only content-approved activities can be scheduled." };
     }
 
-    // Step 3: Conflict detection with effective schedules (scheduleDraft || publishedSchedule)
+    let finalDateKey = dateKey;
+    let finalStartTime = startTime;
+    let finalEndTime = endTime;
+
+    // Handle predefined Workshop slot reservation
+    if (activity.type === "WORKSHOP" && workshopSlotId) {
+      const slotDef = getWorkshopSlotById(workshopSlotId);
+      if (!slotDef) {
+        return { success: false, error: `Invalid Workshop slot ID: ${workshopSlotId}` };
+      }
+      finalDateKey = slotDef.dateKey;
+      finalStartTime = slotDef.startTime;
+      finalEndTime = slotDef.endTime;
+
+      // Correction #5: Server-side Workshop Slot Collision Check across DRAFT and PUBLISHED states!
+      const slotConflict = await checkWorkshopSlotConflict(activeEdition._id, actObjId, workshopSlotId);
+      if (slotConflict.hasConflict) {
+        return {
+          success: false,
+          error: `Workshop slot ${slotDef.slotId} (${slotDef.sessionGroup.en} ${slotDef.startTime}-${slotDef.endTime}) is already reserved by "${slotConflict.conflictingActivityTitle}" (${slotConflict.conflictingState} schedule).`,
+        };
+      }
+    }
+
+    if (!isValidDayKey(finalDateKey, activeEdition)) {
+      return { success: false, error: "Selected date is outside the Summit edition date range." };
+    }
+
+    if (!finalStartTime || !finalEndTime || finalStartTime >= finalEndTime) {
+      return { success: false, error: "Start time must be before End time." };
+    }
+
+    const trimmedVenue = venue.trim();
+    if (!trimmedVenue) {
+      return { success: false, error: "Venue / Room / Stage is required." };
+    }
+
+    // Venue overlap conflict detection
     const conflict = await checkScheduleConflict(
       activeEdition._id,
       actObjId,
-      dateKey,
+      finalDateKey,
       trimmedVenue,
-      startTime,
-      endTime
+      finalStartTime,
+      finalEndTime
     );
 
     if (conflict.hasConflict) {
@@ -421,10 +429,11 @@ export async function saveActivityScheduleAction(
     }
 
     const scheduleDraft: ActivityScheduleDraft = {
-      dateKey,
-      startTime,
-      endTime,
+      dateKey: finalDateKey,
+      startTime: finalStartTime,
+      endTime: finalEndTime,
       venue: trimmedVenue,
+      workshopSlotId: workshopSlotId || undefined,
       operationalNotes: operationalNotes?.trim() || undefined,
       updatedBy: dbUser._id!,
       updatedAt: new Date(),
@@ -441,7 +450,7 @@ export async function saveActivityScheduleAction(
             action: "SUMMIT_ACTIVITY_SCHEDULE_SAVED",
             actorUserId: dbUser._id,
             organizationId: activity.organizationId,
-            metadata: { activityId: actObjId.toString(), dateKey, venue: trimmedVenue },
+            metadata: { activityId: actObjId.toString(), dateKey: finalDateKey, venue: trimmedVenue, workshopSlotId },
           },
           session
         );
@@ -457,10 +466,6 @@ export async function saveActivityScheduleAction(
   }
 }
 
-/**
- * Server Action: Publish activity schedule.
- * Copies scheduleDraft -> publishedSchedule.
- */
 export async function publishActivityScheduleAction(
   activityId: string
 ): Promise<{
@@ -493,6 +498,7 @@ export async function publishActivityScheduleAction(
       startTime: activity.scheduleDraft.startTime,
       endTime: activity.scheduleDraft.endTime,
       venue: activity.scheduleDraft.venue,
+      workshopSlotId: activity.scheduleDraft.workshopSlotId,
       publishedAt: now,
       publishedBy: dbUser._id!,
     };
@@ -508,7 +514,7 @@ export async function publishActivityScheduleAction(
             action: "SUMMIT_ACTIVITY_SCHEDULE_PUBLISHED",
             actorUserId: dbUser._id,
             organizationId: activity.organizationId,
-            metadata: { activityId: actObjId.toString() },
+            metadata: { activityId: actObjId.toString(), workshopSlotId: publishedSchedule.workshopSlotId },
           },
           session
         );

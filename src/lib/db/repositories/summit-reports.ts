@@ -19,6 +19,8 @@ import type { OrganizationParticipation } from "@/lib/db/models/organization-par
 import type { SummitBoothAssignment } from "@/lib/db/models/summit-booth-assignment";
 import type { Scholarship } from "@/lib/db/models/scholarship";
 import { DEFAULT_ICS_RULE } from "@/lib/config/ics-rules";
+import { getTrackById } from "@/lib/config/workshop-tracks";
+import { getPerformanceScopeById } from "@/lib/config/performance-scopes";
 
 export type SummitReportType =
   | "REGISTRATIONS"
@@ -65,6 +67,65 @@ export interface SummitReportOverview {
   boothsPublished: number;
   activitiesApproved: number;
   scholarshipsPublished: number;
+}
+
+/**
+ * Resolves human-readable Workshop Topic Title for operational reports.
+ * 1. Custom topic title (from acceptedTopicSnapshot or customTopicTitle).
+ * 2. Suggested topic title (lookup via trackId + topicId in WORKSHOP_TRACKS).
+ * 3. Tentative title fallback from acceptedTopicSnapshot if set.
+ */
+export function resolveReportTopicTitle(act?: SummitActivity): string {
+  if (!act || act.type !== "WORKSHOP") return "";
+  const acc = act.acceptedTopicSnapshot;
+
+  // 1. Custom Topic Title
+  const customTitle = acc?.customTopicTitle || act.customTopicTitle;
+  if (customTitle && customTitle.trim() !== "") {
+    return customTitle.trim();
+  }
+
+  // 2. Suggested Topic Title lookup via WORKSHOP_TRACKS
+  const trackId = acc?.trackId || act.trackId;
+  const topicId = acc?.topicId || act.topicId;
+
+  if (trackId && topicId) {
+    const trackDef = getTrackById(trackId);
+    if (trackDef) {
+      const topicDef = trackDef.suggestedTopics.find((t) => t.id === topicId);
+      if (topicDef) {
+        return topicDef.title.en;
+      }
+    }
+  }
+
+  // 3. Fallback to tentativeTitle from acceptedTopicSnapshot if available
+  if (acc?.tentativeTitle?.en) {
+    return acc.tentativeTitle.en;
+  }
+
+  return "";
+}
+
+/**
+ * Resolves human-readable Workshop Track Name for operational reports.
+ */
+export function resolveReportTrackName(act?: SummitActivity): string {
+  if (!act || act.type !== "WORKSHOP") return "";
+  const trackId = act.acceptedTopicSnapshot?.trackId || act.trackId;
+  if (!trackId) return "";
+  const trackDef = getTrackById(trackId);
+  return trackDef ? trackDef.name.en : "";
+}
+
+/**
+ * Resolves human-readable Performance Scope Name for operational reports.
+ */
+export function resolveReportPerformanceScopeName(act?: SummitActivity): string {
+  if (!act || act.type !== "STAGE_PERFORMANCE") return "";
+  if (!act.performanceScopeId) return "";
+  const scopeDef = getPerformanceScopeById(act.performanceScopeId);
+  return scopeDef ? scopeDef.name.en : "";
 }
 
 /**
@@ -336,6 +397,9 @@ export async function getActivitySelectionExportRows(editionId: ObjectId) {
   const headers = [
     "Activity Type",
     "Activity Title",
+    "Workshop Track",
+    "Workshop Topic",
+    "Performance Scope",
     "Partner Organization",
     "Published Date",
     "Published Start Time",
@@ -363,6 +427,9 @@ export async function getActivitySelectionExportRows(editionId: ObjectId) {
     return [
       act?.type || "WORKSHOP",
       title,
+      resolveReportTrackName(act),
+      resolveReportTopicTitle(act),
+      resolveReportPerformanceScopeName(act),
       orgName,
       sched?.dateKey || "Unavailable",
       sched?.startTime || "",
@@ -418,6 +485,9 @@ export async function getActivityAttendanceExportRows(editionId: ObjectId) {
   const headers = [
     "Activity Type",
     "Activity Title",
+    "Workshop Track",
+    "Workshop Topic",
+    "Performance Scope",
     "Partner Organization",
     "Attendance Activity Day",
     "Current Published Date",
@@ -449,6 +519,9 @@ export async function getActivityAttendanceExportRows(editionId: ObjectId) {
     return [
       act?.type || "WORKSHOP",
       title,
+      resolveReportTrackName(act),
+      resolveReportTopicTitle(act),
+      resolveReportPerformanceScopeName(act),
       orgName,
       att.activityDayKey,
       sched?.dateKey || "Unavailable",
@@ -515,6 +588,9 @@ export async function getActivityScheduleExportRows(editionId: ObjectId) {
   const headers = [
     "Activity Type",
     "Title",
+    "Workshop Track",
+    "Workshop Topic",
+    "Performance Scope",
     "Partner Organization",
     "Date",
     "Start Time",
@@ -535,6 +611,9 @@ export async function getActivityScheduleExportRows(editionId: ObjectId) {
     return [
       act.type,
       snap.title.en || snap.title.vi || "Activity",
+      resolveReportTrackName(act),
+      resolveReportTopicTitle(act),
+      resolveReportPerformanceScopeName(act),
       orgName,
       sched.dateKey,
       sched.startTime,

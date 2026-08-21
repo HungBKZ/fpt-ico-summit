@@ -8,6 +8,10 @@ import { isParticipationConfirmed } from "@/lib/db/repositories/organization-par
 import { v2 as cloudinary } from "cloudinary";
 import { sanitizeHtml } from "@/lib/utils/sanitizer";
 import { createAuditEntry } from "@/lib/db/repositories/audit-logs";
+import { findUserById } from "@/lib/db/repositories/users";
+import { getOrganizationById } from "@/lib/db/repositories/organizations";
+import { getTrackById } from "@/lib/config/workshop-tracks";
+import { getPerformanceScopeById } from "@/lib/config/performance-scopes";
 import {
   createSummitActivity,
   findActivityById,
@@ -15,6 +19,9 @@ import {
   submitActivityForReview,
   requestActivityChanges,
   approveActivityContent,
+  submitTopicProposal,
+  requestTopicChanges,
+  acceptTopicProposal,
 } from "@/lib/db/repositories/summit-activities";
 import type {
   SummitActivity,
@@ -26,11 +33,12 @@ import type {
   WorkshopLanguage,
   WorkshopFormat,
   PerformanceType,
+  MaterialSharingPermission,
+  AcceptedTopicSnapshot,
 } from "@/lib/db/models/summit-activity";
+import type { WorkshopTrackId } from "@/lib/config/workshop-tracks";
+import type { PerformanceScopeId } from "@/lib/config/performance-scopes";
 
-/**
- * Validates that an external material URL uses safe HTTP or HTTPS protocol only.
- */
 function isSafeUrl(url?: string): boolean {
   if (!url || !url.trim()) return true;
   const trimmed = url.trim().toLowerCase();
@@ -45,19 +53,11 @@ function isSafeUrl(url?: string): boolean {
   return trimmed.startsWith("http://") || trimmed.startsWith("https://");
 }
 
-/**
- * Validates basic email string format.
- */
 function isValidEmail(emailStr?: string): boolean {
   if (!emailStr || !emailStr.trim()) return false;
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailStr.trim());
 }
 
-/**
- * Server-side security verification of Cloudinary activity image.
- * Authenticates Partner, re-queries Partner org, verifies activity ownership, checks editability,
- * validates publicId namespace prefix, and queries Cloudinary Admin API to verify image specs.
- */
 async function verifyCloudinaryActivityImage(
   publicId: string,
   activityId: string
@@ -144,9 +144,14 @@ async function verifyCloudinaryActivityImage(
 
 /**
  * Server Action: Partner creates a new DRAFT activity proposal (WORKSHOP or STAGE_PERFORMANCE).
+ * Sets fixed 30-min duration for Workshops. Accepts initial trackId or performanceScopeId.
  */
 export async function createActivityDraftAction(
-  type: ActivityType
+  type: ActivityType,
+  scopeData?: {
+    trackId?: WorkshopTrackId;
+    performanceScopeId?: PerformanceScopeId;
+  }
 ): Promise<{ success: boolean; activityId?: string; error?: string }> {
   try {
     const { dbUser } = await requirePartner();
@@ -166,7 +171,7 @@ export async function createActivityDraftAction(
             title: { en: "" },
             shortDescription: { en: "" },
             language: "ENGLISH",
-            durationMinutes: 45,
+            durationMinutes: 30, // Canonical 30-min duration
             format: "TALK",
             speakers: [],
           }
@@ -186,6 +191,9 @@ export async function createActivityDraftAction(
       organizationId: dbUser.organizationId,
       createdBy: dbUser._id!,
       type,
+      trackId: scopeData?.trackId,
+      performanceScopeId: scopeData?.performanceScopeId,
+      topicReviewStatus: type === "WORKSHOP" ? "DRAFT" : undefined,
       isContentApproved: false,
       draftStatus: "DRAFT",
       draftSnapshot: initialSnapshot,
@@ -223,7 +231,231 @@ export async function createActivityDraftAction(
 }
 
 /**
+ * Server Action: Partner submits Stage A Workshop Topic Proposal for Admin review.
+ */
+export async function submitTopicProposalAction(
+  activityId: string,
+  formData: FormData
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { dbUser } = await requirePartner();
+    if (!dbUser._id || !dbUser.organizationId) {
+      return { success: false, error: "No organization associated with partner account." };
+    }
+
+    // 1. Live user lookup
+    const userDoc = await findUserById(dbUser._id);
+    if (!userDoc) {
+      return { success: false, error: "Authenticated user record not found." };
+    }
+
+    // 2. Live organization lookup
+    const orgDoc = await getOrganizationById(dbUser.organizationId);
+    if (!orgDoc) {
+      return { success: false, error: "Organization record not found." };
+    }
+
+    // 3. Active Summit Edition lookup
+    const activeEdition = await getActiveSummitEdition();
+    if (!activeEdition || !activeEdition._id) {
+      return { success: false, error: "No active Summit edition found." };
+    }
+
+    // 4. Confirmed Organization Participation check
+    const confirmedParticipation = await isParticipationConfirmed(dbUser.organizationId, activeEdition._id);
+    if (!confirmedParticipation) {
+      return {
+        success: false,
+        error: "Your organization does not have an active confirmed participation for this Summit edition.",
+      };
+    }
+
+    const activity = await findActivityById(activityId);
+    if (!activity || !activity._id) {
+      return { success: false, error: "Activity proposal not found." };
+    }
+
+    if (!activity.organizationId.equals(dbUser.organizationId)) {
+      return { success: false, error: "Unauthorized access to this activity proposal." };
+    }
+
+    if (activity.type !== "WORKSHOP") {
+      return { success: false, error: "Topic proposals apply only to Workshops." };
+    }
+
+    const trackId = String(formData.get("trackId") || "").trim() as WorkshopTrackId;
+    const topicSelectionType = String(formData.get("topicSelectionType") || "SUGGESTED") as "SUGGESTED" | "CUSTOM";
+    const topicId = String(formData.get("topicId") || "").trim() || undefined;
+    const customTopicTitle = String(formData.get("customTopicTitle") || "").trim() || undefined;
+    const customTopicFitReason = String(formData.get("customTopicFitReason") || "").trim() || undefined;
+    const tentativeTitleEn = String(formData.get("tentativeTitleEn") || "").trim();
+    const tentativeTitleVi = String(formData.get("tentativeTitleVi") || "").trim() || undefined;
+    const conceptSummaryEn = String(formData.get("conceptSummaryEn") || "").trim();
+    const conceptSummaryVi = String(formData.get("conceptSummaryVi") || "").trim() || undefined;
+    const presentationLanguage = String(formData.get("presentationLanguage") || "ENGLISH") as WorkshopLanguage;
+    const otherLanguage = String(formData.get("otherLanguage") || "").trim() || undefined;
+
+    // 5. Server-side Track & Topic Verification
+    if (!trackId) return { success: false, error: "Selecting a Workshop Track is required." };
+    const trackDef = getTrackById(trackId);
+    if (!trackDef) {
+      return { success: false, error: "Invalid Workshop Track selected." };
+    }
+
+    if (topicSelectionType === "SUGGESTED") {
+      if (!topicId) {
+        return { success: false, error: "Please select a suggested topic or propose a custom topic." };
+      }
+      const topicExists = trackDef.suggestedTopics.some((t) => t.id === topicId);
+      if (!topicExists) {
+        return { success: false, error: "Selected topic does not belong to the chosen Workshop Track." };
+      }
+    } else if (topicSelectionType === "CUSTOM") {
+      if (!customTopicTitle) return { success: false, error: "Custom topic title is required." };
+      if (!customTopicFitReason) return { success: false, error: "Please explain why your custom topic fits this Track." };
+    }
+
+    if (!tentativeTitleEn) return { success: false, error: "Tentative Workshop Title (EN) is required." };
+    if (!conceptSummaryEn) return { success: false, error: "Short Concept / Rationale (EN) is required." };
+
+    const updatedSnapshot: WorkshopSnapshot = {
+      ...(activity.draftSnapshot as WorkshopSnapshot),
+      title: { en: tentativeTitleEn, vi: tentativeTitleVi },
+      shortDescription: { en: conceptSummaryEn, vi: conceptSummaryVi },
+      language: presentationLanguage,
+      otherLanguage,
+      durationMinutes: 30, // Fixed 30 min duration
+    };
+
+    const activityIdObj = activity._id;
+    const client = await getMongoClient();
+    const session = client.startSession();
+
+    try {
+      await session.withTransaction(async () => {
+        await updateActivityDraft(
+          activityIdObj,
+          updatedSnapshot,
+          {
+            trackId,
+            topicSelectionType,
+            topicId,
+            customTopicTitle,
+            customTopicFitReason,
+          },
+          session
+        );
+        await submitTopicProposal(
+          activityIdObj,
+          trackId,
+          topicSelectionType,
+          { topicId, customTopicTitle, customTopicFitReason },
+          session
+        );
+        await createAuditEntry(
+          {
+            action: "WORKSHOP_TOPIC_SUBMITTED",
+            actorUserId: dbUser._id,
+            organizationId: dbUser.organizationId,
+            metadata: { activityId: activityIdObj.toString(), trackId, topicSelectionType, topicId },
+          },
+          session
+        );
+      });
+    } finally {
+      await session.endSession();
+    }
+
+    return { success: true };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Failed to submit topic proposal.";
+    return { success: false, error: msg };
+  }
+}
+
+/**
+ * Server Action (ADMIN ONLY): Review Stage A Workshop Topic Proposal (ACCEPT or REQUEST_CHANGES).
+ * Saves immutable acceptedTopicSnapshot when accepted.
+ */
+export async function reviewTopicProposalAction(
+  activityId: string,
+  decision: "ACCEPT" | "REQUEST_CHANGES",
+  feedback?: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { dbUser } = await requireAdmin();
+
+    const activity = await findActivityById(activityId);
+    if (!activity || !activity._id) {
+      return { success: false, error: "Activity proposal not found." };
+    }
+
+    if (activity.type !== "WORKSHOP") {
+      return { success: false, error: "Topic review applies only to Workshops." };
+    }
+
+    const activityIdObj = activity._id;
+    const client = await getMongoClient();
+    const session = client.startSession();
+
+    try {
+      await session.withTransaction(async () => {
+        if (decision === "ACCEPT") {
+          const ws = activity.draftSnapshot as WorkshopSnapshot;
+          const acceptedSnapshot: AcceptedTopicSnapshot = {
+            trackId: activity.trackId!,
+            topicSelectionType: activity.topicSelectionType || "SUGGESTED",
+            topicId: activity.topicId,
+            customTopicTitle: activity.customTopicTitle,
+            customTopicFitReason: activity.customTopicFitReason,
+            tentativeTitle: ws.title,
+            conceptSummary: ws.shortDescription,
+            presentationLanguage: ws.language,
+            otherLanguage: ws.otherLanguage,
+            acceptedAt: new Date(),
+            acceptedBy: dbUser._id!,
+          };
+          await acceptTopicProposal(activityIdObj, acceptedSnapshot, dbUser._id!, session);
+          await createAuditEntry(
+            {
+              action: "WORKSHOP_TOPIC_ACCEPTED",
+              actorUserId: dbUser._id,
+              organizationId: activity.organizationId,
+              metadata: { activityId: activityIdObj.toString(), trackId: activity.trackId },
+            },
+            session
+          );
+        } else {
+          const trimmedFeedback = (feedback || "").trim();
+          if (!trimmedFeedback) {
+            throw new Error("Feedback note is required when requesting topic changes.");
+          }
+          await requestTopicChanges(activityIdObj, trimmedFeedback, dbUser._id!, session);
+          await createAuditEntry(
+            {
+              action: "WORKSHOP_TOPIC_CHANGES_REQUESTED",
+              actorUserId: dbUser._id,
+              organizationId: activity.organizationId,
+              metadata: { activityId: activityIdObj.toString(), feedback: trimmedFeedback },
+            },
+            session
+          );
+        }
+      });
+    } finally {
+      await session.endSession();
+    }
+
+    return { success: true };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Failed to review topic proposal.";
+    return { success: false, error: msg };
+  }
+}
+
+/**
  * Server Action: Partner saves draft edits to an activity proposal.
+ * Automatically enforces Topic Locking (Correction #3) and fixed 30-min Workshop duration.
  */
 export async function saveActivityDraftAction(
   activityId: string,
@@ -268,7 +500,6 @@ export async function saveActivityDraftAction(
       };
     }
 
-    // Cover image server-side verification if provided
     let coverImage: MediaAsset | undefined;
     const coverPublicId = String(formData.get("coverPublicId") || "").trim();
     if (coverPublicId) {
@@ -282,6 +513,18 @@ export async function saveActivityDraftAction(
     const materialAccessConfirmed = formData.get("materialAccessConfirmed") === "true";
 
     let updatedSnapshot: WorkshopSnapshot | StagePerformanceSnapshot;
+    const trackId = (formData.get("trackId") as WorkshopTrackId) || activity.trackId;
+    const topicSelectionType = (formData.get("topicSelectionType") as "SUGGESTED" | "CUSTOM") || activity.topicSelectionType;
+    const topicId = String(formData.get("topicId") || "").trim() || activity.topicId;
+    const customTopicTitle = String(formData.get("customTopicTitle") || "").trim() || activity.customTopicTitle;
+    const customTopicFitReason = String(formData.get("customTopicFitReason") || "").trim() || activity.customTopicFitReason;
+    const performanceScopeId = (formData.get("performanceScopeId") as PerformanceScopeId) || activity.performanceScopeId;
+    if (activity.type === "STAGE_PERFORMANCE" && performanceScopeId) {
+      const scopeDef = getPerformanceScopeById(performanceScopeId);
+      if (!scopeDef) {
+        return { success: false, error: "Invalid Stage Performance Scope selected." };
+      }
+    }
 
     if (activity.type === "WORKSHOP") {
       const speakersJson = String(formData.get("speakersJson") || "[]");
@@ -292,7 +535,6 @@ export async function saveActivityDraftAction(
         rawSpeakers = [];
       }
 
-      // Ensure stable id for each speaker
       const speakers: WorkshopSpeaker[] = rawSpeakers.map((sp, idx) => ({
         id: sp.id || `sp_${Date.now()}_${idx}_${Math.random().toString(36).substr(2, 4)}`,
         fullName: String(sp.fullName || "").trim(),
@@ -306,6 +548,10 @@ export async function saveActivityDraftAction(
         email: String(sp.email || "").trim(),
         phoneOrWhatsapp: String(sp.phoneOrWhatsapp || "").trim() || undefined,
       }));
+
+      const interpretationRequired = formData.get("interpretationRequired") === "true";
+      const interpretationNotes = String(formData.get("interpretationNotes") || "").trim() || undefined;
+      const materialSharingPermission = (String(formData.get("materialSharingPermission") || "INTERNAL_USE_ONLY") as MaterialSharingPermission);
 
       const workshopDraft: WorkshopSnapshot = {
         title: {
@@ -322,7 +568,9 @@ export async function saveActivityDraftAction(
         },
         language: (String(formData.get("language") || "ENGLISH") as WorkshopLanguage),
         otherLanguage: String(formData.get("otherLanguage") || "").trim() || undefined,
-        durationMinutes: Math.max(1, Number(formData.get("durationMinutes")) || 45),
+        interpretationRequired,
+        interpretationNotes,
+        durationMinutes: 30, // Fixed 30 min duration for Workshops
         format: (String(formData.get("format") || "TALK") as WorkshopFormat),
         otherFormat: String(formData.get("otherFormat") || "").trim() || undefined,
         targetAudience: String(formData.get("targetAudience") || "").trim() || undefined,
@@ -335,6 +583,7 @@ export async function saveActivityDraftAction(
         slideUrl: slideUrl || undefined,
         supportingContentUrl: supportingContentUrl || undefined,
         referenceUrl: referenceUrl || undefined,
+        materialSharingPermission,
         technicalRequirements: {
           projector: formData.get("techProjector") === "true",
           microphone: formData.get("techMicrophone") === "true",
@@ -398,7 +647,19 @@ export async function saveActivityDraftAction(
     const session = client.startSession();
     try {
       await session.withTransaction(async () => {
-        await updateActivityDraft(activityIdObj, updatedSnapshot, session);
+        await updateActivityDraft(
+          activityIdObj,
+          updatedSnapshot,
+          {
+            trackId,
+            topicSelectionType,
+            topicId,
+            customTopicTitle,
+            customTopicFitReason,
+            performanceScopeId,
+          },
+          session
+        );
         await createAuditEntry(
           {
             action: "SUMMIT_ACTIVITY_DRAFT_SAVED",
@@ -421,8 +682,8 @@ export async function saveActivityDraftAction(
 }
 
 /**
- * Server Action: Partner submits activity proposal for Admin review.
- * Enforces Active Organization Participation rule, Dual Confirmations, and Mandatory Field Validation.
+ * Server Action: Partner submits activity proposal for Admin review (Stage B for Workshop, single stage for Performance).
+ * Enforces Active Organization Participation rule, Dual Confirmations, Topic Acceptance rule for Workshop, and Mandatory Field Validation.
  */
 export async function submitActivityForReviewAction(
   activityId: string,
@@ -444,7 +705,6 @@ export async function submitActivityForReviewAction(
       return { success: false, error: "Activity proposal not found." };
     }
 
-    // 1. ACTIVE PARTICIPATION SUBMIT RULE
     const confirmedParticipation = await isParticipationConfirmed(dbUser.organizationId, activity.editionId);
     if (!confirmedParticipation) {
       return {
@@ -456,7 +716,6 @@ export async function submitActivityForReviewAction(
     const activityIdObj = activity._id;
     const snapshot = activity.draftSnapshot;
 
-    // 2. DUAL CONFIRMATION CHECKS
     if (!snapshot.dataPermissionConfirmed) {
       return {
         success: false,
@@ -465,6 +724,14 @@ export async function submitActivityForReviewAction(
     }
 
     if (activity.type === "WORKSHOP") {
+      // 2-STAGE WORKSHOP RULE: Topic MUST be accepted before submitting final content for Admin review!
+      if (activity.topicReviewStatus !== "ACCEPTED") {
+        return {
+          success: false,
+          error: "Workshop Topic Proposal must be accepted by Admin before submitting final Workshop details.",
+        };
+      }
+
       const ws = snapshot as WorkshopSnapshot;
       const hasMaterialLinks = Boolean(
         (ws.slideUrl && ws.slideUrl.trim() !== "") ||
@@ -479,11 +746,9 @@ export async function submitActivityForReviewAction(
         };
       }
 
-      // Mandatory fields for Workshop
       if (!ws.title?.en) return { success: false, error: "English Title is required." };
       if (!ws.shortDescription?.en) return { success: false, error: "English Short Description is required." };
-      if (!ws.durationMinutes || ws.durationMinutes <= 0) return { success: false, error: "Valid duration is required." };
-      if (!ws.language) return { success: false, error: "Language is required." };
+      if (!ws.language) return { success: false, error: "Presentation Language is required." };
       if (!ws.format) return { success: false, error: "Format is required." };
       if (!ws.speakers || ws.speakers.length === 0) return { success: false, error: "At least one speaker is required for a Workshop proposal." };
 
@@ -511,7 +776,6 @@ export async function submitActivityForReviewAction(
         };
       }
 
-      // Mandatory fields for Performance
       if (!ps.title?.en) return { success: false, error: "English Title is required." };
       if (!ps.shortDescription?.en) return { success: false, error: "English Short Description is required." };
       if (!ps.performanceType) return { success: false, error: "Performance Type is required." };

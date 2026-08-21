@@ -1,7 +1,8 @@
 /**
  * src/lib/db/repositories/summit-activities.ts
  *
- * Repository for SummitActivity collection data operations supporting Dual Approval State.
+ * Repository for SummitActivity collection data operations supporting Dual Approval State,
+ * 2-Stage Topic Approval, Accepted Topic Locking, Workshop Slot Collision Check, & Track Balancing.
  */
 
 import { type ClientSession, type Filter, ObjectId } from "mongodb";
@@ -11,9 +12,13 @@ import type {
   SummitActivity,
   ActivityType,
   ActivityDraftStatus,
+  WorkshopTopicReviewStatus,
+  AcceptedTopicSnapshot,
   WorkshopSnapshot,
   StagePerformanceSnapshot,
 } from "@/lib/db/models/summit-activity";
+import type { WorkshopTrackId } from "@/lib/config/workshop-tracks";
+import type { PerformanceScopeId } from "@/lib/config/performance-scopes";
 import { escapeRegex } from "@/lib/utils";
 
 import { getActiveSummitEdition } from "@/lib/db/repositories/summit-editions";
@@ -24,7 +29,7 @@ async function getCollection() {
 }
 
 /**
- * Counts activities with draftStatus = "IN_REVIEW" for the active edition.
+ * Counts activities with draftStatus = "IN_REVIEW" or topicReviewStatus = "IN_REVIEW" for the active edition.
  */
 export async function countPendingActivities(): Promise<number> {
   const activeEdition = await getActiveSummitEdition();
@@ -32,7 +37,10 @@ export async function countPendingActivities(): Promise<number> {
   const coll = await getCollection();
   return coll.countDocuments({
     editionId: activeEdition._id,
-    draftStatus: "IN_REVIEW",
+    $or: [
+      { draftStatus: "IN_REVIEW" },
+      { topicReviewStatus: "IN_REVIEW" },
+    ],
   });
 }
 
@@ -60,26 +68,174 @@ export async function findActivityById(
 }
 
 /**
- * Updates an activity's draftSnapshot and sets draftStatus back to DRAFT.
- * Preserves isContentApproved and approvedSnapshot intact if already approved.
+ * Submits Stage A Workshop Topic Proposal for Admin review.
  */
-export async function updateActivityDraft(
+export async function submitTopicProposal(
   id: ObjectId,
-  draftSnapshot: WorkshopSnapshot | StagePerformanceSnapshot,
+  trackId: WorkshopTrackId,
+  topicSelectionType: "SUGGESTED" | "CUSTOM",
+  topicData: {
+    topicId?: string;
+    customTopicTitle?: string;
+    customTopicFitReason?: string;
+  },
   session?: ClientSession
 ): Promise<void> {
   const coll = await getCollection();
+  const now = new Date();
   await coll.updateOne(
     { _id: id },
     {
       $set: {
-        draftSnapshot,
-        draftStatus: "DRAFT",
-        updatedAt: new Date(),
+        trackId,
+        topicSelectionType,
+        topicId: topicData.topicId,
+        customTopicTitle: topicData.customTopicTitle,
+        customTopicFitReason: topicData.customTopicFitReason,
+        topicReviewStatus: "IN_REVIEW",
+        topicSubmittedAt: now,
+        updatedAt: now,
       },
     },
     { session }
   );
+}
+
+/**
+ * Admin requests changes on Stage A Topic Proposal with feedback.
+ */
+export async function requestTopicChanges(
+  id: ObjectId,
+  feedback: string,
+  reviewedBy: ObjectId,
+  session?: ClientSession
+): Promise<void> {
+  const coll = await getCollection();
+  const now = new Date();
+  await coll.updateOne(
+    { _id: id },
+    {
+      $set: {
+        topicReviewStatus: "CHANGES_REQUESTED",
+        topicReviewFeedback: feedback,
+        "review.reviewedAt": now,
+        "review.reviewedBy": reviewedBy,
+        updatedAt: now,
+      },
+    },
+    { session }
+  );
+}
+
+/**
+ * Admin accepts Stage A Workshop Topic Proposal.
+ * Locks accepted values into immutable acceptedTopicSnapshot.
+ */
+export async function acceptTopicProposal(
+  id: ObjectId,
+  acceptedSnapshot: AcceptedTopicSnapshot,
+  reviewedBy: ObjectId,
+  session?: ClientSession
+): Promise<void> {
+  const coll = await getCollection();
+  const now = new Date();
+  await coll.updateOne(
+    { _id: id },
+    {
+      $set: {
+        topicReviewStatus: "ACCEPTED",
+        acceptedTopicSnapshot: acceptedSnapshot,
+        "review.reviewedAt": now,
+        "review.reviewedBy": reviewedBy,
+        updatedAt: now,
+      },
+    },
+    { session }
+  );
+}
+
+/**
+ * Updates an activity's draftSnapshot and sets draftStatus back to DRAFT.
+ * Correction #3: If Topic was ACCEPTED and Partner modifies topic-defining fields,
+ * automatically reset topicReviewStatus to DRAFT to force re-review.
+ */
+export async function updateActivityDraft(
+  id: ObjectId,
+  draftSnapshot: WorkshopSnapshot | StagePerformanceSnapshot,
+  additionalFields?: {
+    trackId?: WorkshopTrackId;
+    topicSelectionType?: "SUGGESTED" | "CUSTOM";
+    topicId?: string;
+    customTopicTitle?: string;
+    customTopicFitReason?: string;
+    performanceScopeId?: PerformanceScopeId;
+  },
+  session?: ClientSession
+): Promise<void> {
+  const coll = await getCollection();
+  const existing = await coll.findOne({ _id: id }, { session });
+
+  const setFields: Record<string, unknown> = {
+    draftSnapshot,
+    draftStatus: "DRAFT",
+    updatedAt: new Date(),
+  };
+
+  const unsetFields: Record<string, string> = {};
+
+  if (additionalFields) {
+    if (additionalFields.trackId !== undefined) setFields.trackId = additionalFields.trackId;
+    if (additionalFields.topicSelectionType !== undefined) setFields.topicSelectionType = additionalFields.topicSelectionType;
+    if (additionalFields.topicId !== undefined) setFields.topicId = additionalFields.topicId;
+    if (additionalFields.customTopicTitle !== undefined) setFields.customTopicTitle = additionalFields.customTopicTitle;
+    if (additionalFields.customTopicFitReason !== undefined) setFields.customTopicFitReason = additionalFields.customTopicFitReason;
+    if (additionalFields.performanceScopeId !== undefined) setFields.performanceScopeId = additionalFields.performanceScopeId;
+
+  // Requirement #2: Comprehensive Stage A Topic-Defining Data Invalidation
+  if (existing && existing.type === "WORKSHOP" && existing.topicReviewStatus === "ACCEPTED" && existing.acceptedTopicSnapshot) {
+    const acc = existing.acceptedTopicSnapshot;
+    const wsDraft = draftSnapshot as WorkshopSnapshot;
+
+    const newTrackId = additionalFields?.trackId !== undefined ? additionalFields.trackId : existing.trackId;
+    const newTopicType = additionalFields?.topicSelectionType !== undefined ? additionalFields.topicSelectionType : existing.topicSelectionType;
+    const newTopicId = additionalFields?.topicId !== undefined ? additionalFields.topicId : existing.topicId;
+    const newCustomTitle = additionalFields?.customTopicTitle !== undefined ? additionalFields.customTopicTitle : existing.customTopicTitle;
+    const newCustomFit = additionalFields?.customTopicFitReason !== undefined ? additionalFields.customTopicFitReason : existing.customTopicFitReason;
+
+    const newTitleEn = wsDraft?.title?.en || "";
+    const newTitleVi = wsDraft?.title?.vi || "";
+    const newConceptEn = wsDraft?.shortDescription?.en || "";
+    const newConceptVi = wsDraft?.shortDescription?.vi || "";
+    const newLang = wsDraft?.language || "ENGLISH";
+    const newOtherLang = wsDraft?.otherLanguage || "";
+
+    const topicChanged =
+      newTrackId !== acc.trackId ||
+      newTopicType !== acc.topicSelectionType ||
+      (newTopicId || "") !== (acc.topicId || "") ||
+      (newCustomTitle || "") !== (acc.customTopicTitle || "") ||
+      (newCustomFit || "") !== (acc.customTopicFitReason || "") ||
+      newTitleEn !== (acc.tentativeTitle?.en || "") ||
+      newTitleVi !== (acc.tentativeTitle?.vi || "") ||
+      newConceptEn !== (acc.conceptSummary?.en || "") ||
+      newConceptVi !== (acc.conceptSummary?.vi || "") ||
+      newLang !== (acc.presentationLanguage || "ENGLISH") ||
+      newOtherLang !== (acc.otherLanguage || "");
+
+    if (topicChanged) {
+      setFields.topicReviewStatus = "DRAFT";
+      unsetFields.acceptedTopicSnapshot = "";
+      unsetFields.topicReviewFeedback = "";
+    }
+  }
+  }
+
+  const updateDoc: Record<string, unknown> = { $set: setFields };
+  if (Object.keys(unsetFields).length > 0) {
+    updateDoc.$unset = unsetFields;
+  }
+
+  await coll.updateOne({ _id: id }, updateDoc, { session });
 }
 
 /**
@@ -183,6 +339,8 @@ export async function listActivitiesForPartner(
 export interface ListActivitiesAdminParams {
   editionId: ObjectId;
   type?: ActivityType | "All";
+  trackId?: WorkshopTrackId | "All";
+  topicReviewStatus?: WorkshopTopicReviewStatus | "All";
   draftStatus?: ActivityDraftStatus | "All";
   isApprovedOnly?: boolean;
   q?: string;
@@ -203,6 +361,8 @@ export interface ListActivitiesAdminResult {
 export async function listActivitiesForAdmin({
   editionId,
   type,
+  trackId,
+  topicReviewStatus,
   draftStatus,
   isApprovedOnly,
   q,
@@ -214,6 +374,14 @@ export async function listActivitiesForAdmin({
 
   if (type && type !== "All") {
     filter.type = type;
+  }
+
+  if (trackId && trackId !== "All") {
+    filter.trackId = trackId;
+  }
+
+  if (topicReviewStatus && topicReviewStatus !== "All") {
+    filter.topicReviewStatus = topicReviewStatus;
   }
 
   if (draftStatus && draftStatus !== "All") {
@@ -234,6 +402,7 @@ export async function listActivitiesForAdmin({
         { "draftSnapshot.title.en": regex },
         { "draftSnapshot.title.vi": regex },
         { "draftSnapshot.shortDescription.en": regex },
+        { customTopicTitle: regex },
       ];
     }
   }
@@ -264,10 +433,47 @@ export async function listActivitiesForAdmin({
 }
 
 /**
+ * Correction #5: Server-side Workshop Slot Collision Check across DRAFT and PUBLISHED states.
+ * Rejects if ANOTHER activity in the same edition occupies workshopSlotId through scheduleDraft OR publishedSchedule.
+ */
+export async function checkWorkshopSlotConflict(
+  editionId: ObjectId,
+  excludeActivityId: ObjectId,
+  workshopSlotId: string,
+  session?: ClientSession
+): Promise<{ hasConflict: boolean; conflictingActivityTitle?: string; conflictingState?: "DRAFT" | "PUBLISHED" }> {
+  const coll = await getCollection();
+  const conflicting = await coll.findOne(
+    {
+      editionId,
+      _id: { $ne: excludeActivityId },
+      $or: [
+        { "scheduleDraft.workshopSlotId": workshopSlotId },
+        { "publishedSchedule.workshopSlotId": workshopSlotId },
+      ],
+    },
+    { session }
+  );
+
+  if (conflicting) {
+    const title =
+      conflicting.approvedSnapshot?.title?.en ||
+      conflicting.draftSnapshot?.title?.en ||
+      "Untitled Workshop";
+    const state = conflicting.publishedSchedule?.workshopSlotId === workshopSlotId ? "PUBLISHED" : "DRAFT";
+    return {
+      hasConflict: true,
+      conflictingActivityTitle: title,
+      conflictingState: state,
+    };
+  }
+
+  return { hasConflict: false };
+}
+
+/**
  * Checks for venue and time overlap conflicts among approved activities in the active edition.
  * Evaluates the effective schedule: scheduleDraft if present, otherwise publishedSchedule.
- * Formula for strict overlap (allowing back-to-back):
- * newStart < existingEnd && newEnd > existingStart
  */
 export async function checkScheduleConflict(
   editionId: ObjectId,
@@ -281,7 +487,6 @@ export async function checkScheduleConflict(
   const coll = await getCollection();
   const trimmedVenue = venue.trim().toLowerCase();
 
-  // Find approved activities in the edition (excluding current activity) with any schedule
   const candidates = await coll
     .find(
       {
@@ -298,12 +503,10 @@ export async function checkScheduleConflict(
     .toArray();
 
   for (const act of candidates) {
-    // Effective schedule: scheduleDraft if exists, else publishedSchedule
     const eff = act.scheduleDraft || act.publishedSchedule;
     if (!eff) continue;
 
     if (eff.dateKey === dateKey && eff.venue.trim().toLowerCase() === trimmedVenue) {
-      // Overlap check
       if (startTime < eff.endTime && endTime > eff.startTime) {
         const title =
           act.approvedSnapshot?.title?.en ||
@@ -467,3 +670,34 @@ export async function countSchedulingStats(
   return { unscheduled, scheduled, published };
 }
 
+/**
+ * Correction #4 & #11: Track Balance Summary per Track across 20 slots & all Workshop proposals.
+ * Distinguishes: Topic Proposals, Topic Accepted, Final Approved, Scheduled.
+ */
+export async function getWorkshopTrackBalanceSummary(
+  editionId: ObjectId
+): Promise<Record<WorkshopTrackId, { topicProposals: number; topicAccepted: number; finalApproved: number; scheduled: number }>> {
+  const coll = await getCollection();
+  const workshops = await coll.find({ editionId, type: "WORKSHOP" }).toArray();
+
+  const summary: Record<string, { topicProposals: number; topicAccepted: number; finalApproved: number; scheduled: number }> = {
+    STUDY_ABROAD_SCHOLARSHIPS: { topicProposals: 0, topicAccepted: 0, finalApproved: 0, scheduled: 0 },
+    INTERNATIONAL_MOBILITY_EXCHANGE: { topicProposals: 0, topicAccepted: 0, finalApproved: 0, scheduled: 0 },
+    AI_EDUCATION_FUTURE_CAREERS: { topicProposals: 0, topicAccepted: 0, finalApproved: 0, scheduled: 0 },
+    TECHNOLOGY_INNOVATION: { topicProposals: 0, topicAccepted: 0, finalApproved: 0, scheduled: 0 },
+    GLOBAL_COMPETENCIES_CROSS_CULTURAL: { topicProposals: 0, topicAccepted: 0, finalApproved: 0, scheduled: 0 },
+    INDUSTRY_EMPLOYABILITY: { topicProposals: 0, topicAccepted: 0, finalApproved: 0, scheduled: 0 },
+  };
+
+  for (const act of workshops) {
+    if (act.trackId && summary[act.trackId]) {
+      const tr = summary[act.trackId];
+      tr.topicProposals += 1;
+      if (act.topicReviewStatus === "ACCEPTED") tr.topicAccepted += 1;
+      if (act.isContentApproved) tr.finalApproved += 1;
+      if (act.publishedSchedule || act.scheduleDraft) tr.scheduled += 1;
+    }
+  }
+
+  return summary as Record<WorkshopTrackId, { topicProposals: number; topicAccepted: number; finalApproved: number; scheduled: number }>;
+}

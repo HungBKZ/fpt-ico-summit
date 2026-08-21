@@ -11,7 +11,11 @@ import type {
   WorkshopSnapshot,
   StagePerformanceSnapshot,
 } from "@/lib/db/models/summit-activity";
-import { createActivityDraftAction } from "@/app/actions/activity-actions";
+import type { OrganizationType } from "@/lib/db/models/organization";
+import { WorkshopScopeSelector } from "@/components/partner/WorkshopScopeSelector";
+import { PerformanceScopeSelector } from "@/components/partner/PerformanceScopeSelector";
+import { getTrackById } from "@/lib/config/workshop-tracks";
+import { getPerformanceScopeById } from "@/lib/config/performance-scopes";
 
 interface ActivityProposalListProps {
   activities: SummitActivity[];
@@ -25,6 +29,7 @@ interface ActivityProposalListProps {
       attendanceRatePercent: number;
     }
   >;
+  partnerOrgType?: OrganizationType;
   locale: Locale;
   dict: Dictionary;
 }
@@ -32,6 +37,7 @@ interface ActivityProposalListProps {
 export function ActivityProposalList({
   activities,
   attendanceMetricsMap,
+  partnerOrgType,
   locale,
   dict,
 }: ActivityProposalListProps) {
@@ -40,22 +46,7 @@ export function ActivityProposalList({
   const isVi = locale === "vi";
 
   const [filterType, setFilterType] = useState<"ALL" | ActivityType>("ALL");
-  const [creatingType, setCreatingType] = useState<ActivityType | null>(null);
-  const [error, setError] = useState("");
-
-  const handleCreate = async (type: ActivityType) => {
-    setCreatingType(type);
-    setError("");
-
-    const res = await createActivityDraftAction(type);
-    setCreatingType(null);
-
-    if (res.success && res.activityId) {
-      router.push(`/${locale}/dashboard/activities/${res.activityId}`);
-    } else {
-      setError(res.error || "Failed to create activity proposal.");
-    }
-  };
+  const [activeScopeSelector, setActiveScopeSelector] = useState<ActivityType | null>(null);
 
   const filtered = activities.filter((act) => {
     if (filterType === "ALL") return true;
@@ -65,9 +56,27 @@ export function ActivityProposalList({
   const getStatusBadge = (act: SummitActivity) => {
     return (
       <div className="flex flex-wrap items-center gap-1.5">
+        {act.type === "WORKSHOP" && (
+          <>
+            {act.topicReviewStatus === "ACCEPTED" ? (
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-900 border border-blue-200">
+                ✓ {isVi ? "Chủ đề đã duyệt (Stage A)" : "Topic Accepted"}
+              </span>
+            ) : act.topicReviewStatus === "IN_REVIEW" ? (
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">
+                ⏳ {isVi ? "Chờ duyệt chủ đề" : "Topic in Review"}
+              </span>
+            ) : act.topicReviewStatus === "CHANGES_REQUESTED" ? (
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-900 border border-rose-200">
+                ⚠ {isVi ? "Yêu cầu sửa chủ đề" : "Topic Changes Requested"}
+              </span>
+            ) : null}
+          </>
+        )}
+
         {act.isContentApproved && (
           <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-            ✓ {isVi ? "Đã duyệt" : "Approved"}
+            ✓ {isVi ? "Nội dung đã duyệt" : "Content Approved"}
           </span>
         )}
 
@@ -83,7 +92,7 @@ export function ActivityProposalList({
           </span>
         )}
 
-        {act.draftStatus === "DRAFT" && (
+        {act.draftStatus === "DRAFT" && act.topicReviewStatus !== "IN_REVIEW" && (
           <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
             {act.isContentApproved ? (isVi ? "Bản sửa đổi" : "Draft Edits") : dict.partnerCms.statusDraft}
           </span>
@@ -92,14 +101,29 @@ export function ActivityProposalList({
     );
   };
 
+  if (activeScopeSelector === "WORKSHOP") {
+    return (
+      <WorkshopScopeSelector
+        partnerOrgType={partnerOrgType}
+        locale={locale}
+        onCancel={() => setActiveScopeSelector(null)}
+        onSuccess={(id) => router.push(`/${locale}/dashboard/activities/${id}`)}
+      />
+    );
+  }
+
+  if (activeScopeSelector === "STAGE_PERFORMANCE") {
+    return (
+      <PerformanceScopeSelector
+        locale={locale}
+        onCancel={() => setActiveScopeSelector(null)}
+        onSuccess={(id) => router.push(`/${locale}/dashboard/activities/${id}`)}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {error && (
-        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold rounded-xl">
-          {error}
-        </div>
-      )}
-
       {/* Action Bar */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         {/* Tabs */}
@@ -139,23 +163,21 @@ export function ActivityProposalList({
           </button>
         </div>
 
-        {/* Creation Buttons */}
+        {/* Scope-First Creation Buttons */}
         <div className="flex items-center gap-2">
           <button
             type="button"
-            disabled={creatingType !== null}
-            onClick={() => handleCreate("WORKSHOP")}
-            className="py-2.5 px-4 bg-[var(--color-navy)] text-white text-xs font-bold rounded-xl hover:bg-slate-800 transition shadow-sm disabled:opacity-50 flex items-center gap-1.5"
+            onClick={() => setActiveScopeSelector("WORKSHOP")}
+            className="py-2.5 px-4 bg-[var(--color-navy)] text-white text-xs font-bold rounded-xl hover:bg-slate-800 transition shadow-sm flex items-center gap-1.5"
           >
-            <span>{creatingType === "WORKSHOP" ? "..." : actDict.proposeWorkshopBtn}</span>
+            <span>+ {actDict.proposeWorkshopBtn}</span>
           </button>
           <button
             type="button"
-            disabled={creatingType !== null}
-            onClick={() => handleCreate("STAGE_PERFORMANCE")}
-            className="py-2.5 px-4 bg-orange-600 text-white text-xs font-bold rounded-xl hover:bg-orange-700 transition shadow-sm disabled:opacity-50 flex items-center gap-1.5"
+            onClick={() => setActiveScopeSelector("STAGE_PERFORMANCE")}
+            className="py-2.5 px-4 bg-orange-600 text-white text-xs font-bold rounded-xl hover:bg-orange-700 transition shadow-sm flex items-center gap-1.5"
           >
-            <span>{creatingType === "STAGE_PERFORMANCE" ? "..." : actDict.proposePerformanceBtn}</span>
+            <span>+ {actDict.proposePerformanceBtn}</span>
           </button>
         </div>
       </div>
@@ -180,6 +202,9 @@ export function ActivityProposalList({
             const title = (isVi ? snap.title?.vi : snap.title?.en) || snap.title?.en || "Untitled Activity";
             const shortDesc = (isVi ? snap.shortDescription?.vi : snap.shortDescription?.en) || snap.shortDescription?.en || "";
 
+            const trackDef = isWorkshop ? getTrackById(act.trackId) : undefined;
+            const scopeDef = !isWorkshop ? getPerformanceScopeById(act.performanceScopeId) : undefined;
+
             return (
               <div
                 key={id}
@@ -187,7 +212,7 @@ export function ActivityProposalList({
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="space-y-1.5 max-w-2xl">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span
                         className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                           isWorkshop
@@ -197,6 +222,19 @@ export function ActivityProposalList({
                       >
                         {isWorkshop ? actDict.typeWorkshop : actDict.typePerformance}
                       </span>
+
+                      {trackDef && (
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                          🎯 {isVi ? trackDef.name.vi : trackDef.name.en}
+                        </span>
+                      )}
+
+                      {scopeDef && (
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-orange-50 text-orange-800 border border-orange-200">
+                          🎭 {isVi ? scopeDef.name.vi : scopeDef.name.en}
+                        </span>
+                      )}
+
                       {getStatusBadge(act)}
                     </div>
 

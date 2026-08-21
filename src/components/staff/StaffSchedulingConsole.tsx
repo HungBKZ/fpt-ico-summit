@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/types";
 import { formatDayKeyLabel } from "@/lib/utils/edition-utils";
-import type { SummitActivity, WorkshopSnapshot, StagePerformanceSnapshot } from "@/lib/db/models/summit-activity";
+import type { SummitActivity } from "@/lib/db/models/summit-activity";
+import { WORKSHOP_SLOTS, getWorkshopSlotById } from "@/lib/config/workshop-slots";
+import { getTrackById } from "@/lib/config/workshop-tracks";
+import { getPerformanceScopeById } from "@/lib/config/performance-scopes";
 import {
   saveActivityScheduleAction,
   publishActivityScheduleAction,
@@ -34,6 +37,7 @@ export function StaffSchedulingConsole({
   locale,
 }: StaffSchedulingConsoleProps) {
   const router = useRouter();
+  const isVi = locale === "vi";
   const [activitiesList, setActivitiesList] = useState<SummitActivity[]>(initialActivities);
   const [activeTab, setActiveTab] = useState<"WORKSHOP" | "STAGE_PERFORMANCE">("WORKSHOP");
   const [statusFilter, setStatusFilter] = useState<"All" | "UNSCHEDULED" | "DRAFT_ONLY" | "PUBLISHED">("All");
@@ -67,11 +71,14 @@ export function StaffSchedulingConsole({
   const selectedActivity = activitiesList.find((a) => a._id?.toString() === selectedActivityId);
 
   // Form states for selected activity
+  const [workshopSlotId, setWorkshopSlotId] = useState<string>(
+    selectedActivity?.scheduleDraft?.workshopSlotId || selectedActivity?.publishedSchedule?.workshopSlotId || "WS_2026_01"
+  );
   const [dateKey, setDateKey] = useState(
     selectedActivity?.scheduleDraft?.dateKey || (editionDays.length > 0 ? editionDays[0] : "")
   );
-  const [startTime, setStartTime] = useState(selectedActivity?.scheduleDraft?.startTime || "09:00");
-  const [endTime, setEndTime] = useState(selectedActivity?.scheduleDraft?.endTime || "10:00");
+  const [startTime, setStartTime] = useState(selectedActivity?.scheduleDraft?.startTime || "08:30");
+  const [endTime, setEndTime] = useState(selectedActivity?.scheduleDraft?.endTime || "09:00");
   const [venue, setVenue] = useState(selectedActivity?.scheduleDraft?.venue || "");
   const [operationalNotes, setOperationalNotes] = useState(
     selectedActivity?.scheduleDraft?.operationalNotes || ""
@@ -83,11 +90,33 @@ export function StaffSchedulingConsole({
     setFeedback(null);
 
     const eff = act.scheduleDraft || act.publishedSchedule;
-    setDateKey(eff?.dateKey || (editionDays.length > 0 ? editionDays[0] : ""));
-    setStartTime(eff?.startTime || "09:00");
-    setEndTime(eff?.endTime || "10:00");
+    if (act.type === "WORKSHOP") {
+      const slotId = eff?.workshopSlotId || "WS_2026_01";
+      setWorkshopSlotId(slotId);
+      const slotDef = getWorkshopSlotById(slotId);
+      if (slotDef) {
+        setDateKey(slotDef.dateKey);
+        setStartTime(slotDef.startTime);
+        setEndTime(slotDef.endTime);
+      }
+    } else {
+      setDateKey(eff?.dateKey || (editionDays.length > 0 ? editionDays[0] : ""));
+      setStartTime(eff?.startTime || "09:00");
+      setEndTime(eff?.endTime || "10:00");
+    }
+
     setVenue(eff?.venue || "");
     setOperationalNotes(eff?.operationalNotes || "");
+  };
+
+  const handleSlotChange = (slotId: string) => {
+    setWorkshopSlotId(slotId);
+    const slotDef = getWorkshopSlotById(slotId);
+    if (slotDef) {
+      setDateKey(slotDef.dateKey);
+      setStartTime(slotDef.startTime);
+      setEndTime(slotDef.endTime);
+    }
   };
 
   const handleSaveSchedule = async (e: React.FormEvent) => {
@@ -103,22 +132,21 @@ export function StaffSchedulingConsole({
       startTime,
       endTime,
       venue,
-      operationalNotes
+      operationalNotes,
+      activeTab === "WORKSHOP" ? workshopSlotId : undefined
     );
 
     setIsSaving(false);
 
-    if (res.success) {
-      if (res.scheduleDraft) {
-        setActivitiesList((prev) =>
-          prev.map((act) =>
-            act._id?.toString() === selectedActivityId
-              ? { ...act, scheduleDraft: res.scheduleDraft }
-              : act
-          )
-        );
-      }
+    if (res.success && res.scheduleDraft) {
       setFeedback({ type: "success", msg: "Schedule draft saved successfully." });
+      setActivitiesList((prev) =>
+        prev.map((act) =>
+          act._id?.toString() === selectedActivityId
+            ? { ...act, scheduleDraft: res.scheduleDraft }
+            : act
+        )
+      );
       router.refresh();
     } else {
       setFeedback({ type: "error", msg: res.error || "Failed to save schedule draft." });
@@ -134,383 +162,370 @@ export function StaffSchedulingConsole({
     const res = await publishActivityScheduleAction(selectedActivityId);
     setIsPublishing(false);
 
-    if (res.success) {
-      if (res.publishedSchedule) {
-        setActivitiesList((prev) =>
-          prev.map((act) =>
-            act._id?.toString() === selectedActivityId
-              ? { ...act, publishedSchedule: res.publishedSchedule, scheduleDraft: undefined }
-              : act
-          )
-        );
-      }
-      setFeedback({ type: "success", msg: "Schedule published to Partner and public program view!" });
+    if (res.success && res.publishedSchedule) {
+      setFeedback({ type: "success", msg: "Schedule published successfully!" });
+      setActivitiesList((prev) =>
+        prev.map((act) =>
+          act._id?.toString() === selectedActivityId
+            ? { ...act, publishedSchedule: res.publishedSchedule, scheduleDraft: undefined }
+            : act
+        )
+      );
       router.refresh();
     } else {
       setFeedback({ type: "error", msg: res.error || "Failed to publish schedule." });
     }
   };
 
+  // Check occupied slots
+  const getSlotOccupant = (slotId: string) => {
+    for (const act of activitiesList) {
+      if (act._id?.toString() === selectedActivityId) continue;
+      if (act.type !== "WORKSHOP") continue;
+      if (act.scheduleDraft?.workshopSlotId === slotId) {
+        const title = act.approvedSnapshot?.title?.en || act.draftSnapshot?.title?.en || "Workshop";
+        return { title, status: "DRAFT" };
+      }
+      if (act.publishedSchedule?.workshopSlotId === slotId) {
+        const title = act.approvedSnapshot?.title?.en || act.draftSnapshot?.title?.en || "Workshop";
+        return { title, status: "PUBLISHED" };
+      }
+    }
+    return null;
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs">
-        <h1 className="text-xl font-bold text-slate-900">
-          Activity Scheduling Console
-        </h1>
-        <p className="text-xs text-slate-500 mt-1">
-          Schedule approved Workshops and Stage Performances for the Summit master timetable.
-        </p>
-      </div>
-
-      {/* Summary Cards */}
+    <div className="space-y-6 text-xs">
+      {/* Overview Stats Strip */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-amber-200 shadow-2xs bg-amber-50/30">
-          <span className="text-xs font-bold text-amber-700 uppercase tracking-wider block">
-            Approved Unscheduled
+        <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs space-y-1">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+            Unscheduled Approved Activities
           </span>
-          <span className="text-2xl font-black text-amber-600 mt-1 block">
-            {stats.unscheduled}
-          </span>
+          <span className="text-2xl font-bold text-amber-600">{stats.unscheduled}</span>
         </div>
-
-        <div className="bg-white p-5 rounded-2xl border border-blue-200 shadow-2xs bg-blue-50/30">
-          <span className="text-xs font-bold text-blue-700 uppercase tracking-wider block">
-            Scheduled (Draft)
+        <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs space-y-1">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+            Draft Schedules (Internal Staff Only)
           </span>
-          <span className="text-2xl font-black text-blue-600 mt-1 block">
-            {stats.scheduled}
-          </span>
+          <span className="text-2xl font-bold text-blue-600">{stats.scheduled}</span>
         </div>
-
-        <div className="bg-white p-5 rounded-2xl border border-emerald-200 shadow-2xs bg-emerald-50/30">
-          <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider block">
-            Published Schedules
+        <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs space-y-1">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+            Published Schedules (Public & Partner)
           </span>
-          <span className="text-2xl font-black text-emerald-600 mt-1 block">
-            {stats.published}
-          </span>
+          <span className="text-2xl font-bold text-emerald-600">{stats.published}</span>
         </div>
       </div>
 
-      {/* Feedback Banner */}
-      {feedback && (
-        <div
-          className={`p-4 rounded-xl text-xs font-semibold flex items-center justify-between ${
-            feedback.type === "success"
-              ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
-              : "bg-rose-50 border border-rose-200 text-rose-800"
-          }`}
-        >
-          <span>{feedback.type === "success" ? "✅" : "⚠️"} {feedback.msg}</span>
-          <button onClick={() => setFeedback(null)} className="hover:underline">
-            Dismiss
-          </button>
-        </div>
-      )}
-
-      {/* Tabs & Filters */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs flex flex-wrap items-center justify-between gap-4">
-        {/* Activity Type Tabs */}
-        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-semibold">
-          <button
-            onClick={() => {
-              setActiveTab("WORKSHOP");
-              setSelectedActivityId(null);
-            }}
-            className={`px-4 py-2 rounded-lg transition ${
-              activeTab === "WORKSHOP"
-                ? "bg-white text-slate-900 shadow-2xs font-bold"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            🎤 Workshops
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab("STAGE_PERFORMANCE");
-              setSelectedActivityId(null);
-            }}
-            className={`px-4 py-2 rounded-lg transition ${
-              activeTab === "STAGE_PERFORMANCE"
-                ? "bg-white text-slate-900 shadow-2xs font-bold"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            🎭 Stage Performances
-          </button>
-        </div>
-
-        {/* Schedule Status Filter */}
-        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-semibold">
-          {[
-            { id: "All", label: "All" },
-            { id: "UNSCHEDULED", label: "Unscheduled" },
-            { id: "DRAFT_ONLY", label: "Draft Schedule" },
-            { id: "PUBLISHED", label: "Published" },
-          ].map((tab) => (
+      {/* Main Console Container */}
+      <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 shadow-2xs">
+        {/* Navigation Tabs */}
+        <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-200">
+          <div className="flex items-center gap-2">
             <button
-              key={tab.id}
-              onClick={() => setStatusFilter(tab.id as typeof statusFilter)}
-              className={`px-3 py-1.5 rounded-lg transition ${
-                statusFilter === tab.id
-                  ? "bg-white text-slate-900 shadow-2xs font-bold"
-                  : "text-slate-600 hover:text-slate-900"
+              type="button"
+              onClick={() => {
+                setActiveTab("WORKSHOP");
+                setSelectedActivityId(null);
+              }}
+              className={`py-2 px-4 rounded-xl font-bold transition ${
+                activeTab === "WORKSHOP"
+                  ? "bg-[var(--color-navy)] text-white shadow-2xs"
+                  : "bg-slate-100 text-slate-700 hover:bg-slate-200"
               }`}
             >
-              {tab.label}
+              Workshops (20 Predefined Slots)
             </button>
-          ))}
-        </div>
-      </div>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("STAGE_PERFORMANCE");
+                setSelectedActivityId(null);
+              }}
+              className={`py-2 px-4 rounded-xl font-bold transition ${
+                activeTab === "STAGE_PERFORMANCE"
+                  ? "bg-orange-600 text-white shadow-2xs"
+                  : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+              }`}
+            >
+              Stage Performances (Flexible)
+            </button>
+          </div>
 
-      {/* Split Layout: Approved Activities List on Left, Schedule Editor on Right */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Activity List */}
-        <div className="lg:col-span-5 bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
-          <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-            Content-Approved Proposals ({filteredActivities.length})
-          </h2>
-
-          <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
-            {filteredActivities.length === 0 ? (
-              <p className="text-xs text-slate-400 p-4 text-center">
-                No approved {activeTab === "WORKSHOP" ? "workshops" : "performances"} match current filters.
-              </p>
-            ) : (
-              filteredActivities.map((act) => {
-                const idStr = act._id!.toString();
-                const isSelected = idStr === selectedActivityId;
-                const org = orgMap[act.organizationId.toString()];
-                const snapshot = act.approvedSnapshot;
-                const title = snapshot?.title?.en || "Untitled";
-
-                const isPublished = Boolean(act.publishedSchedule);
-                const hasDraft = Boolean(act.scheduleDraft);
-
-                return (
-                  <button
-                    key={idStr}
-                    onClick={() => handleSelectActivity(act)}
-                    className={`w-full text-left p-4 rounded-xl transition border ${
-                      isSelected
-                        ? "bg-[var(--color-navy)] text-white border-[var(--color-navy)] font-bold shadow-2xs"
-                        : "bg-white hover:bg-slate-50 border-slate-200 text-slate-800"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <span className="text-xs font-bold leading-snug block">
-                        {title}
-                      </span>
-                      {isPublished ? (
-                        <span className="px-2 py-0.5 text-[9px] font-bold rounded-full bg-emerald-100 text-emerald-800 shrink-0">
-                          Published
-                        </span>
-                      ) : hasDraft ? (
-                        <span className="px-2 py-0.5 text-[9px] font-bold rounded-full bg-blue-100 text-blue-800 shrink-0">
-                          Scheduled Draft
-                        </span>
-                      ) : (
-                        <span className="px-2 py-0.5 text-[9px] font-bold rounded-full bg-amber-100 text-amber-800 shrink-0">
-                          Unscheduled
-                        </span>
-                      )}
-                    </div>
-
-                    <span
-                      className={`text-[10px] block mt-1 ${
-                        isSelected ? "text-slate-300" : "text-slate-500"
-                      }`}
-                    >
-                      {org?.name || "Institution"} • {snapshot?.durationMinutes || 0} min
-                      {selectionCounts && selectionCounts[idStr] ? (
-                        <span className="ml-2 font-bold text-emerald-400">
-                          👥 {selectionCounts[idStr]} selected
-                        </span>
-                      ) : null}
-                    </span>
-
-                    {(act.scheduleDraft || act.publishedSchedule) && (
-                      <span
-                        className={`text-[10px] font-mono block mt-1 ${
-                          isSelected ? "text-blue-200" : "text-blue-700 font-semibold"
-                        }`}
-                      >
-                        📅 {(act.scheduleDraft || act.publishedSchedule)?.dateKey} •{" "}
-                        {(act.scheduleDraft || act.publishedSchedule)?.startTime}-
-                        {(act.scheduleDraft || act.publishedSchedule)?.endTime} @{" "}
-                        {(act.scheduleDraft || act.publishedSchedule)?.venue}
-                      </span>
-                    )}
-                  </button>
-                );
-              })
-            )}
+          <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200/80 text-[11px]">
+            {[
+              { id: "All", label: "All Statuses" },
+              { id: "UNSCHEDULED", label: "Unscheduled" },
+              { id: "DRAFT_ONLY", label: "Draft Scheduled" },
+              { id: "PUBLISHED", label: "Published" },
+            ].map((st) => (
+              <button
+                key={st.id}
+                type="button"
+                onClick={() => setStatusFilter(st.id as "All" | "UNSCHEDULED" | "DRAFT_ONLY" | "PUBLISHED")}
+                className={`px-2.5 py-1 rounded-lg font-semibold transition ${
+                  statusFilter === st.id
+                    ? "bg-white text-slate-900 shadow-2xs"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                {st.label}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Right Column: Schedule Editor & Approved Preview */}
-        <div className="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs space-y-6">
-          {selectedActivity && selectedActivity.approvedSnapshot ? (
-            <>
-              {/* Approved Content Preview (Read from approvedSnapshot ONLY) */}
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs">
-                <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">
-                  ✓ Approved Proposal Metadata (Read-Only)
-                </span>
-                <h3 className="font-bold text-slate-900 text-sm">
-                  {selectedActivity.approvedSnapshot.title.en}
-                </h3>
-                <p className="text-slate-600">
-                  <strong>Organization:</strong> {orgMap[selectedActivity.organizationId.toString()]?.name}
-                </p>
-                <p className="text-slate-600">
-                  <strong>Duration:</strong> {selectedActivity.approvedSnapshot.durationMinutes} minutes
-                </p>
+        {/* 2-Column Scheduling Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Activity Selector List (5 Cols) */}
+          <div className="lg:col-span-5 space-y-3 border-r-0 lg:border-r border-slate-100 lg:pr-6">
+            <span className="font-bold text-slate-700 uppercase tracking-wider block text-[11px]">
+              Select Content-Approved Activity ({filteredActivities.length})
+            </span>
 
-                {selectedActivity.type === "WORKSHOP" ? (
-                  <>
-                    <p className="text-slate-600">
-                      <strong>Format / Language:</strong>{" "}
-                      {(selectedActivity.approvedSnapshot as WorkshopSnapshot).format} /{" "}
-                      {(selectedActivity.approvedSnapshot as WorkshopSnapshot).language}
-                    </p>
-                    <p className="text-slate-600">
-                      <strong>Speakers:</strong>{" "}
-                      {(selectedActivity.approvedSnapshot as WorkshopSnapshot).speakers
-                        ?.map((sp) => `${sp.fullName} (${sp.positionTitle}, ${sp.organizationName})`)
-                        .join("; ") || "None"}
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-slate-600">
-                      <strong>Performance Type / Performers:</strong>{" "}
-                      {(selectedActivity.approvedSnapshot as StagePerformanceSnapshot).performanceType} /{" "}
-                      {(selectedActivity.approvedSnapshot as StagePerformanceSnapshot).numberOfPerformers} performers
-                    </p>
-                    <p className="text-slate-600">
-                      <strong>Contact:</strong>{" "}
-                      {(selectedActivity.approvedSnapshot as StagePerformanceSnapshot).contactPersonName} (
-                      {(selectedActivity.approvedSnapshot as StagePerformanceSnapshot).email})
-                    </p>
-                  </>
-                )}
+            {filteredActivities.length === 0 ? (
+              <div className="p-8 bg-slate-50 rounded-xl border border-slate-200 text-center">
+                <p className="text-slate-500 font-medium">No approved activities matching filter.</p>
               </div>
+            ) : (
+              <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
+                {filteredActivities.map((act) => {
+                  const idStr = act._id!.toString();
+                  const isSelected = idStr === selectedActivityId;
+                  const snap = act.approvedSnapshot || act.draftSnapshot;
+                  const isWs = act.type === "WORKSHOP";
+                  const trackDef = isWs ? getTrackById(act.trackId) : undefined;
+                  const scopeDef = !isWs ? getPerformanceScopeById(act.performanceScopeId) : undefined;
 
-              {/* Schedule Editor Form */}
-              <form onSubmit={handleSaveSchedule} className="space-y-4">
-                <h3 className="text-sm font-bold text-slate-900">
-                  Schedule Details
-                </h3>
+                  const org = orgMap[act.organizationId.toString()];
+                  const title = (isVi ? snap.title?.vi : snap.title?.en) || snap.title?.en || "Untitled";
 
-                {/* Day Picker */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Summit Date
-                  </label>
-                  <div className="flex items-center gap-2 overflow-x-auto">
-                    {editionDays.map((day) => (
-                      <button
-                        key={day}
-                        type="button"
-                        onClick={() => setDateKey(day)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${
-                          dateKey === day
-                            ? "bg-[var(--color-navy)] text-white"
-                            : "bg-slate-100 hover:bg-slate-200 text-slate-700"
-                        }`}
+                  const hasDraft = Boolean(act.scheduleDraft);
+                  const hasPublished = Boolean(act.publishedSchedule);
+
+                  return (
+                    <div
+                      key={idStr}
+                      onClick={() => handleSelectActivity(act)}
+                      className={`p-3.5 rounded-xl border cursor-pointer transition space-y-2 ${
+                        isSelected
+                          ? "border-blue-600 bg-blue-50/70 shadow-2xs ring-2 ring-blue-500/20"
+                          : "border-slate-200 bg-white hover:bg-slate-50"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-bold text-slate-900 truncate max-w-[200px]">
+                          {org?.name || "Organization"}
+                        </span>
+
+                        <div className="flex items-center gap-1">
+                          {hasPublished ? (
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                              Published
+                            </span>
+                          ) : hasDraft ? (
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                              Draft Schedule
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                              Unscheduled
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <p className="font-bold text-slate-800 line-clamp-1">{title}</p>
+
+                      <div className="flex items-center justify-between text-[10px] text-slate-500 font-medium">
+                        <span>{trackDef ? `🎯 ${trackDef.name[locale]}` : scopeDef ? `🎭 ${scopeDef.name[locale]}` : `${snap.durationMinutes}m`}</span>
+                        {selectionCounts && selectionCounts[idStr] !== undefined && (
+                          <span className="text-blue-700 font-bold">
+                            👥 {selectionCounts[idStr]} selections
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Schedule Form / Slot Assignment (7 Cols) */}
+          <div className="lg:col-span-7 space-y-6">
+            {!selectedActivity ? (
+              <div className="p-12 bg-slate-50 rounded-2xl border border-slate-200 text-center space-y-2">
+                <p className="font-bold text-slate-700 text-sm">Select an Approved Activity</p>
+                <p className="text-slate-500 font-medium text-xs">
+                  Choose an activity from the left list to assign a Workshop Slot / Stage Venue and manage operational scheduling.
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={handleSaveSchedule} className="space-y-5">
+                {/* Active Selection Banner */}
+                <div className="p-4 bg-slate-900 text-white rounded-2xl space-y-1 shadow-2xs">
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="font-bold uppercase tracking-wider text-blue-300">
+                      {selectedActivity.type === "WORKSHOP" ? "Workshop Slot Scheduler" : "Stage Performance Scheduler"}
+                    </span>
+                    <span>{orgMap[selectedActivity.organizationId.toString()]?.name}</span>
+                  </div>
+                  <h3 className="font-bold text-sm text-white">
+                    {selectedActivity.approvedSnapshot?.title?.en || selectedActivity.draftSnapshot?.title?.en}
+                  </h3>
+                </div>
+
+                {feedback && (
+                  <div
+                    className={`p-3.5 rounded-xl font-semibold text-xs ${
+                      feedback.type === "success"
+                        ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                        : "bg-rose-50 text-rose-800 border border-rose-200"
+                    }`}
+                  >
+                    {feedback.msg}
+                  </div>
+                )}
+
+                {/* WORKSHOP PREDEFINED 20 SLOTS SELECTOR */}
+                {selectedActivity.type === "WORKSHOP" ? (
+                  <div className="space-y-3 p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                    <label className="block font-bold text-slate-800 text-xs uppercase tracking-wider">
+                      Predefined Workshop Slot (20 Total Slots) *
+                    </label>
+
+                    <select
+                      value={workshopSlotId}
+                      onChange={(e) => handleSlotChange(e.target.value)}
+                      className="w-full p-3 rounded-xl border border-slate-300 font-semibold text-xs bg-white"
+                    >
+                      {WORKSHOP_SLOTS.map((slot) => {
+                        const occupant = getSlotOccupant(slot.slotId);
+                        const isOccupied = Boolean(occupant);
+
+                        return (
+                          <option
+                            key={slot.slotId}
+                            value={slot.slotId}
+                            disabled={isOccupied}
+                          >
+                            {slot.slotId} — {slot.sessionGroup.en} ({slot.startTime}–{slot.endTime})
+                            {occupant ? ` [RESERVED: ${occupant.title}]` : " [AVAILABLE]"}
+                          </option>
+                        );
+                      })}
+                    </select>
+
+                    <div className="grid grid-cols-3 gap-2 p-3 bg-white rounded-xl border border-slate-200 text-xs">
+                      <div>
+                        <span className="text-[10px] text-slate-400 block font-medium">Date</span>
+                        <strong className="text-slate-900 font-mono">{dateKey}</strong>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-400 block font-medium">Start Time</span>
+                        <strong className="text-slate-900 font-mono">{startTime}</strong>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-400 block font-medium">End Time</span>
+                        <strong className="text-slate-900 font-mono">{endTime}</strong>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* STAGE PERFORMANCE FLEXIBLE TIMING */
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block font-semibold text-slate-700 mb-1">Date *</label>
+                      <select
+                        value={dateKey}
+                        onChange={(e) => setDateKey(e.target.value)}
+                        className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white"
                       >
-                        {formatDayKeyLabel(day, locale)} ({day})
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                        {editionDays.map((d) => (
+                          <option key={d} value={d}>
+                            {formatDayKeyLabel(d, locale)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-                {/* Start & End Times */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Start Time (HH:mm, 24h)
-                    </label>
-                    <input
-                      type="time"
-                      value={startTime}
-                      onChange={(e) => setStartTime(e.target.value)}
-                      className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
-                      required
-                    />
-                  </div>
+                    <div>
+                      <label className="block font-semibold text-slate-700 mb-1">Start Time (HH:mm) *</label>
+                      <input
+                        type="time"
+                        required
+                        value={startTime}
+                        onChange={(e) => setStartTime(e.target.value)}
+                        className="w-full p-2.5 rounded-xl border border-slate-300 text-xs"
+                      />
+                    </div>
 
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      End Time (HH:mm, 24h)
-                    </label>
-                    <input
-                      type="time"
-                      value={endTime}
-                      onChange={(e) => setEndTime(e.target.value)}
-                      className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
-                      required
-                    />
+                    <div>
+                      <label className="block font-semibold text-slate-700 mb-1">End Time (HH:mm) *</label>
+                      <input
+                        type="time"
+                        required
+                        value={endTime}
+                        onChange={(e) => setEndTime(e.target.value)}
+                        className="w-full p-2.5 rounded-xl border border-slate-300 text-xs"
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {/* Venue / Room / Stage */}
+                {/* Venue / Room / Stage Input */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Venue / Room / Stage (Free-text)
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Venue / Room / Stage Location *
                   </label>
                   <input
                     type="text"
+                    required
                     value={venue}
                     onChange={(e) => setVenue(e.target.value)}
-                    placeholder="e.g. Alpha 201, Innovation Hub, Main Stage, Cultural Stage"
-                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
+                    placeholder="e.g. Gamma 101, Main Stage, Hall A"
+                    className="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 {/* Operational Notes */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Staff Operational Notes (Optional)
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Internal Operational Notes (Optional)
                   </label>
                   <textarea
                     rows={2}
                     value={operationalNotes}
                     onChange={(e) => setOperationalNotes(e.target.value)}
-                    placeholder="Internal setup notes, technician assignments, mic checks..."
-                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Notes for staff, tech setup, or equipment coordination..."
+                    className="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
-                {/* Actions */}
-                <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
+                {/* Action Buttons */}
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-200">
                   <button
                     type="submit"
-                    disabled={isSaving}
-                    className="px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl transition disabled:opacity-50"
+                    disabled={isSaving || isPublishing}
+                    className="py-2.5 px-5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl transition shadow-2xs disabled:opacity-50"
                   >
-                    {isSaving ? "Saving Schedule..." : "Save Schedule Draft"}
+                    {isSaving ? "Saving Draft..." : "Save Schedule Draft"}
                   </button>
 
                   <button
                     type="button"
+                    disabled={isSaving || isPublishing || !selectedActivity.scheduleDraft}
                     onClick={handlePublishSchedule}
-                    disabled={isPublishing || isSaving || !selectedActivity.scheduleDraft}
-                    className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition disabled:opacity-50"
+                    className="py-2.5 px-5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition shadow-md disabled:opacity-50"
                   >
-                    {isPublishing ? "Publishing..." : "Publish Schedule"}
+                    {isPublishing ? "Publishing..." : "Publish Schedule →"}
                   </button>
                 </div>
               </form>
-            </>
-          ) : (
-            <p className="text-xs text-slate-400 p-8 text-center">
-              Select an approved activity proposal from the left list to edit its schedule.
-            </p>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>

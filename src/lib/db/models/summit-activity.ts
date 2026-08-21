@@ -2,9 +2,12 @@
  * src/lib/db/models/summit-activity.ts
  *
  * Domain model for SummitActivity (Workshops & Stage Performances) for FPT ICO Summit 2026.
+ * Extended with Workshop Tracks, AcceptedTopicSnapshot, 2-Stage Proposal Workflow, Performance Scopes & 20 Workshop Slots.
  */
 
 import type { ObjectId } from "mongodb";
+import type { WorkshopTrackId } from "@/lib/config/workshop-tracks";
+import type { PerformanceScopeId } from "@/lib/config/performance-scopes";
 
 export type ActivityType = "WORKSHOP" | "STAGE_PERFORMANCE";
 
@@ -13,6 +16,13 @@ export type ActivityDraftStatus =
   | "DRAFT"
   | "IN_REVIEW"
   | "CHANGES_REQUESTED";
+
+export type WorkshopTopicReviewStatus =
+  | "NONE"
+  | "DRAFT"
+  | "IN_REVIEW"
+  | "CHANGES_REQUESTED"
+  | "ACCEPTED";
 
 export type WorkshopFormat =
   | "TALK"
@@ -26,6 +36,11 @@ export type WorkshopLanguage =
   | "VIETNAMESE"
   | "BILINGUAL"
   | "OTHER";
+
+export type MaterialSharingPermission =
+  | "PUBLICLY_SHAREABLE"
+  | "INTERNAL_USE_ONLY"
+  | "DO_NOT_SHARE";
 
 export type PerformanceType =
   | "TRADITIONAL_MUSIC"
@@ -72,6 +87,26 @@ export interface WorkshopTechnicalRequirements {
   additionalRequirements?: string;
 }
 
+export interface AcceptedTopicSnapshot {
+  trackId?: WorkshopTrackId;
+  topicSelectionType?: "SUGGESTED" | "CUSTOM";
+  topicId?: string;
+  customTopicTitle?: string;
+  customTopicFitReason?: string;
+  tentativeTitle: {
+    en: string;
+    vi?: string;
+  };
+  conceptSummary: {
+    en: string;
+    vi?: string;
+  };
+  presentationLanguage: WorkshopLanguage;
+  otherLanguage?: string;
+  acceptedAt: Date;
+  acceptedBy: ObjectId;
+}
+
 export interface WorkshopSnapshot {
   title: {
     en: string;
@@ -87,7 +122,9 @@ export interface WorkshopSnapshot {
   };
   language: WorkshopLanguage;
   otherLanguage?: string;
-  durationMinutes: number;
+  interpretationRequired?: boolean;
+  interpretationNotes?: string;
+  durationMinutes: number; // Canonical 30 min for new Workshop proposals
   format: WorkshopFormat;
   otherFormat?: string;
   targetAudience?: string;
@@ -101,6 +138,7 @@ export interface WorkshopSnapshot {
   slideUrl?: string;
   supportingContentUrl?: string;
   referenceUrl?: string;
+  materialSharingPermission?: MaterialSharingPermission;
   technicalRequirements?: WorkshopTechnicalRequirements;
   materialAccessConfirmed?: boolean;
   dataPermissionConfirmed?: boolean;
@@ -160,23 +198,25 @@ export interface ActivityReviewInfo {
   reviewedBy?: ObjectId;
 }
 
-/** Staff-managed operational schedule draft (Phase 5C) */
+/** Staff-managed operational schedule draft (Phase 5C & Web Realignment) */
 export interface ActivityScheduleDraft {
-  dateKey: string;           // "2026-11-21"
-  startTime: string;         // "09:00" (HH:mm, 24h)
-  endTime: string;           // "10:00"
+  dateKey: string;           // "2026-11-21" | "2026-11-22"
+  startTime: string;         // "08:30" (HH:mm, 24h)
+  endTime: string;           // "09:00"
   venue: string;             // Free text: "Alpha 201", "Main Stage"
+  workshopSlotId?: string;   // Predefined slot ID for WORKSHOP (e.g. "WS_2026_01")
   operationalNotes?: string;
   updatedBy: ObjectId;
   updatedAt: Date;
 }
 
-/** Published operational schedule visible to Partner/Member (Phase 5C) */
+/** Published operational schedule visible to Partner/Member (Phase 5C & Web Realignment) */
 export interface ActivityPublishedSchedule {
   dateKey: string;
   startTime: string;
   endTime: string;
   venue: string;
+  workshopSlotId?: string;   // Predefined slot ID for WORKSHOP (e.g. "WS_2026_01")
   operationalNotes?: string;
   publishedBy: ObjectId;
   publishedAt: Date;
@@ -197,7 +237,25 @@ export interface SummitActivity {
   /** Activity classification */
   type: ActivityType;
 
-  /** Dual approval state flags */
+  /** Workshop Track taxonomy & Topic proposal fields (WORKSHOP ONLY) */
+  trackId?: WorkshopTrackId;
+  topicSelectionType?: "SUGGESTED" | "CUSTOM";
+  topicId?: string;
+  customTopicTitle?: string;
+  customTopicFitReason?: string;
+
+  /** Two-Stage Workshop Topic Review status */
+  topicReviewStatus?: WorkshopTopicReviewStatus;
+  topicReviewFeedback?: string;
+  topicSubmittedAt?: Date;
+
+  /** Immutable snapshot of accepted topic when Admin accepts Topic Proposal */
+  acceptedTopicSnapshot?: AcceptedTopicSnapshot;
+
+  /** Stage Performance Scope classification (STAGE_PERFORMANCE ONLY) */
+  performanceScopeId?: PerformanceScopeId;
+
+  /** Dual approval state flags for Final Content */
   isContentApproved: boolean;
   draftStatus: ActivityDraftStatus;
 
@@ -212,19 +270,18 @@ export interface SummitActivity {
   dataPermissionConfirmedAt?: Date;
   dataPermissionConfirmedBy?: ObjectId;
 
-  /** Review history & feedback */
+  /** Final Content Review history & feedback */
   review?: ActivityReviewInfo;
 
   approvedAt?: Date;
   approvedBy?: ObjectId;
 
-  /** Operational schedule draft edited by SUMMIT_STAFF (Phase 5C) */
+  /** Operational schedule draft edited by SUMMIT_STAFF */
   scheduleDraft?: ActivityScheduleDraft;
 
-  /** Published schedule visible to Partner and future Member views (Phase 5C) */
+  /** Published schedule visible to Partner/Member */
   publishedSchedule?: ActivityPublishedSchedule;
 
   createdAt: Date;
   updatedAt: Date;
 }
-

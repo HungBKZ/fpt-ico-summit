@@ -10,10 +10,12 @@ import type {
   WorkshopSnapshot,
   WorkshopSpeaker,
   MediaAsset,
+  MaterialSharingPermission,
 } from "@/lib/db/models/summit-activity";
 import { saveActivityDraftAction, submitActivityForReviewAction } from "@/app/actions/activity-actions";
 import { getCloudinaryUploadSignatureAction } from "@/app/actions/upload-actions";
 import { RichTextEditor } from "@/components/ui/RichTextEditor";
+import { getTrackById } from "@/lib/config/workshop-tracks";
 
 interface WorkshopEditorFormProps {
   activity: SummitActivity;
@@ -23,15 +25,19 @@ interface WorkshopEditorFormProps {
 
 export function WorkshopEditorForm({
   activity,
+  locale = "en",
   dict,
 }: WorkshopEditorFormProps) {
   const router = useRouter();
   const actDict = dict.partnerActivities;
   const cmsDict = dict.partnerCms;
+  const isVi = locale === "vi";
 
   const snap = activity.draftSnapshot as WorkshopSnapshot;
   const isReadOnly = activity.draftStatus === "IN_REVIEW";
   const id = activity._id!.toString();
+
+  const trackDef = getTrackById(activity.trackId);
 
   // Controlled states for rich text & speakers
   const [fullDescEn, setFullDescEn] = useState(snap.fullDescription?.en || "");
@@ -43,6 +49,12 @@ export function WorkshopEditorForm({
   const [coverImage, setCoverImage] = useState<MediaAsset | undefined>(snap.coverImage);
   const [coverUploading, setCoverUploading] = useState(false);
   const [coverError, setCoverError] = useState("");
+
+  const [interpretationRequired, setInterpretationRequired] = useState(Boolean(snap.interpretationRequired));
+  const [interpretationNotes, setInterpretationNotes] = useState(snap.interpretationNotes || "");
+  const [materialSharingPermission, setMaterialSharingPermission] = useState<MaterialSharingPermission>(
+    snap.materialSharingPermission || "INTERNAL_USE_ONLY"
+  );
 
   const [materialAccessConfirmed, setMaterialAccessConfirmed] = useState(
     Boolean(snap.materialAccessConfirmed)
@@ -123,7 +135,7 @@ export function WorkshopEditorForm({
   // Speaker array management
   const addSpeaker = () => {
     const newSpeaker: WorkshopSpeaker = {
-      id: `sp_${crypto.randomUUID()}`,
+      id: `sp_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
       fullName: "",
       positionTitle: "",
       organizationName: "",
@@ -154,6 +166,9 @@ export function WorkshopEditorForm({
     if (coverImage?.publicId) {
       formData.set("coverPublicId", coverImage.publicId);
     }
+    formData.set("interpretationRequired", String(interpretationRequired));
+    formData.set("interpretationNotes", interpretationNotes);
+    formData.set("materialSharingPermission", materialSharingPermission);
     formData.set("materialAccessConfirmed", String(materialAccessConfirmed));
     formData.set("dataPermissionConfirmed", String(dataPermissionConfirmed));
     return formData;
@@ -207,6 +222,36 @@ export function WorkshopEditorForm({
 
   return (
     <form onSubmit={(e) => e.preventDefault()} className="space-y-8 text-xs">
+      {/* Track & Topic Identity Card */}
+      <div className="p-5 bg-gradient-to-r from-blue-50/90 to-indigo-50/90 border border-blue-200 rounded-2xl space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider block">
+            🎯 WORKSHOP TRACK & SCOPE
+          </span>
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-900 border border-blue-200">
+            {trackDef ? (isVi ? trackDef.name.vi : trackDef.name.en) : "Track General"}
+          </span>
+        </div>
+
+        {activity.acceptedTopicSnapshot ? (
+          <div className="p-3 bg-white/80 rounded-xl border border-blue-100 space-y-1">
+            <span className="text-[10px] font-bold text-emerald-800 uppercase block">
+              ✓ Locked Accepted Topic (Stage A)
+            </span>
+            <p className="text-xs font-bold text-slate-900">
+              {activity.acceptedTopicSnapshot.tentativeTitle.en}
+            </p>
+            <p className="text-[11px] text-slate-600">
+              {activity.acceptedTopicSnapshot.conceptSummary.en}
+            </p>
+          </div>
+        ) : activity.topicReviewStatus === "IN_REVIEW" ? (
+          <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-amber-900 text-xs font-medium">
+            ⏳ Topic proposal is currently under Admin Review. Final content submission will unlock once topic is accepted.
+          </div>
+        ) : null}
+      </div>
+
       {/* Approved Content Notice when editing draft */}
       {activity.isContentApproved && activity.draftStatus === "DRAFT" && (
         <div className="p-4 bg-emerald-50/90 border border-emerald-200 rounded-2xl space-y-1">
@@ -281,7 +326,7 @@ export function WorkshopEditorForm({
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Language *</label>
+            <label className="block font-semibold text-slate-700 mb-1">Presentation Language *</label>
             <select
               name="language"
               disabled={isReadOnly}
@@ -311,19 +356,51 @@ export function WorkshopEditorForm({
             </select>
           </div>
 
-          <div>
-            <label className="block font-semibold text-slate-700 mb-1">
-              Duration (Minutes) *
+          {/* Fixed 30-min Duration Rule Read-Only Badge */}
+          <div className="md:col-span-2 p-3 bg-slate-100 rounded-xl border border-slate-200 flex items-center justify-between">
+            <div>
+              <span className="font-bold text-slate-800 block text-xs">
+                ⏱️ Standard Workshop Session Duration
+              </span>
+              <span className="text-[11px] text-slate-500 font-medium block">
+                Standard format: 20 min presentation · 7 min Q&A · 3 min transition
+              </span>
+            </div>
+            <span className="px-3 py-1 bg-white text-blue-900 font-bold text-xs rounded-lg border border-slate-300">
+              30 Minutes (Fixed)
+            </span>
+          </div>
+
+          {/* Language Interpretation Preferences */}
+          <div className="md:col-span-2 p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                disabled={isReadOnly}
+                checked={interpretationRequired}
+                onChange={(e) => setInterpretationRequired(e.target.checked)}
+                className="rounded text-blue-600"
+              />
+              <span className="font-bold text-slate-800">
+                🌐 Interpretation Required? (Phiên dịch song song)
+              </span>
             </label>
-            <input
-              type="number"
-              name="durationMinutes"
-              min={1}
-              required
-              disabled={isReadOnly}
-              defaultValue={snap.durationMinutes || 45}
-              className="w-full p-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 text-xs"
-            />
+
+            {interpretationRequired && (
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Interpretation Language / Notes
+                </label>
+                <input
+                  type="text"
+                  disabled={isReadOnly}
+                  value={interpretationNotes}
+                  onChange={(e) => setInterpretationNotes(e.target.value)}
+                  placeholder="e.g. English to Vietnamese consecutive interpretation needed"
+                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs"
+                />
+              </div>
+            )}
           </div>
 
           <div>
@@ -345,7 +422,7 @@ export function WorkshopEditorForm({
       {/* 2. Workshop Content */}
       <section className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4">
         <h2 className="text-sm font-bold text-[var(--color-navy)] uppercase tracking-wider border-b border-slate-100 pb-2">
-          2. Workshop Content
+          2. Workshop Content & Takeaways
         </h2>
 
         <div className="space-y-4">
@@ -566,10 +643,10 @@ export function WorkshopEditorForm({
         )}
       </section>
 
-      {/* 4. Workshop Materials (LINKS ONLY) */}
+      {/* 4. Workshop Materials & Sharing Rights */}
       <section className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4">
         <h2 className="text-sm font-bold text-[var(--color-navy)] uppercase tracking-wider border-b border-slate-100 pb-2">
-          4. Workshop Materials (Access Links)
+          4. Workshop Materials & Post-Event Sharing Permissions
         </h2>
 
         <div className="p-3.5 bg-amber-50/70 border border-amber-200 text-amber-900 rounded-xl font-medium space-y-1">
@@ -625,9 +702,51 @@ export function WorkshopEditorForm({
             />
           </div>
         </div>
+
+        {/* Post-Event Material Sharing Permission */}
+        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+          <label className="block font-bold text-slate-800 text-xs">
+            📄 Post-Event Material Sharing Permission * (Quyền chia sẻ tài liệu)
+          </label>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <label className="flex items-center gap-2 p-2.5 bg-white rounded-lg border cursor-pointer">
+              <input
+                type="radio"
+                name="materialSharingPermission"
+                value="PUBLICLY_SHAREABLE"
+                disabled={isReadOnly}
+                checked={materialSharingPermission === "PUBLICLY_SHAREABLE"}
+                onChange={() => setMaterialSharingPermission("PUBLICLY_SHAREABLE")}
+              />
+              <span className="font-semibold text-slate-800">Publicly Shareable</span>
+            </label>
+            <label className="flex items-center gap-2 p-2.5 bg-white rounded-lg border cursor-pointer">
+              <input
+                type="radio"
+                name="materialSharingPermission"
+                value="INTERNAL_USE_ONLY"
+                disabled={isReadOnly}
+                checked={materialSharingPermission === "INTERNAL_USE_ONLY"}
+                onChange={() => setMaterialSharingPermission("INTERNAL_USE_ONLY")}
+              />
+              <span className="font-semibold text-slate-800">Internal Use Only</span>
+            </label>
+            <label className="flex items-center gap-2 p-2.5 bg-white rounded-lg border cursor-pointer">
+              <input
+                type="radio"
+                name="materialSharingPermission"
+                value="DO_NOT_SHARE"
+                disabled={isReadOnly}
+                checked={materialSharingPermission === "DO_NOT_SHARE"}
+                onChange={() => setMaterialSharingPermission("DO_NOT_SHARE")}
+              />
+              <span className="font-semibold text-slate-800">Do Not Share</span>
+            </label>
+          </div>
+        </div>
       </section>
 
-      {/* 5. Promotional Image (Cloudinary Signed Upload) */}
+      {/* 5. Promotional Image */}
       <section className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4">
         <h2 className="text-sm font-bold text-[var(--color-navy)] uppercase tracking-wider border-b border-slate-100 pb-2">
           5. Workshop Promotional Cover Image
@@ -745,7 +864,6 @@ export function WorkshopEditorForm({
           7. Declarations & Mandatory Confirmations
         </h2>
 
-        {/* Confirmation A: Material Link Access (Shown ONLY when material links exist) */}
         {hasMaterialLinks && (
           <label className="flex items-start gap-2.5 cursor-pointer">
             <input
@@ -761,7 +879,6 @@ export function WorkshopEditorForm({
           </label>
         )}
 
-        {/* Confirmation B: Third-Party Data & Media Authorization (ALWAYS visible) */}
         <label className={`flex items-start gap-2.5 cursor-pointer ${hasMaterialLinks ? "pt-2 border-t border-blue-200/60" : ""}`}>
           <input
             type="checkbox"
@@ -794,7 +911,7 @@ export function WorkshopEditorForm({
             onClick={handleSubmitReviewClick}
             className="py-3 px-6 bg-[var(--color-navy)] hover:bg-slate-800 text-white font-bold rounded-xl transition shadow-md disabled:opacity-50"
           >
-            {submitting ? "Submitting..." : "Submit for Review"}
+            {submitting ? "Submitting..." : "Submit Final Content for Review"}
           </button>
         </div>
       )}

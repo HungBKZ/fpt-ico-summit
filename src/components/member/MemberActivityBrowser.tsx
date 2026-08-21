@@ -7,6 +7,7 @@ import type { Dictionary } from "@/i18n/types";
 import type { MemberSafeActivityDTO } from "@/lib/utils/member-dto";
 import { MemberActivityCard } from "./MemberActivityCard";
 import { MemberActivityDetailModal } from "./MemberActivityDetailModal";
+import { WORKSHOP_TRACKS, type WorkshopTrackId } from "@/lib/config/workshop-tracks";
 import {
   selectSummitActivityAction,
   unselectSummitActivityAction,
@@ -34,6 +35,7 @@ export function MemberActivityBrowser({
   dict,
 }: MemberActivityBrowserProps) {
   const [activeTab, setActiveTab] = useState<"ALL" | "WORKSHOP" | "STAGE_PERFORMANCE" | "MY_SELECTIONS">("ALL");
+  const [selectedTrackFilter, setSelectedTrackFilter] = useState<WorkshopTrackId | "ALL">("ALL");
   const [selections, setSelections] = useState<string[]>(initialSelections);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [selectedModalActivity, setSelectedModalActivity] = useState<MemberSafeActivityDTO | null>(null);
@@ -41,24 +43,27 @@ export function MemberActivityBrowser({
 
   const mDict = dict.memberActivities;
 
-  // Filter activities based on tab
+  // Filter activities based on tab & track
   const filteredActivities = activities.filter((act) => {
     if (activeTab === "MY_SELECTIONS") {
       return selections.includes(act._id);
     }
-    // Only show activities eligible for selection in selectable tabs
     const isSelectable = selectableActivityIds
       ? selectableActivityIds.includes(act._id)
       : act.isSelectable;
 
     if (!isSelectable) return false;
 
-    if (activeTab === "WORKSHOP") return act.type === "WORKSHOP";
-    if (activeTab === "STAGE_PERFORMANCE") return act.type === "STAGE_PERFORMANCE";
+    if (activeTab === "WORKSHOP" && act.type !== "WORKSHOP") return false;
+    if (activeTab === "STAGE_PERFORMANCE" && act.type !== "STAGE_PERFORMANCE") return false;
+
+    if (selectedTrackFilter !== "ALL" && act.type === "WORKSHOP") {
+      if (act.trackId !== selectedTrackFilter) return false;
+    }
+
     return true;
   });
 
-  // Calculate schedule conflicts among current selections (republished schedule detection)
   const getHasConflict = (act: MemberSafeActivityDTO): boolean => {
     if (!selections.includes(act._id) || !act.publishedSchedule) return false;
     const sched = act.publishedSchedule;
@@ -118,125 +123,177 @@ export function MemberActivityBrowser({
           <h1 className="text-xl font-bold text-[var(--color-navy)]">
             {mDict?.title || "Optional Summit Activities"}
           </h1>
-          <p className="text-xs text-slate-500 mt-1 leading-relaxed max-w-3xl">
-            {mDict?.subtitle ||
-              "Workshops and Stage Performances are optional activities within the FPT ICO Summit. You may join one, multiple, or none of these activities."}
+          <p className="text-xs text-slate-500 mt-1">
+            {mDict?.subtitle || "Browse workshops and cultural stage performances. Selection is optional and has no seat quota limits."}
           </p>
         </div>
 
-        {/* Registration Requirement Notice */}
         {!isRegistered && (
-          <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-xs font-semibold text-amber-900 flex flex-wrap items-center justify-between gap-3">
-            <span>⚠️ {mDict?.mustRegisterNotice || "Please register for FPT ICO Summit before selecting optional activities."}</span>
+          <div className="p-4 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl text-xs font-medium space-y-2">
+            <p className="font-bold flex items-center gap-1.5">
+              ⚠️ Summit Registration Required to Save Selections
+            </p>
+            <p className="leading-relaxed">
+              You can browse activities, but you must complete your main Summit Registration before adding workshops or stage performances to your itinerary.
+            </p>
             <Link
               href={`/${locale}/dashboard/registration`}
-              className="px-4 py-2 bg-[var(--color-navy)] text-white rounded-lg text-xs font-bold hover:opacity-90 transition"
+              className="inline-flex items-center gap-1 py-1.5 px-3 bg-amber-700 text-white font-bold rounded-lg hover:bg-amber-800 transition shadow-2xs mt-1"
             >
-              Register Now →
+              Complete Registration Now →
             </Link>
           </div>
         )}
       </div>
 
-      {/* Feedback Banner */}
       {feedback && (
         <div
-          className={`p-4 rounded-xl text-xs font-semibold flex items-center justify-between ${
+          className={`p-4 rounded-xl text-xs font-semibold ${
             feedback.type === "success"
-              ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
-              : "bg-rose-50 border border-rose-200 text-rose-800"
+              ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+              : "bg-rose-50 text-rose-800 border border-rose-200"
           }`}
         >
-          <span>{feedback.type === "success" ? "✅" : "⚠️"} {feedback.msg}</span>
-          <button onClick={() => setFeedback(null)} className="hover:underline">
-            Dismiss
-          </button>
+          {feedback.msg}
         </div>
       )}
 
-      {/* Tabs */}
-      <div className="bg-white p-2 rounded-2xl border border-slate-200 shadow-2xs flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-semibold overflow-x-auto w-full sm:w-auto">
-          {[
-            { id: "ALL", label: mDict?.tabAll || "All Activities" },
-            { id: "WORKSHOP", label: mDict?.tabWorkshops || "Workshops" },
-            { id: "STAGE_PERFORMANCE", label: mDict?.tabPerformances || "Stage Performances" },
-            {
-              id: "MY_SELECTIONS",
-              label: `${mDict?.tabMySelections || "My Selections"} (${selections.length})`,
-            },
-          ].map((tab) => (
+      {/* Tabs & Track Filters */}
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200/80 text-xs font-semibold">
             <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as typeof activeTab)}
-              className={`px-4 py-2 rounded-lg transition whitespace-nowrap ${
-                activeTab === tab.id
-                  ? "bg-white text-slate-900 shadow-2xs font-bold"
+              type="button"
+              onClick={() => setActiveTab("ALL")}
+              className={`px-3 py-1.5 rounded-lg transition ${
+                activeTab === "ALL"
+                  ? "bg-white text-slate-900 shadow-2xs"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              {tab.label}
+              {mDict?.tabAll || "All Activities"}
             </button>
-          ))}
+            <button
+              type="button"
+              onClick={() => setActiveTab("WORKSHOP")}
+              className={`px-3 py-1.5 rounded-lg transition ${
+                activeTab === "WORKSHOP"
+                  ? "bg-white text-slate-900 shadow-2xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              {mDict?.tabWorkshops || "Workshops"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("STAGE_PERFORMANCE")}
+              className={`px-3 py-1.5 rounded-lg transition ${
+                activeTab === "STAGE_PERFORMANCE"
+                  ? "bg-white text-slate-900 shadow-2xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              {mDict?.tabPerformances || "Stage Performances"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("MY_SELECTIONS")}
+              className={`px-3 py-1.5 rounded-lg transition ${
+                activeTab === "MY_SELECTIONS"
+                  ? "bg-[var(--color-navy)] text-white shadow-2xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              ⭐ {mDict?.tabMySelections || "My Selections"} ({selections.length})
+            </button>
+          </div>
         </div>
 
-        <span className="text-xs text-slate-500 font-medium px-3 hidden sm:inline">
-          Showing {filteredActivities.length} activities
-        </span>
+        {/* Workshop Track Filter Buttons */}
+        {(activeTab === "ALL" || activeTab === "WORKSHOP") && (
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-medium">
+            <button
+              type="button"
+              onClick={() => setSelectedTrackFilter("ALL")}
+              className={`px-2.5 py-1 rounded-lg transition whitespace-nowrap ${
+                selectedTrackFilter === "ALL"
+                  ? "bg-slate-800 text-white font-bold"
+                  : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+              }`}
+            >
+              All Tracks
+            </button>
+            {WORKSHOP_TRACKS.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setSelectedTrackFilter(t.id)}
+                className={`px-2.5 py-1 rounded-lg transition whitespace-nowrap ${
+                  selectedTrackFilter === t.id
+                    ? "bg-blue-600 text-white font-bold"
+                    : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+                }`}
+              >
+                🎯 {t.name[locale]}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Activities Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredActivities.length === 0 ? (
-          <div className="col-span-full bg-white p-12 rounded-2xl border border-slate-200 text-center text-slate-400 font-medium text-xs">
+      {/* Grid of Activity Cards */}
+      {filteredActivities.length === 0 ? (
+        <div className="p-12 bg-white rounded-2xl border border-slate-200 text-center space-y-2">
+          <p className="text-xs font-semibold text-slate-500">
             {activeTab === "MY_SELECTIONS"
-              ? "You have not selected any optional activities yet. Browse Workshops & Performances to add them to your itinerary!"
-              : "No optional activities are currently available in this category."}
-          </div>
-        ) : (
-          filteredActivities.map((act) => {
-            const org = orgMap[act.organizationId] || { name: "Institution", country: "" };
-            const isSel = selections.includes(act._id);
+              ? "You haven't selected any optional activities yet."
+              : "No activities available for the selected category/track."}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {filteredActivities.map((act) => {
+            const isSelected = selections.includes(act._id);
+            const isAttended = Boolean(attendedActivityIds && attendedActivityIds.includes(act._id));
             const hasConflict = getHasConflict(act);
-
-            const hasAttended = Boolean(attendedActivityIds?.includes(act._id));
+            const isProcessing = processingId === act._id;
+            const org = orgMap[act.organizationId];
 
             return (
               <MemberActivityCard
                 key={act._id}
                 activity={act}
-                orgName={org.name}
-                orgCountry={org.country}
-                isSelected={isSel}
+                isSelected={isSelected}
+                isAttended={isAttended}
+                hasConflict={hasConflict}
+                isProcessing={isProcessing}
                 isRegistered={isRegistered}
-                hasScheduleConflict={hasConflict}
-                hasAttended={hasAttended}
-                onSelect={handleSelect}
-                onUnselect={handleUnselect}
-                onViewDetails={(activity) => setSelectedModalActivity(activity)}
-                isProcessing={processingId === act._id}
+                organizationName={org?.name || "Institution"}
+                organizationCountry={org?.country || "Global"}
                 locale={locale}
-                dict={dict}
+                onSelect={() => handleSelect(act._id)}
+                onUnselect={() => handleUnselect(act._id)}
+                onViewDetails={() => setSelectedModalActivity(act)}
               />
             );
-          })
-        )}
-      </div>
+          })}
+        </div>
+      )}
 
-      {/* Activity Detail Modal */}
+      {/* Detail Modal */}
       {selectedModalActivity && (
         <MemberActivityDetailModal
           activity={selectedModalActivity}
-          orgName={orgMap[selectedModalActivity.organizationId]?.name || "Institution"}
-          orgCountry={orgMap[selectedModalActivity.organizationId]?.country || ""}
           isSelected={selections.includes(selectedModalActivity._id)}
-          isRegistered={isRegistered}
-          onClose={() => setSelectedModalActivity(null)}
-          onSelect={handleSelect}
-          onUnselect={handleUnselect}
           isProcessing={processingId === selectedModalActivity._id}
+          isRegistered={isRegistered}
+          orgName={orgMap[selectedModalActivity.organizationId]?.name || "Institution"}
+          orgCountry={orgMap[selectedModalActivity.organizationId]?.country || "Global"}
           locale={locale}
           dict={dict}
+          onClose={() => setSelectedModalActivity(null)}
+          onSelect={() => handleSelect(selectedModalActivity._id)}
+          onUnselect={() => handleUnselect(selectedModalActivity._id)}
         />
       )}
     </div>

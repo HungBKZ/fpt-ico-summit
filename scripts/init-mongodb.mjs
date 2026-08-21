@@ -528,7 +528,66 @@ async function run() {
           }
         );
       }
-      console.log("Legacy summitActivities migration complete.");
+      console.log("Legacy summitActivities dual approval migration complete.");
+    }
+
+    // Requirement #3: Migration for legacy WORKSHOP/STAGE_PERFORMANCE records lacking topicReviewStatus
+    const docsLackingTopicStatus = await activitiesCollRaw.find({
+      $or: [
+        { topicReviewStatus: { $exists: false } },
+        { topicReviewStatus: null },
+      ],
+    }).toArray();
+
+    if (docsLackingTopicStatus.length > 0) {
+      console.log(`Migrating ${docsLackingTopicStatus.length} legacy summitActivities documents lacking topicReviewStatus...`);
+      for (const doc of docsLackingTopicStatus) {
+        if (doc.type === "WORKSHOP") {
+          const isApproved = Boolean(doc.isContentApproved || doc.approvedSnapshot);
+          const topicStatus = isApproved ? "ACCEPTED" : "DRAFT";
+          const snap = doc.approvedSnapshot || doc.draftSnapshot;
+
+          const acceptedSnapshot = isApproved
+            ? doc.acceptedTopicSnapshot || {
+                ...(doc.trackId ? { trackId: doc.trackId } : {}),
+                ...(doc.topicSelectionType ? { topicSelectionType: doc.topicSelectionType } : {}),
+                ...(doc.topicId ? { topicId: doc.topicId } : {}),
+                ...(doc.customTopicTitle ? { customTopicTitle: doc.customTopicTitle } : {}),
+                ...(doc.customTopicFitReason ? { customTopicFitReason: doc.customTopicFitReason } : {}),
+                tentativeTitle: snap?.title || { en: "Legacy Approved Workshop" },
+                conceptSummary: snap?.shortDescription || { en: "Legacy Approved Workshop Content" },
+                presentationLanguage: snap?.language || "ENGLISH",
+                acceptedAt: doc.approvedAt || doc.createdAt || new Date(),
+              }
+            : null;
+
+          const setPayload = {
+            topicReviewStatus: topicStatus,
+          };
+          if (doc.trackId) setPayload.trackId = doc.trackId;
+          if (doc.topicSelectionType) setPayload.topicSelectionType = doc.topicSelectionType;
+          if (doc.topicId) setPayload.topicId = doc.topicId;
+          if (doc.customTopicTitle) setPayload.customTopicTitle = doc.customTopicTitle;
+          if (doc.customTopicFitReason) setPayload.customTopicFitReason = doc.customTopicFitReason;
+          if (acceptedSnapshot) setPayload.acceptedTopicSnapshot = acceptedSnapshot;
+
+          await activitiesCollRaw.updateOne(
+            { _id: doc._id },
+            { $set: setPayload }
+          );
+        } else {
+          // STAGE_PERFORMANCE activities use "NONE" as authoritative topic review status
+          await activitiesCollRaw.updateOne(
+            { _id: doc._id },
+            {
+              $set: {
+                topicReviewStatus: "NONE",
+              },
+            }
+          );
+        }
+      }
+      console.log("Legacy summitActivities topicReviewStatus migration complete.");
     }
 
     const summitActivitiesVal = {
@@ -555,6 +614,19 @@ async function run() {
           draftSnapshot: { bsonType: "object" },
           approvedSnapshot: { bsonType: ["object", "null"] },
           review: { bsonType: ["object", "null"] },
+          trackId: { bsonType: ["string", "null"] },
+          topicSelectionType: { enum: ["SUGGESTED", "CUSTOM", null] },
+          topicId: { bsonType: ["string", "null"] },
+          customTopicTitle: { bsonType: ["string", "null"] },
+          customTopicFitReason: { bsonType: ["string", "null"] },
+          topicReviewStatus: { enum: ["NONE", "DRAFT", "IN_REVIEW", "ACCEPTED", "CHANGES_REQUESTED", null] },
+          topicReviewFeedback: { bsonType: ["string", "null"] },
+          topicSubmittedAt: { bsonType: ["date", "null"] },
+          acceptedTopicSnapshot: { bsonType: ["object", "null"] },
+          performanceScopeId: { bsonType: ["string", "null"] },
+          interpretationRequired: { bsonType: ["bool", "null"] },
+          interpretationNotes: { bsonType: ["string", "null"] },
+          materialSharingPermission: { enum: ["PUBLICLY_SHAREABLE", "INTERNAL_USE_ONLY", "DO_NOT_SHARE", null] },
           dataPermissionConfirmed: { bsonType: ["bool", "null"] },
           dataPermissionConfirmedAt: { bsonType: ["date", "null"] },
           dataPermissionConfirmedBy: { bsonType: ["objectId", "null"] },
@@ -572,6 +644,7 @@ async function run() {
     await ensureIndex(activitiesCol, { editionId: 1, type: 1 }, { name: "idx_activity_edition_type" });
     await ensureIndex(activitiesCol, { editionId: 1, isContentApproved: 1, draftStatus: 1 }, { name: "idx_activity_edition_approval_draft" });
     await ensureIndex(activitiesCol, { organizationId: 1, updatedAt: -1 }, { name: "idx_activity_org_updated" });
+    await ensureIndex(activitiesCol, { editionId: 1, trackId: 1 }, { name: "idx_activity_edition_track", sparse: true });
 
     // ── 10. summitCheckIns (Phase 5C) ───────────────────────────────────────
     const checkInsVal = {

@@ -10,8 +10,14 @@ import type {
   WorkshopSnapshot,
   StagePerformanceSnapshot,
 } from "@/lib/db/models/summit-activity";
-import { requestActivityChangesAction, approveActivityContentAction } from "@/app/actions/activity-actions";
+import {
+  requestActivityChangesAction,
+  approveActivityContentAction,
+  reviewTopicProposalAction,
+} from "@/app/actions/activity-actions";
 import { SafeHtml } from "@/components/ui/SafeHtml";
+import { getTrackById } from "@/lib/config/workshop-tracks";
+import { getPerformanceScopeById } from "@/lib/config/performance-scopes";
 
 export interface SerializedAdminActivityDetail extends SummitActivity {
   orgName?: string;
@@ -38,12 +44,54 @@ export function AdminActivityReviewDetail({
   const ws = snap as WorkshopSnapshot;
   const ps = snap as StagePerformanceSnapshot;
 
+  const trackDef = isWorkshop ? getTrackById(activity.trackId) : undefined;
+  const scopeDef = !isWorkshop ? getPerformanceScopeById(activity.performanceScopeId) : undefined;
+
   const [feedback, setFeedback] = useState("");
   const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showTopicRejectModal, setShowTopicRejectModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  const handleApprove = async () => {
+  // Stage A: Admin accepts Topic Proposal
+  const handleAcceptTopic = async () => {
+    setSubmitting(true);
+    setError("");
+
+    const res = await reviewTopicProposalAction(activity._id!.toString(), "ACCEPT");
+    setSubmitting(false);
+
+    if (res.success) {
+      router.refresh();
+    } else {
+      setError(res.error || "Failed to accept topic proposal.");
+    }
+  };
+
+  // Stage A: Admin requests topic changes
+  const handleRequestTopicChanges = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!feedback.trim()) {
+      setError(admDict.feedbackRequired);
+      return;
+    }
+
+    setSubmitting(true);
+    setError("");
+
+    const res = await reviewTopicProposalAction(activity._id!.toString(), "REQUEST_CHANGES", feedback);
+    setSubmitting(false);
+
+    if (res.success) {
+      setShowTopicRejectModal(false);
+      router.refresh();
+    } else {
+      setError(res.error || "Failed to request topic changes.");
+    }
+  };
+
+  // Stage B: Admin approves Final Content
+  const handleApproveContent = async () => {
     setSubmitting(true);
     setError("");
 
@@ -57,7 +105,8 @@ export function AdminActivityReviewDetail({
     }
   };
 
-  const handleRequestChanges = async (e: React.FormEvent) => {
+  // Stage B: Admin requests content changes
+  const handleRequestContentChanges = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!feedback.trim()) {
       setError(admDict.feedbackRequired);
@@ -74,7 +123,7 @@ export function AdminActivityReviewDetail({
       setShowRejectModal(false);
       router.refresh();
     } else {
-      setError(res.error || "Failed to request changes.");
+      setError(res.error || "Failed to request content changes.");
     }
   };
 
@@ -89,7 +138,7 @@ export function AdminActivityReviewDetail({
       {/* Header Info & Action Controls */}
       <div className="bg-white p-6 rounded-2xl border border-slate-200 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
             <span
               className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                 isWorkshop
@@ -99,6 +148,19 @@ export function AdminActivityReviewDetail({
             >
               {isWorkshop ? "Workshop" : "Stage Performance"}
             </span>
+
+            {trackDef && (
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-800 border border-slate-200">
+                🎯 Track: {trackDef.name[locale]}
+              </span>
+            )}
+
+            {scopeDef && (
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-orange-50 text-orange-800 border border-orange-200">
+                🎭 Scope: {scopeDef.name[locale]}
+              </span>
+            )}
+
             <span className="text-xs font-semibold text-slate-500">
               Provider: <strong className="text-slate-900">{activity.orgName || "Organization"}</strong> ({activity.orgCountry || "Global"})
             </span>
@@ -109,9 +171,9 @@ export function AdminActivityReviewDetail({
           </h1>
         </div>
 
-        {/* Action Buttons */}
+        {/* Stage B Content Approval Action Buttons */}
         <div className="flex items-center gap-2">
-          {activity.draftStatus !== "NONE" && (
+          {activity.draftStatus === "IN_REVIEW" && (
             <>
               <button
                 type="button"
@@ -124,33 +186,95 @@ export function AdminActivityReviewDetail({
               <button
                 type="button"
                 disabled={submitting}
-                onClick={handleApprove}
+                onClick={handleApproveContent}
                 className="py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition shadow-md"
               >
-                {submitting ? "Approving..." : admDict.approveBtn}
+                {submitting ? "Approving..." : "Approve Final Content"}
               </button>
             </>
           )}
         </div>
       </div>
 
-      {/* Previously Approved Revision Notice */}
-      {activity.isContentApproved && activity.draftStatus !== "NONE" && (
-        <div className="p-4 bg-emerald-50/90 border border-emerald-200 rounded-2xl space-y-1">
-          <p className="text-xs font-bold text-emerald-900 flex items-center gap-1.5">
-            ✓ Previously Approved Content (Draft Revision Under Moderation)
-          </p>
-          <p className="text-xs text-emerald-800 leading-relaxed font-medium">
-            This activity already has an active approved snapshot. You are currently reviewing a draft revision submitted by the partner. Approving will replace the approved snapshot with the current draft.
-          </p>
-        </div>
-      )}
+      {/* Stage A Topic Proposal Review Box (For Workshops) */}
+      {isWorkshop && (
+        <div className="p-6 bg-gradient-to-r from-blue-50/90 to-indigo-50/90 border border-blue-200 rounded-2xl space-y-4">
+          <div className="flex items-center justify-between border-b border-blue-200/60 pb-3">
+            <div>
+              <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider block">
+                STAGE A: WORKSHOP TOPIC PROPOSAL REVIEW
+              </span>
+              <h2 className="text-sm font-bold text-slate-900 mt-0.5">
+                Topic Scope: {trackDef?.name[locale] || "General Track"}
+              </h2>
+            </div>
 
-      {/* Review Feedback Display if present */}
-      {activity.review?.feedback && (
-        <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl space-y-1">
-          <p className="font-bold text-amber-900 text-xs">⚠️ Previous Feedback Note:</p>
-          <p className="text-amber-800 leading-relaxed font-medium">{activity.review.feedback}</p>
+            <div className="flex items-center gap-2">
+              {activity.topicReviewStatus === "ACCEPTED" ? (
+                <span className="px-3 py-1 bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold rounded-full text-xs">
+                  ✓ Topic Accepted & Locked
+                </span>
+              ) : activity.topicReviewStatus === "IN_REVIEW" ? (
+                <span className="px-3 py-1 bg-amber-100 text-amber-900 border border-amber-300 font-bold rounded-full text-xs">
+                  ⏳ Topic Review Pending
+                </span>
+              ) : activity.topicReviewStatus === "CHANGES_REQUESTED" ? (
+                <span className="px-3 py-1 bg-rose-100 text-rose-900 border border-rose-300 font-bold rounded-full text-xs">
+                  ⚠ Topic Changes Requested
+                </span>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-4 rounded-xl border border-blue-100 text-xs">
+            <div>
+              <span className="text-[10px] text-slate-400 font-medium block uppercase">Selected Track</span>
+              <strong className="text-slate-900">{trackDef?.name[locale]}</strong>
+            </div>
+
+            <div>
+              <span className="text-[10px] text-slate-400 font-medium block uppercase">Topic Selection Type</span>
+              <strong className="text-slate-900">
+                {activity.topicSelectionType === "CUSTOM" ? "Custom Proposed Topic" : "Pre-approved Suggested Topic"}
+              </strong>
+            </div>
+
+            {activity.customTopicTitle && (
+              <div className="md:col-span-2 p-3 bg-amber-50 rounded-lg border border-amber-200 space-y-1">
+                <span className="text-[10px] font-bold text-amber-900 uppercase block">Custom Topic Rationale</span>
+                <p className="font-bold text-slate-900">{activity.customTopicTitle}</p>
+                <p className="text-slate-700 text-xs">{activity.customTopicFitReason}</p>
+              </div>
+            )}
+
+            <div className="md:col-span-2">
+              <span className="text-[10px] text-slate-400 font-medium block uppercase">Tentative Title & Concept Rationale</span>
+              <p className="font-bold text-slate-900 text-sm mt-0.5">{ws.title?.en}</p>
+              <p className="text-slate-700 text-xs mt-1 leading-relaxed">{ws.shortDescription?.en}</p>
+            </div>
+          </div>
+
+          {/* Stage A Topic Decision Buttons */}
+          {activity.topicReviewStatus === "IN_REVIEW" && (
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={() => setShowTopicRejectModal(true)}
+                className="py-2 px-4 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 font-bold rounded-xl text-xs"
+              >
+                Request Topic Changes
+              </button>
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={handleAcceptTopic}
+                className="py-2 px-5 bg-blue-700 hover:bg-blue-800 text-white font-bold rounded-xl text-xs shadow-sm"
+              >
+                {submitting ? "Accepting..." : "Accept Topic Proposal (Stage A) ✓"}
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -161,7 +285,7 @@ export function AdminActivityReviewDetail({
           {/* Summary & Descriptions */}
           <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4">
             <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100 pb-2">
-              Content & Overview
+              STAGE B: FINAL CONTENT & AGENDA DETAILS
             </h2>
 
             <div>
@@ -287,6 +411,12 @@ export function AdminActivityReviewDetail({
                       </a>
                     </div>
                   )}
+                  {ws.materialSharingPermission && (
+                    <div className="pt-2 border-t border-slate-100 font-sans">
+                      <span className="text-[10px] text-slate-400 block uppercase">Sharing Permission</span>
+                      <strong className="text-blue-900 font-bold">{ws.materialSharingPermission}</strong>
+                    </div>
+                  )}
                 </>
               ) : (
                 <>
@@ -306,20 +436,12 @@ export function AdminActivityReviewDetail({
                       </a>
                     </div>
                   )}
-                  {ps.supportingContentUrl && (
-                    <div>
-                      <span className="text-[10px] text-slate-400 block uppercase font-sans">Supporting Material Link</span>
-                      <a href={ps.supportingContentUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline truncate block">
-                        {ps.supportingContentUrl}
-                      </a>
-                    </div>
-                  )}
                 </>
               )}
             </div>
           </div>
 
-          {/* Technical / Stage Requirements */}
+          {/* Operational Requirements */}
           <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-3">
             <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100 pb-2">
               Operational Requirements
@@ -327,26 +449,20 @@ export function AdminActivityReviewDetail({
 
             {isWorkshop ? (
               <ul className="space-y-1.5 text-xs font-medium text-slate-700">
+                <li>• Session Duration: <strong>30 mins (Fixed)</strong></li>
+                <li>• Interpretation: <strong>{ws.interpretationRequired ? `YES (${ws.interpretationNotes || ""})` : "No"}</strong></li>
                 <li>• Projector: <strong>{ws.technicalRequirements?.projector ? "YES" : "No"}</strong></li>
                 <li>• Microphone: <strong>{ws.technicalRequirements?.microphone ? "YES" : "No"}</strong></li>
                 <li>• Audio Speakers: <strong>{ws.technicalRequirements?.speakersAudio ? "YES" : "No"}</strong></li>
                 <li>• High-speed Internet: <strong>{ws.technicalRequirements?.internet ? "YES" : "No"}</strong></li>
                 <li>• Whiteboard: <strong>{ws.technicalRequirements?.whiteboard ? "YES" : "No"}</strong></li>
-                {ws.technicalRequirements?.otherEquipment && (
-                  <li className="pt-1 text-slate-500">Other: {ws.technicalRequirements.otherEquipment}</li>
-                )}
               </ul>
             ) : (
               <div className="space-y-2 text-xs font-medium text-slate-700">
                 <p>Performers: <strong>{ps.numberOfPerformers}</strong></p>
+                <p>Duration: <strong>{ps.durationMinutes} mins</strong></p>
                 {ps.stageRequirements?.microphonesRequired && (
                   <p>Mics Needed: <strong>{ps.stageRequirements.microphonesRequired}</strong></p>
-                )}
-                {ps.stageRequirements?.propsOrInstruments && (
-                  <p>Props: <strong>{ps.stageRequirements.propsOrInstruments}</strong></p>
-                )}
-                {ps.stageRequirements?.stageSetupRequirements && (
-                  <p className="text-slate-500">Setup: {ps.stageRequirements.stageSetupRequirements}</p>
                 )}
               </div>
             )}
@@ -354,12 +470,12 @@ export function AdminActivityReviewDetail({
         </div>
       </div>
 
-      {/* Request Changes Modal */}
-      {showRejectModal && (
+      {/* Stage A Topic Reject Modal */}
+      {showTopicRejectModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
           <div className="bg-white p-6 rounded-2xl border border-slate-200 max-w-md w-full space-y-4 shadow-xl">
             <h3 className="text-sm font-bold text-slate-900">
-              {admDict.requestChangesBtn}
+              Request Workshop Topic Changes (Stage A)
             </h3>
 
             <div>
@@ -370,7 +486,49 @@ export function AdminActivityReviewDetail({
                 rows={4}
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
-                placeholder="Explain what specific edits are required..."
+                placeholder="Explain what specific edits are required for the topic proposal..."
+                className="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-rose-500"
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowTopicRejectModal(false)}
+                className="py-2 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={handleRequestTopicChanges}
+                className="py-2 px-4 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-md"
+              >
+                {submitting ? "Sending..." : "Send Topic Feedback"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Stage B Content Reject Modal */}
+      {showRejectModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 max-w-md w-full space-y-4 shadow-xl">
+            <h3 className="text-sm font-bold text-slate-900">
+              Request Final Content Changes (Stage B)
+            </h3>
+
+            <div>
+              <label className="block font-semibold text-slate-700 mb-1">
+                Feedback Note for Partner *
+              </label>
+              <textarea
+                rows={4}
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+                placeholder="Explain what specific content edits are required..."
                 className="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-rose-500"
               />
             </div>
@@ -386,10 +544,10 @@ export function AdminActivityReviewDetail({
               <button
                 type="button"
                 disabled={submitting}
-                onClick={handleRequestChanges}
+                onClick={handleRequestContentChanges}
                 className="py-2 px-4 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-md"
               >
-                {submitting ? "Sending..." : "Send Request"}
+                {submitting ? "Sending..." : "Send Content Feedback"}
               </button>
             </div>
           </div>

@@ -16,6 +16,8 @@ import type {
   MediaAsset,
   ActivityPublishedSchedule,
 } from "@/lib/db/models/summit-activity";
+import type { WorkshopTrackId } from "@/lib/config/workshop-tracks";
+import type { PerformanceScopeId } from "@/lib/config/performance-scopes";
 
 export interface MemberSafeSpeaker {
   id: string;
@@ -87,6 +89,8 @@ export interface MemberSafeActivityDTO {
   editionId: string;
   organizationId: string;
   type: "WORKSHOP" | "STAGE_PERFORMANCE";
+  trackId?: WorkshopTrackId;
+  performanceScopeId?: PerformanceScopeId;
   approvedSnapshot?: MemberSafeWorkshopSnapshot | MemberSafePerformanceSnapshot;
   publishedSchedule?: {
     dateKey: string;
@@ -101,7 +105,7 @@ export interface MemberSafeActivityDTO {
 /**
  * Transforms a raw SummitActivity model into a Member-safe DTO.
  * NEVER uses draftSnapshot — approvedSnapshot ONLY.
- * If approvedSnapshot is missing, returns a tombstone DTO (isSelectable = false, isHistoricalUnavailable = true).
+ * Exposes trackId & performanceScopeId ONLY when activity content is approved.
  */
 export function toMemberSafeActivityDTO(
   activity: SummitActivity,
@@ -181,6 +185,8 @@ export function toMemberSafeActivityDTO(
     editionId: activity.editionId.toString(),
     organizationId: activity.organizationId.toString(),
     type: activity.type,
+    trackId: Boolean(activity.isContentApproved && activity.publishedSchedule) ? activity.trackId : undefined,
+    performanceScopeId: Boolean(activity.isContentApproved && activity.publishedSchedule) ? activity.performanceScopeId : undefined,
     approvedSnapshot: safeSnapshot,
     publishedSchedule: safeSchedule,
     isSelectable,

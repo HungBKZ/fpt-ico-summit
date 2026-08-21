@@ -464,6 +464,12 @@ export type Dictionary = {
     materialAccessConfirmLabel: string;
     dataPermissionConfirmLabel: string;
     unconfirmedParticipationError: string;
+    topicProposalStepTitle: string;
+    topicAcceptedBadge: string;
+    topicPendingBadge: string;
+    topicChangesRequestedBadge: string;
+    postEventSharingPermissionLabel: string;
+    interpretationLabel: string;
   };
   adminActivities: {
     title: string;
@@ -476,6 +482,8 @@ export type Dictionary = {
     filterAllTypes: string;
     filterWorkshops: string;
     filterPerformances: string;
+    acceptTopicBtn: string;
+    requestTopicChangesBtn: string;
     colOrganization: string;
     colType: string;
     colTitle: string;

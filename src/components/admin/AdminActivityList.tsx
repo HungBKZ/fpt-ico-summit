@@ -6,6 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/types";
 import type { SummitActivity } from "@/lib/db/models/summit-activity";
+import { WORKSHOP_TRACKS, getTrackById, type WorkshopTrackId } from "@/lib/config/workshop-tracks";
+import { getPerformanceScopeById } from "@/lib/config/performance-scopes";
 
 export interface SerializedAdminActivity extends SummitActivity {
   orgName?: string;
@@ -20,6 +22,7 @@ interface AdminActivityListProps {
   activeType: string;
   activeStatus: string;
   queryParam: string;
+  trackBalanceSummary?: Record<WorkshopTrackId, { topicProposals: number; topicAccepted: number; finalApproved: number; scheduled: number }>;
   locale: Locale;
   dict: Dictionary;
 }
@@ -32,6 +35,7 @@ export function AdminActivityList({
   activeType,
   activeStatus,
   queryParam,
+  trackBalanceSummary,
   locale,
   dict,
 }: AdminActivityListProps) {
@@ -41,8 +45,9 @@ export function AdminActivityList({
   const isVi = locale === "vi";
 
   const [q, setQ] = useState(queryParam);
+  const [selectedTrack, setSelectedTrack] = useState<string>(searchParams.get("trackId") || "All");
 
-  const updateFilters = (newStatus?: string, newType?: string, newQ?: string) => {
+  const updateFilters = (newStatus?: string, newType?: string, newTrack?: string, newQ?: string) => {
     const params = new URLSearchParams(searchParams.toString());
     
     if (newStatus !== undefined) {
@@ -53,6 +58,11 @@ export function AdminActivityList({
     if (newType !== undefined) {
       if (newType === "All") params.delete("type");
       else params.set("type", newType);
+    }
+
+    if (newTrack !== undefined) {
+      if (newTrack === "All") params.delete("trackId");
+      else params.set("trackId", newTrack);
     }
 
     if (newQ !== undefined) {
@@ -67,26 +77,44 @@ export function AdminActivityList({
   const getStatusBadge = (act: SummitActivity) => {
     return (
       <div className="flex flex-wrap items-center gap-1.5">
+        {act.type === "WORKSHOP" && (
+          <>
+            {act.topicReviewStatus === "ACCEPTED" ? (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-900 border border-blue-200">
+                ✓ {isVi ? "Chủ đề đã duyệt" : "Topic Accepted"}
+              </span>
+            ) : act.topicReviewStatus === "IN_REVIEW" ? (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">
+                ⏳ {isVi ? "Duyệt chủ đề" : "Topic Pending"}
+              </span>
+            ) : act.topicReviewStatus === "CHANGES_REQUESTED" ? (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-900 border border-rose-200">
+                ⚠ {isVi ? "Sửa chủ đề" : "Topic Revision"}
+              </span>
+            ) : null}
+          </>
+        )}
+
         {act.isContentApproved && (
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-            ✓ {isVi ? "Đã duyệt" : "Approved"}
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+            ✓ {isVi ? "Nội dung đã duyệt" : "Content Approved"}
           </span>
         )}
 
         {act.draftStatus === "IN_REVIEW" && (
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
             {dict.partnerCms.statusInReview}
           </span>
         )}
 
         {act.draftStatus === "CHANGES_REQUESTED" && (
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
             {dict.partnerCms.statusChangesRequested}
           </span>
         )}
 
-        {act.draftStatus === "DRAFT" && (
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+        {act.draftStatus === "DRAFT" && act.topicReviewStatus !== "IN_REVIEW" && (
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
             {act.isContentApproved ? (isVi ? "Bản sửa đổi" : "Draft Edits") : dict.partnerCms.statusDraft}
           </span>
         )}
@@ -96,6 +124,43 @@ export function AdminActivityList({
 
   return (
     <div className="space-y-6">
+      {/* Track Balance Summary Panel (Correction #4 & #11) */}
+      {trackBalanceSummary && (
+        <div className="p-5 bg-gradient-to-r from-slate-900 to-blue-950 text-white rounded-2xl space-y-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-blue-300">
+              📊 Workshop Track Balance Summary (HTQT Content Diversity)
+            </span>
+            <span className="text-xs text-slate-300 font-medium">
+              20 Predefined Slots Planned
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            {WORKSHOP_TRACKS.map((track) => {
+              const stats = trackBalanceSummary[track.id] || { topicProposals: 0, topicAccepted: 0, finalApproved: 0, scheduled: 0 };
+
+              return (
+                <div
+                  key={track.id}
+                  className="p-3 bg-white/10 backdrop-blur-xs rounded-xl border border-white/10 space-y-1 text-xs"
+                >
+                  <span className="font-bold text-white block truncate text-[11px]" title={track.name[locale]}>
+                    {track.name[locale]}
+                  </span>
+                  <div className="space-y-0.5 text-[10px] text-slate-300 font-medium">
+                    <p>Proposals: <strong className="text-white">{stats.topicProposals}</strong></p>
+                    <p>Accepted: <strong className="text-blue-300">{stats.topicAccepted}</strong></p>
+                    <p>Approved: <strong className="text-emerald-300">{stats.finalApproved}</strong></p>
+                    <p>Scheduled: <strong className="text-amber-300">{stats.scheduled}</strong></p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Top Filter Bar */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         {/* Status Tabs */}
@@ -110,7 +175,7 @@ export function AdminActivityList({
             <button
               key={tab.id}
               type="button"
-              onClick={() => updateFilters(tab.id, undefined, undefined)}
+              onClick={() => updateFilters(tab.id, undefined, undefined, undefined)}
               className={`px-3 py-1.5 rounded-lg font-semibold transition ${
                 activeStatus === tab.id
                   ? "bg-white text-slate-900 shadow-2xs"
@@ -122,11 +187,12 @@ export function AdminActivityList({
           ))}
         </div>
 
-        {/* Search & Type Filter Controls */}
-        <div className="flex items-center gap-2">
+        {/* Search, Type & Track Filters */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Type Filter */}
           <select
             value={activeType}
-            onChange={(e) => updateFilters(undefined, e.target.value, undefined)}
+            onChange={(e) => updateFilters(undefined, e.target.value, undefined, undefined)}
             className="p-2.5 rounded-xl border border-slate-300 text-xs font-medium bg-white"
           >
             <option value="All">{admDict.filterAllTypes}</option>
@@ -134,10 +200,27 @@ export function AdminActivityList({
             <option value="STAGE_PERFORMANCE">{admDict.filterPerformances}</option>
           </select>
 
+          {/* Track Filter */}
+          <select
+            value={selectedTrack}
+            onChange={(e) => {
+              setSelectedTrack(e.target.value);
+              updateFilters(undefined, undefined, e.target.value, undefined);
+            }}
+            className="p-2.5 rounded-xl border border-slate-300 text-xs font-medium bg-white max-w-xs"
+          >
+            <option value="All">All Tracks</option>
+            {WORKSHOP_TRACKS.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name[locale]}
+              </option>
+            ))}
+          </select>
+
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              updateFilters(undefined, undefined, q);
+              updateFilters(undefined, undefined, undefined, q);
             }}
             className="flex items-center gap-2"
           >
@@ -146,7 +229,7 @@ export function AdminActivityList({
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search title or description..."
-              className="p-2.5 rounded-xl border border-slate-300 text-xs w-48 focus:ring-2 focus:ring-blue-500"
+              className="p-2.5 rounded-xl border border-slate-300 text-xs w-44 focus:ring-2 focus:ring-blue-500"
             />
             <button
               type="submit"
@@ -172,7 +255,7 @@ export function AdminActivityList({
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase tracking-wider font-bold">
                 <tr>
                   <th className="p-4">{admDict.colOrganization}</th>
-                  <th className="p-4">{admDict.colType}</th>
+                  <th className="p-4">{admDict.colType} / Scope</th>
                   <th className="p-4">{admDict.colTitle}</th>
                   <th className="p-4">{admDict.colStatus}</th>
                   <th className="p-4">{admDict.colSubmittedAt}</th>
@@ -186,6 +269,9 @@ export function AdminActivityList({
                   const isWorkshop = act.type === "WORKSHOP";
                   const title = (isVi ? snap.title?.vi : snap.title?.en) || snap.title?.en || "Untitled";
 
+                  const trackDef = isWorkshop ? getTrackById(act.trackId) : undefined;
+                  const scopeDef = !isWorkshop ? getPerformanceScopeById(act.performanceScopeId) : undefined;
+
                   return (
                     <tr key={id} className="hover:bg-slate-50/80 transition">
                       <td className="p-4 font-bold text-slate-900">
@@ -196,9 +282,9 @@ export function AdminActivityList({
                           </span>
                         )}
                       </td>
-                      <td className="p-4">
+                      <td className="p-4 space-y-1">
                         <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider inline-block ${
                             isWorkshop
                               ? "bg-blue-100 text-blue-900"
                               : "bg-orange-100 text-orange-900"
@@ -206,6 +292,16 @@ export function AdminActivityList({
                         >
                           {isWorkshop ? "Workshop" : "Performance"}
                         </span>
+                        {trackDef && (
+                          <span className="block text-[10px] font-semibold text-slate-600 truncate max-w-[150px]">
+                            🎯 {trackDef.name[locale]}
+                          </span>
+                        )}
+                        {scopeDef && (
+                          <span className="block text-[10px] font-semibold text-orange-700 truncate max-w-[150px]">
+                            🎭 {scopeDef.name[locale]}
+                          </span>
+                        )}
                       </td>
                       <td className="p-4 max-w-xs font-semibold text-slate-800 truncate">
                         {title}
