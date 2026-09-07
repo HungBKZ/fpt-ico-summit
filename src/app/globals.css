@@ -317,7 +317,8 @@
     animation: marquee-scroll 42s linear infinite;
   }
 
-  .animate-marquee-track:hover {
+  .animate-marquee-track:hover,
+  .marquee-track-wrapper:hover .animate-marquee-track {
     animation-play-state: paused;
   }
 

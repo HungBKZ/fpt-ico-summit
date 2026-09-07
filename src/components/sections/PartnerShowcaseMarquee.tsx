@@ -52,10 +52,21 @@ export function PartnerShowcaseMarquee({
         : "Invited and participating institutions connected with FPT ICO Summit 2026.",
   };
 
-  // Threshold for continuous marquee: if fewer than 5 entries, render a centered static row
-  const isMarqueeMode = entries.length >= 5;
+  // Threshold: 1 visible logo is static centered; 2 or more logos animate as smooth infinite marquee
+  const isMarqueeMode = entries.length >= 2;
 
-  const renderLogoItem = (item: PublicShowcaseEntryDto, isDuplicate = false) => {
+  // Build repeated sequence so track width exceeds viewport for seamless looping without jumps
+  const repeatCount = isMarqueeMode ? Math.max(1, Math.ceil(8 / entries.length)) : 1;
+  const trackItems = Array.from({ length: repeatCount }, () => entries).flat();
+
+  // Consistent linear velocity (~4.5s per item, min 36s) for calm, non-hurried scrolling
+  const marqueeDuration = Math.max(36, trackItems.length * 4.5);
+
+  const renderLogoItem = (
+    item: PublicShowcaseEntryDto,
+    keyPrefix: string,
+    isDuplicate = false
+  ) => {
     const content = (
       <div className="relative flex items-center justify-center h-12 md:h-14 px-3 opacity-85 hover:opacity-100 transition-opacity duration-200 shrink-0">
         <Image
@@ -72,7 +83,7 @@ export function PartnerShowcaseMarquee({
     if (item.websiteUrl) {
       return (
         <a
-          key={isDuplicate ? `dup-${item.id}` : item.id}
+          key={`${keyPrefix}-${item.id}`}
           href={item.websiteUrl}
           target="_blank"
           rel="noopener noreferrer"
@@ -88,7 +99,7 @@ export function PartnerShowcaseMarquee({
 
     return (
       <div
-        key={isDuplicate ? `dup-${item.id}` : item.id}
+        key={`${keyPrefix}-${item.id}`}
         tabIndex={isDuplicate ? -1 : undefined}
         aria-hidden={isDuplicate ? true : undefined}
         className="inline-flex items-center justify-center"
@@ -130,25 +141,29 @@ export function PartnerShowcaseMarquee({
           />
 
           {/* Continuous scrolling container */}
-          <div className="flex w-max">
+          <div className="marquee-track-wrapper flex w-max group hover:[&_.animate-marquee-track]:[animation-play-state:paused]">
             {/* Primary Track — Fully accessible */}
-            <div className="animate-marquee-track flex items-center gap-12 md:gap-16 pr-12 md:pr-16 shrink-0">
-              {entries.map((item) => renderLogoItem(item, false))}
+            <div
+              className="animate-marquee-track flex items-center gap-12 md:gap-16 pr-12 md:pr-16 shrink-0"
+              style={{ animationDuration: `${marqueeDuration}s` }}
+            >
+              {trackItems.map((item, idx) => renderLogoItem(item, `prim-${idx}`, false))}
             </div>
 
             {/* Duplicated Track — Hidden from assistive technology & keyboard navigation */}
             <div
-              className="animate-marquee-track flex items-center gap-12 md:gap-16 pr-12 md:pr-16 shrink-0"
+              className="animate-marquee-track flex items-center gap-12 md:gap-16 pr-12 md:pr-16 shrink-0 motion-reduce:hidden"
+              style={{ animationDuration: `${marqueeDuration}s` }}
               aria-hidden="true"
             >
-              {entries.map((item) => renderLogoItem(item, true))}
+              {trackItems.map((item, idx) => renderLogoItem(item, `dup-${idx}`, true))}
             </div>
           </div>
         </div>
       ) : (
-        /* Small Count Mode: Clean Centered Static Row */
+        /* 1 Logo: Clean Centered Static Presentation */
         <div className="site-container flex flex-wrap items-center justify-center gap-8 md:gap-14 py-2">
-          {entries.map((item) => renderLogoItem(item, false))}
+          {entries.map((item, idx) => renderLogoItem(item, `single-${idx}`, false))}
         </div>
       )}
     </section>
