@@ -73,6 +73,7 @@ export function ShowcaseManagementClient({
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalStep, setModalStep] = useState<1 | 2>(1);
   const [editingEntry, setEditingEntry] = useState<SerializedShowcaseEntry | null>(null);
 
   // Delete Confirmation State
@@ -124,6 +125,7 @@ export function ShowcaseManagementClient({
   const openAddModal = () => {
     setEditingEntry(null);
     setCreatedEntryId(null);
+    setModalStep(1);
     setFormDisplayName("");
     setFormCountry("");
     setFormWebsiteUrl("");
@@ -141,6 +143,7 @@ export function ShowcaseManagementClient({
   const openEditModal = (entry: SerializedShowcaseEntry) => {
     setEditingEntry(entry);
     setCreatedEntryId(entry.id);
+    setModalStep(1);
     setFormDisplayName(entry.displayName);
     setFormCountry(entry.country);
     setFormWebsiteUrl(entry.websiteUrl);
@@ -159,6 +162,7 @@ export function ShowcaseManagementClient({
     setIsModalOpen(false);
     setEditingEntry(null);
     setCreatedEntryId(null);
+    setModalStep(1);
     setFormError(null);
     setFormSuccess(null);
   };
@@ -192,7 +196,7 @@ export function ShowcaseManagementClient({
   const handleLogoUpload = async (file: File) => {
     const targetEntryId = editingEntry?.id || createdEntryId;
     if (!targetEntryId) {
-      setFormError("Please save the organization details first before uploading a logo.");
+      setFormError(t.step1Helper);
       return;
     }
 
@@ -265,14 +269,147 @@ export function ShowcaseManagementClient({
     }
   };
 
-  // Submit Modal Form (Create or Update)
-  const handleSaveForm = async (e: React.FormEvent) => {
+  // STEP 1 Submission: Saves/updates basic details & advances to Step 2
+  const handleSaveStep1 = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
     setFormSuccess(null);
 
     if (!formDisplayName.trim()) {
       setFormError(t.fieldName + " is required.");
+      return;
+    }
+
+    setSavingForm(true);
+
+    try {
+      if (editingEntry) {
+        // Update existing entry details
+        const res = await updateShowcaseEntryAction(editingEntry.id, {
+          displayName: formDisplayName,
+          country: formCountry,
+          websiteUrl: formWebsiteUrl,
+          relationshipStatus: formRelationshipStatus,
+          displayOrder: formDisplayOrder,
+          organizationId: formOrganizationId || null,
+        });
+
+        setSavingForm(false);
+        if (res.success) {
+          setEntries((prev) =>
+            prev.map((item) =>
+              item.id === editingEntry.id
+                ? {
+                    ...item,
+                    displayName: formDisplayName.trim(),
+                    country: formCountry.trim(),
+                    websiteUrl: formWebsiteUrl.trim(),
+                    relationshipStatus: formRelationshipStatus,
+                    displayOrder: formDisplayOrder,
+                    organizationId: formOrganizationId || null,
+                    updatedAt: new Date().toISOString(),
+                  }
+                : item
+            )
+          );
+          // Advance to Step 2
+          setModalStep(2);
+        } else {
+          setFormError(res.error || "Failed to update entry.");
+        }
+      } else if (!createdEntryId) {
+        // Create initial hidden entry
+        const res = await createShowcaseEntryAction({
+          displayName: formDisplayName,
+          country: formCountry,
+          websiteUrl: formWebsiteUrl,
+          relationshipStatus: formRelationshipStatus,
+          displayOrder: formDisplayOrder,
+          displayConsentConfirmed: false,
+          isVisible: false, // Hidden initially until logo is attached
+          organizationId: formOrganizationId || undefined,
+        });
+
+        setSavingForm(false);
+        if (res.success && res.showcaseEntryId) {
+          setCreatedEntryId(res.showcaseEntryId);
+
+          // Add to local state (safe if closed)
+          const newEntry: SerializedShowcaseEntry = {
+            id: res.showcaseEntryId,
+            displayName: formDisplayName.trim(),
+            country: formCountry.trim(),
+            websiteUrl: formWebsiteUrl.trim(),
+            logo: null,
+            relationshipStatus: formRelationshipStatus,
+            isVisible: false,
+            displayOrder: formDisplayOrder,
+            organizationId: formOrganizationId || null,
+            displayConsentConfirmed: false,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+          setEntries((prev) => [newEntry, ...prev]);
+
+          // Automatically advance to Step 2
+          setModalStep(2);
+          setFormSuccess(t.step2Title);
+
+          startTransition(() => {
+            router.refresh();
+          });
+        } else {
+          setFormError(res.error || "Failed to create entry.");
+        }
+      } else {
+        // Already created entry, updating details before advancing
+        const res = await updateShowcaseEntryAction(createdEntryId, {
+          displayName: formDisplayName,
+          country: formCountry,
+          websiteUrl: formWebsiteUrl,
+          relationshipStatus: formRelationshipStatus,
+          displayOrder: formDisplayOrder,
+          organizationId: formOrganizationId || null,
+        });
+
+        setSavingForm(false);
+        if (res.success) {
+          setEntries((prev) =>
+            prev.map((item) =>
+              item.id === createdEntryId
+                ? {
+                    ...item,
+                    displayName: formDisplayName.trim(),
+                    country: formCountry.trim(),
+                    websiteUrl: formWebsiteUrl.trim(),
+                    relationshipStatus: formRelationshipStatus,
+                    displayOrder: formDisplayOrder,
+                    organizationId: formOrganizationId || null,
+                    updatedAt: new Date().toISOString(),
+                  }
+                : item
+            )
+          );
+          setModalStep(2);
+        } else {
+          setFormError(res.error || "Failed to update entry.");
+        }
+      }
+    } catch {
+      setSavingForm(false);
+      setFormError("An unexpected error occurred while saving.");
+    }
+  };
+
+  // STEP 2 Submission: Finalizes logo, consent, and visibility
+  const handleFinishStep2 = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError(null);
+    setFormSuccess(null);
+
+    const targetEntryId = editingEntry?.id || createdEntryId;
+    if (!targetEntryId) {
+      setFormError("Showcase entry ID missing.");
       return;
     }
 
@@ -290,131 +427,49 @@ export function ShowcaseManagementClient({
     setSavingForm(true);
 
     try {
-      if (editingEntry) {
-        // Update existing entry
-        const res = await updateShowcaseEntryAction(editingEntry.id, {
-          displayName: formDisplayName,
-          country: formCountry,
-          websiteUrl: formWebsiteUrl,
-          relationshipStatus: formRelationshipStatus,
-          displayOrder: formDisplayOrder,
-          displayConsentConfirmed: formConsent,
-          isVisible: formIsVisible,
-          organizationId: formOrganizationId || null,
+      const res = await updateShowcaseEntryAction(targetEntryId, {
+        displayName: formDisplayName,
+        country: formCountry,
+        websiteUrl: formWebsiteUrl,
+        relationshipStatus: formRelationshipStatus,
+        displayOrder: formDisplayOrder,
+        displayConsentConfirmed: formConsent,
+        isVisible: formIsVisible,
+        organizationId: formOrganizationId || null,
+      });
+
+      setSavingForm(false);
+      if (res.success) {
+        setEntries((prev) =>
+          prev.map((item) =>
+            item.id === targetEntryId
+              ? {
+                  ...item,
+                  displayName: formDisplayName.trim(),
+                  country: formCountry.trim(),
+                  websiteUrl: formWebsiteUrl.trim(),
+                  relationshipStatus: formRelationshipStatus,
+                  displayOrder: formDisplayOrder,
+                  displayConsentConfirmed: formConsent,
+                  isVisible: formIsVisible,
+                  organizationId: formOrganizationId || null,
+                  logo: currentLogo,
+                  updatedAt: new Date().toISOString(),
+                }
+              : item
+          )
+        );
+
+        startTransition(() => {
+          router.refresh();
         });
-
-        setSavingForm(false);
-        if (res.success) {
-          setEntries((prev) =>
-            prev.map((item) =>
-              item.id === editingEntry.id
-                ? {
-                    ...item,
-                    displayName: formDisplayName.trim(),
-                    country: formCountry.trim(),
-                    websiteUrl: formWebsiteUrl.trim(),
-                    relationshipStatus: formRelationshipStatus,
-                    displayOrder: formDisplayOrder,
-                    displayConsentConfirmed: formConsent,
-                    isVisible: formIsVisible,
-                    organizationId: formOrganizationId || null,
-                    updatedAt: new Date().toISOString(),
-                  }
-                : item
-            )
-          );
-          startTransition(() => {
-            router.refresh();
-          });
-          closeModal();
-        } else {
-          setFormError(res.error || "Failed to update entry.");
-        }
-      } else if (!createdEntryId) {
-        // Create initial hidden entry
-        const res = await createShowcaseEntryAction({
-          displayName: formDisplayName,
-          country: formCountry,
-          websiteUrl: formWebsiteUrl,
-          relationshipStatus: formRelationshipStatus,
-          displayOrder: formDisplayOrder,
-          displayConsentConfirmed: formConsent,
-          isVisible: false, // Must be hidden initially until logo is attached
-          organizationId: formOrganizationId || undefined,
-        });
-
-        setSavingForm(false);
-        if (res.success && res.showcaseEntryId) {
-          setCreatedEntryId(res.showcaseEntryId);
-          setFormSuccess("Entry saved! Now please upload the official logo.");
-
-          // Add to local state
-          const newEntry: SerializedShowcaseEntry = {
-            id: res.showcaseEntryId,
-            displayName: formDisplayName.trim(),
-            country: formCountry.trim(),
-            websiteUrl: formWebsiteUrl.trim(),
-            logo: null,
-            relationshipStatus: formRelationshipStatus,
-            isVisible: false,
-            displayOrder: formDisplayOrder,
-            organizationId: formOrganizationId || null,
-            displayConsentConfirmed: formConsent,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
-          setEntries((prev) => [newEntry, ...prev]);
-
-          startTransition(() => {
-            router.refresh();
-          });
-        } else {
-          setFormError(res.error || "Failed to create entry.");
-        }
+        closeModal();
       } else {
-        // Newly created entry with logo uploaded; now updating visibility/consent
-        const res = await updateShowcaseEntryAction(createdEntryId, {
-          displayName: formDisplayName,
-          country: formCountry,
-          websiteUrl: formWebsiteUrl,
-          relationshipStatus: formRelationshipStatus,
-          displayOrder: formDisplayOrder,
-          displayConsentConfirmed: formConsent,
-          isVisible: formIsVisible,
-          organizationId: formOrganizationId || null,
-        });
-
-        setSavingForm(false);
-        if (res.success) {
-          setEntries((prev) =>
-            prev.map((item) =>
-              item.id === createdEntryId
-                ? {
-                    ...item,
-                    displayName: formDisplayName.trim(),
-                    country: formCountry.trim(),
-                    websiteUrl: formWebsiteUrl.trim(),
-                    relationshipStatus: formRelationshipStatus,
-                    displayOrder: formDisplayOrder,
-                    displayConsentConfirmed: formConsent,
-                    isVisible: formIsVisible,
-                    organizationId: formOrganizationId || null,
-                    updatedAt: new Date().toISOString(),
-                  }
-                : item
-            )
-          );
-          startTransition(() => {
-            router.refresh();
-          });
-          closeModal();
-        } else {
-          setFormError(res.error || "Failed to update entry.");
-        }
+        setFormError(res.error || "Failed to finalize entry.");
       }
     } catch {
       setSavingForm(false);
-      setFormError("An unexpected error occurred while saving.");
+      setFormError("An unexpected error occurred while finalizing.");
     }
   };
 
@@ -773,13 +828,13 @@ export function ShowcaseManagementClient({
         )}
       </div>
 
-      {/* Add / Edit Modal */}
+      {/* Add / Edit Modal with Clear 2-Step Flow */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="bg-white w-full max-w-xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
-            {/* Modal Header */}
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-[var(--color-navy)] font-display">
+            {/* Modal Top Brand & Close Header */}
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+              <h2 className="text-base font-bold text-[var(--color-navy)] font-display">
                 {editingEntry ? t.modalEditTitle : t.modalAddTitle}
               </h2>
               <button
@@ -794,127 +849,269 @@ export function ShowcaseManagementClient({
               </button>
             </div>
 
-            {/* Modal Body */}
-            <form onSubmit={handleSaveForm} className="p-6 space-y-4 overflow-y-auto flex-1">
-              {formError && (
-                <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl">
-                  {formError}
-                </div>
-              )}
-              {formSuccess && (
-                <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs rounded-xl">
-                  {formSuccess}
-                </div>
-              )}
+            {/* Stepper Header Bar */}
+            <div className="px-5 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-2 sm:gap-4">
+                {/* Step 1 Tab Button */}
+                <button
+                  type="button"
+                  onClick={() => setModalStep(1)}
+                  className={`flex items-center gap-2 text-xs font-bold transition-colors ${
+                    modalStep === 1
+                      ? "text-[var(--color-navy)]"
+                      : (editingEntry || createdEntryId)
+                      ? "text-slate-500 hover:text-slate-800 cursor-pointer"
+                      : "text-slate-400"
+                  }`}
+                >
+                  <span
+                    className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                      modalStep === 1
+                        ? "bg-[var(--color-navy)] text-white"
+                        : (editingEntry || createdEntryId)
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-slate-200 text-slate-500"
+                    }`}
+                  >
+                    {(editingEntry || createdEntryId) && modalStep === 2 ? "✓" : "1"}
+                  </span>
+                  <span>{t.step1Title}</span>
+                </button>
 
-              {/* Institution Name */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  {t.fieldName} <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formDisplayName}
-                  onChange={(e) => setFormDisplayName(e.target.value)}
-                  placeholder="e.g. National University of Singapore"
-                  className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-[var(--color-orange)] text-slate-900"
-                />
+                <span className="text-slate-300">/</span>
+
+                {/* Step 2 Tab Button */}
+                <button
+                  type="button"
+                  disabled={!editingEntry && !createdEntryId}
+                  onClick={() => (editingEntry || createdEntryId) && setModalStep(2)}
+                  className={`flex items-center gap-2 text-xs font-bold transition-colors ${
+                    modalStep === 2
+                      ? "text-[var(--color-navy)]"
+                      : (editingEntry || createdEntryId)
+                      ? "text-slate-500 hover:text-slate-800 cursor-pointer"
+                      : "text-slate-300 cursor-not-allowed"
+                  }`}
+                >
+                  <span
+                    className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                      modalStep === 2
+                        ? "bg-[var(--color-navy)] text-white"
+                        : (editingEntry || createdEntryId)
+                        ? "bg-slate-200 text-slate-700"
+                        : "bg-slate-100 text-slate-300"
+                    }`}
+                  >
+                    2
+                  </span>
+                  <span>{t.step2Title}</span>
+                </button>
               </div>
 
-              {/* Country & Official Website */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">{t.fieldCountry}</label>
-                  <input
-                    type="text"
-                    value={formCountry}
-                    onChange={(e) => setFormCountry(e.target.value)}
-                    placeholder="e.g. Singapore"
-                    className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-[var(--color-orange)] text-slate-900"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">{t.fieldWebsite}</label>
-                  <input
-                    type="url"
-                    value={formWebsiteUrl}
-                    onChange={(e) => setFormWebsiteUrl(e.target.value)}
-                    placeholder="https://..."
-                    className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-[var(--color-orange)] text-slate-900"
-                  />
-                </div>
-              </div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                {modalStep === 1 ? t.step1Indicator : t.step2Indicator}
+              </span>
+            </div>
 
-              {/* Relationship Status & Display Order */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Error / Success Alerts */}
+            {formError && (
+              <div className="mx-6 mt-4 p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl">
+                {formError}
+              </div>
+            )}
+            {formSuccess && (
+              <div className="mx-6 mt-4 p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs rounded-xl">
+                {formSuccess}
+              </div>
+            )}
+
+            {/* STEP 1: Organization Details Form */}
+            {modalStep === 1 && (
+              <form onSubmit={handleSaveStep1} className="p-6 space-y-4 overflow-y-auto flex-1">
+                {/* Step 1 Security / Upload location helper notice */}
+                <div className="p-3 bg-blue-50/80 border border-blue-200/80 rounded-xl flex items-start gap-2.5 text-xs text-blue-900 leading-relaxed">
+                  <svg className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="16" x2="12" y2="12" />
+                    <line x1="12" y1="8" x2="12.01" y2="8" />
+                  </svg>
+                  <span>{t.step1Helper}</span>
+                </div>
+
+                {/* Institution Name */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    {t.fieldStatus} <span className="text-rose-500">*</span>
+                    {t.fieldName} <span className="text-rose-500">*</span>
                   </label>
-                  <select
-                    value={formRelationshipStatus}
-                    onChange={(e) => setFormRelationshipStatus(e.target.value as ShowcaseRelationshipStatus)}
-                    className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-[var(--color-orange)] text-slate-900"
-                  >
-                    <option value="INVITED">{t.statusInvited}</option>
-                    <option value="CONFIRMED">{t.statusConfirmed}</option>
-                    <option value="NETWORK_PARTNER">{t.statusNetwork}</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">{t.fieldOrder}</label>
                   <input
-                    type="number"
-                    value={formDisplayOrder}
-                    onChange={(e) => setFormDisplayOrder(parseInt(e.target.value, 10) || 0)}
+                    type="text"
+                    required
+                    value={formDisplayName}
+                    onChange={(e) => setFormDisplayName(e.target.value)}
+                    placeholder="e.g. National University of Singapore"
                     className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-[var(--color-orange)] text-slate-900"
                   />
                 </div>
-              </div>
 
-              {/* Optional Organization Link */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">{t.fieldLinkedOrg}</label>
-                <select
-                  value={formOrganizationId}
-                  onChange={(e) => setFormOrganizationId(e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-[var(--color-orange)] text-slate-900"
-                >
-                  <option value="">{t.noOrgLinked}</option>
-                  {organizationOptions.map((org) => (
-                    <option key={org.id} value={org.id}>
-                      [{org.type}] {org.name} ({org.country})
-                    </option>
-                  ))}
-                </select>
-              </div>
+                {/* Country & Official Website */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{t.fieldCountry}</label>
+                    <input
+                      type="text"
+                      value={formCountry}
+                      onChange={(e) => setFormCountry(e.target.value)}
+                      placeholder="e.g. Singapore"
+                      className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-[var(--color-orange)] text-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{t.fieldWebsite}</label>
+                    <input
+                      type="url"
+                      value={formWebsiteUrl}
+                      onChange={(e) => setFormWebsiteUrl(e.target.value)}
+                      placeholder="https://..."
+                      className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-[var(--color-orange)] text-slate-900"
+                    />
+                  </div>
+                </div>
 
-              {/* Logo Section */}
-              <div className="border-t border-slate-100 pt-4">
-                <label className="block text-xs font-bold text-slate-700 mb-2">{t.fieldLogo}</label>
+                {/* Relationship Status & Display Order */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      {t.fieldStatus} <span className="text-rose-500">*</span>
+                    </label>
+                    <select
+                      value={formRelationshipStatus}
+                      onChange={(e) => setFormRelationshipStatus(e.target.value as ShowcaseRelationshipStatus)}
+                      className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-[var(--color-orange)] text-slate-900"
+                    >
+                      <option value="INVITED">{t.statusInvited}</option>
+                      <option value="CONFIRMED">{t.statusConfirmed}</option>
+                      <option value="NETWORK_PARTNER">{t.statusNetwork}</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{t.fieldOrder}</label>
+                    <input
+                      type="number"
+                      value={formDisplayOrder}
+                      onChange={(e) => setFormDisplayOrder(parseInt(e.target.value, 10) || 0)}
+                      className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-[var(--color-orange)] text-slate-900"
+                    />
+                  </div>
+                </div>
 
-                {currentLogo?.secureUrl ? (
-                  <div className="flex items-center gap-4 p-3 bg-slate-50 border border-slate-200 rounded-xl">
-                    <div className="w-20 h-14 bg-white rounded-lg flex items-center justify-center p-1 border border-slate-200 shrink-0">
-                      <Image
-                        src={currentLogo.secureUrl}
-                        alt="Current logo"
-                        width={80}
-                        height={56}
-                        className="max-h-full max-w-full object-contain"
-                        unoptimized
-                      />
+                {/* Optional Organization Link */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">{t.fieldLinkedOrg}</label>
+                  <select
+                    value={formOrganizationId}
+                    onChange={(e) => setFormOrganizationId(e.target.value)}
+                    className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-[var(--color-orange)] text-slate-900"
+                  >
+                    <option value="">{t.noOrgLinked}</option>
+                    {organizationOptions.map((org) => (
+                      <option key={org.id} value={org.id}>
+                        [{org.type}] {org.name} ({org.country})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Step 1 Actions */}
+                <div className="border-t border-slate-100 pt-4 flex items-center justify-between gap-2.5">
+                  <button
+                    type="button"
+                    onClick={closeModal}
+                    className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                  >
+                    {t.cancelBtn}
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    {(editingEntry || createdEntryId) && (
+                      <button
+                        type="button"
+                        onClick={() => setModalStep(2)}
+                        className="px-4 py-2 text-xs font-bold text-[var(--color-navy)] bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
+                      >
+                        {t.step2Title} →
+                      </button>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={savingForm}
+                      className="px-5 py-2 text-xs font-bold bg-[var(--color-orange)] hover:bg-[#d45300] text-white rounded-xl shadow-md transition-all disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+                    >
+                      <span>{savingForm ? t.savingBtn : t.saveAndContinueBtn}</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </form>
+            )}
+
+            {/* STEP 2: Official Logo & Visibility Form */}
+            {modalStep === 2 && (
+              <form onSubmit={handleFinishStep2} className="p-6 space-y-5 overflow-y-auto flex-1">
+                {/* Official Logo Section */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold text-slate-800">
+                      {t.fieldLogo} <span className="text-rose-500">*</span>
+                    </label>
+                    <span className="text-[11px] text-slate-400 font-medium">PNG, JPG, WebP up to 5 MB</span>
+                  </div>
+
+                  {currentLogo?.secureUrl ? (
+                    <div className="flex items-center gap-4 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                      <div className="w-24 h-16 bg-white rounded-lg flex items-center justify-center p-2 border border-slate-200 shrink-0 shadow-xs">
+                        <Image
+                          src={currentLogo.secureUrl}
+                          alt="Current logo"
+                          width={96}
+                          height={64}
+                          className="max-h-full max-w-full object-contain"
+                          unoptimized
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-xs font-bold text-slate-900 block truncate">
+                          {currentLogo.publicId.split("/").pop()}
+                        </span>
+                        <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1 mt-0.5">
+                          <span>✓</span> Verified on Cloudinary
+                        </span>
+                      </div>
+                      <div>
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          accept="image/png,image/jpeg,image/jpg,image/webp"
+                          className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) handleLogoUpload(f);
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={uploadingLogo}
+                          className="px-3.5 py-1.5 text-xs font-bold text-[var(--color-blue)] hover:bg-blue-50 border border-blue-200 rounded-lg transition-colors cursor-pointer"
+                        >
+                          {uploadingLogo ? t.uploadingLogo : t.changeLogoBtn}
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <span className="text-xs font-bold text-slate-800 block truncate">
-                        {currentLogo.publicId.split("/").pop()}
-                      </span>
-                      <span className="text-[11px] text-emerald-600 block mt-0.5 font-medium">
-                        ✓ Verified on Cloudinary
-                      </span>
-                    </div>
-                    <div>
+                  ) : (
+                    <div className="p-6 bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl text-center hover:border-slate-400 transition-colors">
                       <input
                         type="file"
                         ref={fileInputRef}
@@ -925,115 +1122,114 @@ export function ShowcaseManagementClient({
                           if (f) handleLogoUpload(f);
                         }}
                       />
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={uploadingLogo}
-                        className="px-3 py-1.5 text-xs font-bold text-[var(--color-blue)] hover:bg-blue-50 border border-blue-200 rounded-lg transition-colors cursor-pointer"
-                      >
-                        {uploadingLogo ? t.uploadingLogo : t.changeLogoBtn}
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-4 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-center">
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      accept="image/png,image/jpeg,image/jpg,image/webp"
-                      className="hidden"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) handleLogoUpload(f);
-                      }}
-                    />
-                    {editingEntry || createdEntryId ? (
-                      <div>
-                        <svg
-                          className="w-8 h-8 mx-auto text-slate-400 mb-1"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <button
-                          type="button"
-                          onClick={() => fileInputRef.current?.click()}
-                          disabled={uploadingLogo}
-                          className="px-4 py-2 bg-[var(--color-navy)] text-white text-xs font-bold rounded-xl hover:bg-slate-800 transition-colors cursor-pointer"
-                        >
-                          {uploadingLogo ? t.uploadingLogo : t.uploadLogoBtn}
-                        </button>
-                        <p className="text-[11px] text-slate-400 mt-1">PNG, JPG, WebP up to 5 MB</p>
+                      <div className="max-w-xs mx-auto space-y-2">
+                        <div className="w-12 h-12 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center mx-auto">
+                          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={uploadingLogo}
+                            className="px-4 py-2 bg-[var(--color-navy)] hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                              <polyline points="17 8 12 3 7 8" />
+                              <line x1="12" y1="3" x2="12" y2="15" />
+                            </svg>
+                            <span>{uploadingLogo ? t.uploadingLogo : t.uploadLogoBtn}</span>
+                          </button>
+                        </div>
+                        <p className="text-[11px] text-slate-400">PNG, JPG, WebP up to 5 MB</p>
                       </div>
-                    ) : (
-                      <p className="text-xs text-slate-500">
-                        Please save the entry details below first, then you can upload the logo.
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
+                    </div>
+                  )}
+                </div>
 
-              {/* Public Display Consent Checkbox */}
-              <div className="border-t border-slate-100 pt-4">
-                <label className="flex items-start gap-2.5 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={formConsent}
-                    onChange={(e) => {
-                      setFormConsent(e.target.checked);
-                      if (!e.target.checked) setFormIsVisible(false);
-                    }}
-                    className="mt-0.5 rounded text-[var(--color-orange)] focus:ring-[var(--color-orange)] h-4 w-4"
-                  />
-                  <div>
-                    <span className="text-xs font-bold text-slate-900 block">{t.fieldConsent}</span>
-                    <span className="text-[11px] text-slate-500 block mt-0.5">{t.consentNotice}</span>
-                  </div>
-                </label>
-              </div>
-
-              {/* Visibility on Homepage Toggle */}
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                <label className="flex items-center justify-between cursor-pointer">
-                  <div>
-                    <span className="text-xs font-bold text-slate-800 block">{t.fieldVisible}</span>
-                    {(!formConsent || !currentLogo) && (
-                      <span className="text-[11px] text-amber-600 block mt-0.5">
-                        Requires verified logo and consent confirmation.
+                {/* Public Display Consent Checkbox */}
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                  <label className="flex items-start gap-3 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={formConsent}
+                      onChange={(e) => {
+                        setFormConsent(e.target.checked);
+                        if (!e.target.checked) setFormIsVisible(false);
+                      }}
+                      className="mt-0.5 rounded text-[var(--color-orange)] focus:ring-[var(--color-orange)] h-4 w-4"
+                    />
+                    <div>
+                      <span className="text-xs font-bold text-slate-900 block">{t.fieldConsent}</span>
+                      <span className="text-[11px] text-slate-500 block mt-0.5 leading-relaxed">
+                        {t.consentNotice}
                       </span>
-                    )}
-                  </div>
-                  <input
-                    type="checkbox"
-                    disabled={!formConsent || !currentLogo}
-                    checked={formIsVisible}
-                    onChange={(e) => setFormIsVisible(e.target.checked)}
-                    className="rounded text-emerald-600 focus:ring-emerald-500 h-5 w-5 disabled:opacity-40"
-                  />
-                </label>
-              </div>
+                    </div>
+                  </label>
+                </div>
 
-              {/* Modal Actions */}
-              <div className="border-t border-slate-100 pt-4 flex items-center justify-end gap-2.5">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
-                >
-                  {t.cancelBtn}
-                </button>
-                <button
-                  type="submit"
-                  disabled={savingForm || uploadingLogo}
-                  className="px-5 py-2 text-xs font-bold bg-[var(--color-orange)] hover:bg-[#d45300] text-white rounded-xl shadow-md transition-all disabled:opacity-50 cursor-pointer"
-                >
-                  {savingForm ? t.savingBtn : t.saveBtn}
-                </button>
-              </div>
-            </form>
+                {/* Visibility on Homepage Toggle */}
+                <div className={`p-4 rounded-xl border transition-colors ${
+                  formConsent && currentLogo
+                    ? "bg-white border-emerald-200"
+                    : "bg-slate-50 border-slate-200 opacity-80"
+                }`}>
+                  <label className="flex items-center justify-between cursor-pointer">
+                    <div className="pr-4">
+                      <span className="text-xs font-bold text-slate-900 block">{t.fieldVisible}</span>
+                      {(!formConsent || !currentLogo) && (
+                        <span className="text-[11px] text-amber-700 block mt-0.5">
+                          {t.missingLogoWarning}
+                        </span>
+                      )}
+                    </div>
+                    <input
+                      type="checkbox"
+                      disabled={!formConsent || !currentLogo}
+                      checked={formIsVisible}
+                      onChange={(e) => setFormIsVisible(e.target.checked)}
+                      className="rounded text-emerald-600 focus:ring-emerald-500 h-5 w-5 disabled:opacity-40"
+                    />
+                  </label>
+                </div>
+
+                {/* Step 2 Actions */}
+                <div className="border-t border-slate-100 pt-4 flex items-center justify-between gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setModalStep(1)}
+                    className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer flex items-center gap-1.5"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                    <span>{t.backToStep1Btn}</span>
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={closeModal}
+                      className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                    >
+                      {t.cancelBtn}
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={savingForm || uploadingLogo}
+                      className="px-5 py-2 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-md transition-all disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+                    >
+                      <span>{savingForm ? t.savingBtn : t.finishBtn}</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}

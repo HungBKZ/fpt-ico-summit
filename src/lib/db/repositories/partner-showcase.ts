@@ -226,30 +226,36 @@ export async function listShowcaseEntriesForAdmin(
  * Projects only safe public fields into PublicShowcaseEntryDto.
  */
 export async function getPublicShowcaseEntries(): Promise<PublicShowcaseEntryDto[]> {
-  const db = await getDb();
+  try {
+    const db = await getDb();
 
-  const entries = await db
-    .collection<PartnerShowcaseEntry>(COLLECTIONS.PARTNER_SHOWCASE_ENTRIES)
-    .find({
-      isVisible: true,
-      displayConsentConfirmed: true,
-      "logo.secureUrl": { $exists: true, $ne: "" },
-    })
-    .sort({ displayOrder: 1, createdAt: 1 })
-    .toArray();
+    const entries = await db
+      .collection<PartnerShowcaseEntry>(COLLECTIONS.PARTNER_SHOWCASE_ENTRIES)
+      .find({
+        isVisible: true,
+        displayConsentConfirmed: true,
+        "logo.secureUrl": { $exists: true, $ne: "" },
+        "logo.publicId": { $exists: true, $ne: "" },
+      })
+      .sort({ displayOrder: 1, createdAt: 1 })
+      .toArray();
 
-  return entries.map((entry) => ({
-    id: entry._id?.toString() || "",
-    displayName: entry.displayName,
-    country: entry.country || undefined,
-    websiteUrl: entry.websiteUrl || undefined,
-    logo: {
-      secureUrl: entry.logo!.secureUrl,
-      width: entry.logo!.width,
-      height: entry.logo!.height,
-    },
-    displayOrder: entry.displayOrder,
-  }));
+    return entries.map((entry) => ({
+      id: entry._id?.toString() || "",
+      displayName: entry.displayName,
+      country: entry.country || undefined,
+      websiteUrl: entry.websiteUrl || undefined,
+      logo: {
+        secureUrl: entry.logo!.secureUrl,
+        width: entry.logo!.width,
+        height: entry.logo!.height,
+      },
+      displayOrder: entry.displayOrder,
+    }));
+  } catch (err) {
+    console.warn("Could not load public showcase entries for static generation:", err);
+    return [];
+  }
 }
 
 /**

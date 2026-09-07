@@ -601,12 +601,20 @@ export type Dictionary = {
     noOrgLinked: string;
     saveBtn: string;
     savingBtn: string;
+    saveAndContinueBtn: string;
+    finishBtn: string;
+    backToStep1Btn: string;
     cancelBtn: string;
     deleteBtn: string;
     deleteConfirm: string;
     consentNotice: string;
     missingLogoWarning: string;
     searchPlaceholder: string;
+    step1Indicator: string;
+    step1Title: string;
+    step2Indicator: string;
+    step2Title: string;
+    step1Helper: string;
   };
 };
 

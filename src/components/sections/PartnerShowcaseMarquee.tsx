@@ -1,7 +1,9 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/types";
-import { getPublicShowcaseEntries } from "@/lib/db/repositories/partner-showcase";
 import type { PublicShowcaseEntryDto } from "@/lib/db/models/partner-showcase";
 
 interface PartnerShowcaseMarqueeProps {
@@ -9,14 +11,36 @@ interface PartnerShowcaseMarqueeProps {
   dict: Dictionary;
 }
 
-export async function PartnerShowcaseMarquee({
+export function PartnerShowcaseMarquee({
   locale,
   dict,
 }: PartnerShowcaseMarqueeProps) {
-  const entries = await getPublicShowcaseEntries();
+  const [entries, setEntries] = useState<PublicShowcaseEntryDto[]>([]);
+  const [loaded, setLoaded] = useState(false);
 
-  // If no showcase entries are published/visible, gracefully render nothing
-  if (!entries || entries.length === 0) {
+  useEffect(() => {
+    let isMounted = true;
+    fetch("/api/public/showcase", { cache: "no-store" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted && data?.success && Array.isArray(data.entries)) {
+          setEntries(data.entries);
+        }
+      })
+      .catch(() => {
+        // gracefully ignore fetch error
+      })
+      .finally(() => {
+        if (isMounted) setLoaded(true);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // If loading or no showcase entries are published/visible, gracefully render nothing
+  if (!loaded || !entries || entries.length === 0) {
     return null;
   }
 
