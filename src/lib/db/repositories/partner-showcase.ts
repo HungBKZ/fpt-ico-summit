@@ -31,9 +31,9 @@ export interface CreateShowcaseEntryInput {
 
 export interface UpdateShowcaseEntryInput {
   displayName?: string;
-  country?: string;
-  websiteUrl?: string;
-  logo?: ShowcaseLogo;
+  country?: string | null;
+  websiteUrl?: string | null;
+  logo?: ShowcaseLogo | null;
   relationshipStatus?: ShowcaseRelationshipStatus;
   isVisible?: boolean;
   displayOrder?: number;
@@ -158,31 +158,48 @@ export async function updateShowcaseEntry(
 
   if (input.displayName !== undefined) setFields.displayName = input.displayName.trim();
   if (input.country !== undefined) {
-    const trimmedCountry = input.country.trim();
-    if (trimmedCountry) {
-      setFields.country = trimmedCountry;
-    } else {
+    if (input.country === null) {
       unsetFields.country = "";
+    } else {
+      const trimmedCountry = input.country.trim();
+      if (trimmedCountry) {
+        setFields.country = trimmedCountry;
+      } else {
+        unsetFields.country = "";
+      }
     }
   }
   if (input.websiteUrl !== undefined) {
-    const trimmedUrl = input.websiteUrl.trim();
-    if (trimmedUrl) {
-      setFields.websiteUrl = trimmedUrl;
-    } else {
+    if (input.websiteUrl === null) {
       unsetFields.websiteUrl = "";
+    } else {
+      const trimmedUrl = input.websiteUrl.trim();
+      if (trimmedUrl) {
+        setFields.websiteUrl = trimmedUrl;
+      } else {
+        unsetFields.websiteUrl = "";
+      }
     }
   }
   if (input.relationshipStatus !== undefined) setFields.relationshipStatus = input.relationshipStatus;
   if (input.isVisible !== undefined) setFields.isVisible = input.isVisible;
   if (input.displayOrder !== undefined) setFields.displayOrder = input.displayOrder;
   if (input.displayConsentConfirmed !== undefined) setFields.displayConsentConfirmed = input.displayConsentConfirmed;
-  if (input.logo !== undefined) setFields.logo = input.logo;
+  
+  if (input.logo !== undefined) {
+    if (input.logo === null) {
+      unsetFields.logo = "";
+    } else {
+      setFields.logo = input.logo;
+    }
+  }
 
-  if (input.organizationId === null) {
-    unsetFields.organizationId = "";
-  } else if (input.organizationId !== undefined) {
-    setFields.organizationId = input.organizationId;
+  if (input.organizationId !== undefined) {
+    if (input.organizationId === null) {
+      unsetFields.organizationId = "";
+    } else {
+      setFields.organizationId = input.organizationId;
+    }
   }
 
   const updateDoc: Record<string, unknown> = { $set: setFields };
@@ -197,10 +214,13 @@ export async function updateShowcaseEntry(
 
     return result;
   } catch (err: unknown) {
-    if ((err as { errInfo?: { details?: unknown } })?.errInfo?.details) {
+    const errDetails =
+      (err as { errInfo?: { details?: unknown } })?.errInfo?.details ??
+      (err as { errInfo?: unknown })?.errInfo;
+    if (errDetails) {
       console.error(
-        "[updateShowcaseEntry] MongoDB document validation failed:",
-        JSON.stringify((err as { errInfo: { details: unknown } }).errInfo.details, null, 2)
+        "[updateShowcaseEntry] MongoDB document validation failed:\n" +
+          JSON.stringify(errDetails, null, 2)
       );
     }
     throw err;

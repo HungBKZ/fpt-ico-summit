@@ -362,38 +362,9 @@ export function ShowcaseManagementClient({
           setFormError(res.error || "Failed to create entry.");
         }
       } else {
-        // Already created entry, updating details before advancing
-        const res = await updateShowcaseEntryAction(createdEntryId, {
-          displayName: formDisplayName,
-          country: formCountry,
-          websiteUrl: formWebsiteUrl,
-          relationshipStatus: formRelationshipStatus,
-          displayOrder: formDisplayOrder,
-          organizationId: formOrganizationId || null,
-        });
-
+        // Entry was already created in Step 1; advancing to Step 2 is pure client-state navigation
         setSavingForm(false);
-        if (res.success) {
-          setEntries((prev) =>
-            prev.map((item) =>
-              item.id === createdEntryId
-                ? {
-                    ...item,
-                    displayName: formDisplayName.trim(),
-                    country: formCountry.trim(),
-                    websiteUrl: formWebsiteUrl.trim(),
-                    relationshipStatus: formRelationshipStatus,
-                    displayOrder: formDisplayOrder,
-                    organizationId: formOrganizationId || null,
-                    updatedAt: new Date().toISOString(),
-                  }
-                : item
-            )
-          );
-          setModalStep(2);
-        } else {
-          setFormError(res.error || "Failed to update entry.");
-        }
+        setModalStep(2);
       }
     } catch {
       setSavingForm(false);

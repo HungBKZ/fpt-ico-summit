@@ -152,8 +152,15 @@ export async function createShowcaseEntryAction(
     }
 
     let organizationId: ObjectId | undefined;
-    if (input.organizationId && input.organizationId.trim() && ObjectId.isValid(input.organizationId.trim())) {
-      organizationId = new ObjectId(input.organizationId.trim());
+    if (input.organizationId !== undefined && input.organizationId !== null) {
+      const trimmedOrg = typeof input.organizationId === "string" ? input.organizationId.trim() : "";
+      if (trimmedOrg && trimmedOrg.toLowerCase() !== "none") {
+        if (ObjectId.isValid(trimmedOrg)) {
+          organizationId = new ObjectId(trimmedOrg);
+        } else {
+          return { success: false, error: "Invalid organization ID." };
+        }
+      }
     }
 
     const entry = await createShowcaseEntry({
@@ -187,10 +194,13 @@ export async function createShowcaseEntryAction(
       showcaseEntryId: entry._id?.toString(),
     };
   } catch (err: unknown) {
-    if ((err as { errInfo?: { details?: unknown } })?.errInfo?.details) {
+    const errDetails =
+      (err as { errInfo?: { details?: unknown } })?.errInfo?.details ??
+      (err as { errInfo?: unknown })?.errInfo;
+    if (errDetails) {
       console.error(
-        "[createShowcaseEntryAction] Validation failure details:",
-        JSON.stringify((err as { errInfo: { details: unknown } }).errInfo.details, null, 2)
+        "[createShowcaseEntryAction] Validation failure details:\n" +
+          JSON.stringify(errDetails, null, 2)
       );
     }
     const msg =
@@ -304,8 +314,28 @@ export async function updateShowcaseEntryAction(
       }
     }
 
-    if (input.websiteUrl && !isValidPublicUrl(input.websiteUrl)) {
-      return { success: false, error: "Official Website must be a valid HTTP or HTTPS URL." };
+    // Normalize country: empty / whitespace -> $unset (null), otherwise trimmed string
+    let normalizedCountry: string | null | undefined;
+    if (input.country !== undefined) {
+      if (input.country === null || !input.country.trim()) {
+        normalizedCountry = null;
+      } else {
+        normalizedCountry = input.country.trim();
+      }
+    }
+
+    // Normalize websiteUrl: empty / whitespace -> $unset (null), otherwise validated URL
+    let normalizedWebsiteUrl: string | null | undefined;
+    if (input.websiteUrl !== undefined) {
+      if (input.websiteUrl === null || !input.websiteUrl.trim()) {
+        normalizedWebsiteUrl = null;
+      } else {
+        const trimmedUrl = input.websiteUrl.trim();
+        if (!isValidPublicUrl(trimmedUrl)) {
+          return { success: false, error: "Official Website must be a valid HTTP or HTTPS URL." };
+        }
+        normalizedWebsiteUrl = trimmedUrl;
+      }
     }
 
     const targetVisibility = input.isVisible !== undefined ? input.isVisible : existing.isVisible;
@@ -330,21 +360,52 @@ export async function updateShowcaseEntryAction(
       }
     }
 
+    // Normalize organizationId:
+    // empty / whitespace / "None" (case-insensitive) -> $unset (null)
+    // valid ObjectId string -> ObjectId
+    // invalid non-empty value -> reject safely
+    // undefined -> do not modify
     let organizationId: ObjectId | null | undefined;
-    if (
-      input.organizationId === null ||
-      input.organizationId === "" ||
-      (typeof input.organizationId === "string" && !input.organizationId.trim())
-    ) {
-      organizationId = null;
-    } else if (input.organizationId && ObjectId.isValid(input.organizationId.trim())) {
-      organizationId = new ObjectId(input.organizationId.trim());
+    if (input.organizationId !== undefined) {
+      if (
+        input.organizationId === null ||
+        input.organizationId === "" ||
+        (typeof input.organizationId === "string" &&
+          (!input.organizationId.trim() ||
+            input.organizationId.trim().toLowerCase() === "none"))
+      ) {
+        organizationId = null;
+      } else if (
+        typeof input.organizationId === "string" &&
+        ObjectId.isValid(input.organizationId.trim())
+      ) {
+        organizationId = new ObjectId(input.organizationId.trim());
+      } else {
+        return { success: false, error: "Invalid organization ID." };
+      }
     }
+
+    // Safe diagnostic log excluding any secrets
+    const safePayload = {
+      showcaseEntryId,
+      displayName: input.displayName?.trim(),
+      country: normalizedCountry,
+      websiteUrl: normalizedWebsiteUrl,
+      relationshipStatus: input.relationshipStatus,
+      displayOrder: input.displayOrder !== undefined ? Number(input.displayOrder) : undefined,
+      displayConsentConfirmed: input.displayConsentConfirmed,
+      isVisible: input.isVisible,
+      organizationId: organizationId ? organizationId.toString() : organizationId,
+    };
+    console.log(
+      "[updateShowcaseEntryAction] Safe normalized update payload:\n" +
+        JSON.stringify(safePayload, null, 2)
+    );
 
     await updateShowcaseEntry(showcaseEntryId, {
       displayName: input.displayName?.trim(),
-      country: input.country !== undefined ? input.country.trim() : undefined,
-      websiteUrl: input.websiteUrl !== undefined ? input.websiteUrl.trim() : undefined,
+      country: normalizedCountry,
+      websiteUrl: normalizedWebsiteUrl,
       relationshipStatus: input.relationshipStatus,
       displayOrder: input.displayOrder !== undefined ? Number(input.displayOrder) : undefined,
       displayConsentConfirmed: input.displayConsentConfirmed,
@@ -366,10 +427,13 @@ export async function updateShowcaseEntryAction(
 
     return { success: true };
   } catch (err: unknown) {
-    if ((err as { errInfo?: { details?: unknown } })?.errInfo?.details) {
+    const errDetails =
+      (err as { errInfo?: { details?: unknown } })?.errInfo?.details ??
+      (err as { errInfo?: unknown })?.errInfo;
+    if (errDetails) {
       console.error(
-        "[updateShowcaseEntryAction] Validation failure details:",
-        JSON.stringify((err as { errInfo: { details: unknown } }).errInfo.details, null, 2)
+        "[updateShowcaseEntryAction] Validation failure details:\n" +
+          JSON.stringify(errDetails, null, 2)
       );
     }
     const msg =
