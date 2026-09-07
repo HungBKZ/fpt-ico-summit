@@ -175,16 +175,20 @@ export async function createShowcaseEntryAction(
       createdBy: dbUser._id!,
     });
 
-    await createAuditEntry({
-      action: "SHOWCASE_ENTRY_CREATED",
-      actorUserId: dbUser._id,
-      showcaseEntryId: entry._id,
-      metadata: {
-        displayName: entry.displayName,
-        relationshipStatus: entry.relationshipStatus,
-        isVisible: false,
-      },
-    });
+    try {
+      await createAuditEntry({
+        action: "SHOWCASE_ENTRY_CREATED",
+        actorUserId: dbUser._id,
+        showcaseEntryId: entry._id,
+        metadata: {
+          displayName: entry.displayName,
+          relationshipStatus: entry.relationshipStatus,
+          isVisible: false,
+        },
+      });
+    } catch (auditErr) {
+      console.error("[createShowcaseEntryAction] Non-blocking audit log creation failed:", auditErr);
+    }
 
     revalidatePath("/[locale]/admin/showcase", "page");
     revalidatePath("/[locale]", "page");
@@ -247,15 +251,19 @@ export async function attachShowcaseLogoAction(
       logo: verifiedLogo,
     });
 
-    await createAuditEntry({
-      action: "SHOWCASE_LOGO_UPDATED",
-      actorUserId: dbUser._id,
-      showcaseEntryId: entry._id,
-      metadata: {
-        publicId: verifiedLogo.publicId,
-        secureUrl: verifiedLogo.secureUrl,
-      },
-    });
+    try {
+      await createAuditEntry({
+        action: "SHOWCASE_LOGO_UPDATED",
+        actorUserId: dbUser._id,
+        showcaseEntryId: entry._id,
+        metadata: {
+          publicId: verifiedLogo.publicId,
+          secureUrl: verifiedLogo.secureUrl,
+        },
+      });
+    } catch (auditErr) {
+      console.error("[attachShowcaseLogoAction] Non-blocking audit log creation failed:", auditErr);
+    }
 
     revalidatePath("/[locale]/admin/showcase", "page");
     revalidatePath("/[locale]", "page");
@@ -413,14 +421,18 @@ export async function updateShowcaseEntryAction(
       organizationId,
     });
 
-    await createAuditEntry({
-      action: "SHOWCASE_ENTRY_UPDATED",
-      actorUserId: dbUser._id,
-      showcaseEntryId: existing._id,
-      metadata: {
-        updatedFields: Object.keys(input),
-      },
-    });
+    try {
+      await createAuditEntry({
+        action: "SHOWCASE_ENTRY_UPDATED",
+        actorUserId: dbUser._id,
+        showcaseEntryId: existing._id,
+        metadata: {
+          updatedFields: Object.keys(input),
+        },
+      });
+    } catch (auditErr) {
+      console.error("[updateShowcaseEntryAction] Non-blocking audit log creation failed:", auditErr);
+    }
 
     revalidatePath("/[locale]/admin/showcase", "page");
     revalidatePath("/[locale]", "page");
@@ -485,15 +497,19 @@ export async function toggleShowcaseVisibilityAction(
 
     await updateShowcaseEntry(showcaseEntryId, { isVisible });
 
-    await createAuditEntry({
-      action: "SHOWCASE_ENTRY_VISIBILITY_CHANGED",
-      actorUserId: dbUser._id,
-      showcaseEntryId: existing._id,
-      metadata: {
-        displayName: existing.displayName,
-        isVisible,
-      },
-    });
+    try {
+      await createAuditEntry({
+        action: "SHOWCASE_ENTRY_VISIBILITY_CHANGED",
+        actorUserId: dbUser._id,
+        showcaseEntryId: existing._id,
+        metadata: {
+          displayName: existing.displayName,
+          isVisible,
+        },
+      });
+    } catch (auditErr) {
+      console.error("[toggleShowcaseVisibilityAction] Non-blocking audit log creation failed:", auditErr);
+    }
 
     revalidatePath("/[locale]/admin/showcase", "page");
     revalidatePath("/[locale]", "page");
