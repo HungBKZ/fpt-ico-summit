@@ -84,11 +84,21 @@ export async function createShowcaseEntry(
   if (input.logo) doc.logo = input.logo;
   if (input.organizationId) doc.organizationId = input.organizationId;
 
-  const result = await db
-    .collection<PartnerShowcaseEntry>(COLLECTIONS.PARTNER_SHOWCASE_ENTRIES)
-    .insertOne(doc, { session });
+  try {
+    const result = await db
+      .collection<PartnerShowcaseEntry>(COLLECTIONS.PARTNER_SHOWCASE_ENTRIES)
+      .insertOne(doc, { session });
 
-  return { ...doc, _id: input._id || result.insertedId };
+    return { ...doc, _id: input._id || result.insertedId };
+  } catch (err: unknown) {
+    if ((err as { errInfo?: { details?: unknown } })?.errInfo?.details) {
+      console.error(
+        "[createShowcaseEntry] MongoDB document validation failed:",
+        JSON.stringify((err as { errInfo: { details: unknown } }).errInfo.details, null, 2)
+      );
+    }
+    throw err;
+  }
 }
 
 /**
@@ -144,17 +154,31 @@ export async function updateShowcaseEntry(
   const setFields: Record<string, unknown> = {
     updatedAt: new Date(),
   };
+  const unsetFields: Record<string, ""> = {};
 
   if (input.displayName !== undefined) setFields.displayName = input.displayName.trim();
-  if (input.country !== undefined) setFields.country = input.country.trim();
-  if (input.websiteUrl !== undefined) setFields.websiteUrl = input.websiteUrl.trim();
+  if (input.country !== undefined) {
+    const trimmedCountry = input.country.trim();
+    if (trimmedCountry) {
+      setFields.country = trimmedCountry;
+    } else {
+      unsetFields.country = "";
+    }
+  }
+  if (input.websiteUrl !== undefined) {
+    const trimmedUrl = input.websiteUrl.trim();
+    if (trimmedUrl) {
+      setFields.websiteUrl = trimmedUrl;
+    } else {
+      unsetFields.websiteUrl = "";
+    }
+  }
   if (input.relationshipStatus !== undefined) setFields.relationshipStatus = input.relationshipStatus;
   if (input.isVisible !== undefined) setFields.isVisible = input.isVisible;
   if (input.displayOrder !== undefined) setFields.displayOrder = input.displayOrder;
   if (input.displayConsentConfirmed !== undefined) setFields.displayConsentConfirmed = input.displayConsentConfirmed;
   if (input.logo !== undefined) setFields.logo = input.logo;
 
-  const unsetFields: Record<string, ""> = {};
   if (input.organizationId === null) {
     unsetFields.organizationId = "";
   } else if (input.organizationId !== undefined) {
@@ -166,11 +190,21 @@ export async function updateShowcaseEntry(
     updateDoc.$unset = unsetFields;
   }
 
-  const result = await db
-    .collection<PartnerShowcaseEntry>(COLLECTIONS.PARTNER_SHOWCASE_ENTRIES)
-    .findOneAndUpdate({ _id: objId }, updateDoc, { returnDocument: "after", session });
+  try {
+    const result = await db
+      .collection<PartnerShowcaseEntry>(COLLECTIONS.PARTNER_SHOWCASE_ENTRIES)
+      .findOneAndUpdate({ _id: objId }, updateDoc, { returnDocument: "after", session });
 
-  return result;
+    return result;
+  } catch (err: unknown) {
+    if ((err as { errInfo?: { details?: unknown } })?.errInfo?.details) {
+      console.error(
+        "[updateShowcaseEntry] MongoDB document validation failed:",
+        JSON.stringify((err as { errInfo: { details: unknown } }).errInfo.details, null, 2)
+      );
+    }
+    throw err;
+  }
 }
 
 /**

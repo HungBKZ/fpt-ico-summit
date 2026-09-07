@@ -762,16 +762,15 @@ async function run() {
             ],
             properties: {
               displayName: { bsonType: "string", minLength: 1 },
-              country: { bsonType: "string" },
-              websiteUrl: { bsonType: "string" },
+              country: { bsonType: ["string", "null"] },
+              websiteUrl: { bsonType: ["string", "null"] },
               logo: {
-                bsonType: "object",
-                required: ["publicId", "secureUrl"],
+                bsonType: ["object", "null"],
                 properties: {
                   publicId: { bsonType: "string", minLength: 1 },
                   secureUrl: { bsonType: "string", minLength: 1 },
-                  width: { bsonType: ["int", "double", "long"] },
-                  height: { bsonType: ["int", "double", "long"] },
+                  width: { bsonType: ["int", "double", "long", "null"] },
+                  height: { bsonType: ["int", "double", "long", "null"] },
                 },
               },
               relationshipStatus: { enum: ["INVITED", "CONFIRMED", "NETWORK_PARTNER"] },
@@ -792,8 +791,8 @@ async function run() {
               $and: [
                 { isVisible: true },
                 { displayConsentConfirmed: true },
-                { "logo.publicId": { $type: "string" } },
-                { "logo.secureUrl": { $type: "string" } },
+                { "logo.publicId": { $type: "string", $ne: "" } },
+                { "logo.secureUrl": { $type: "string", $ne: "" } },
               ],
             },
           ],

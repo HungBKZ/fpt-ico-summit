@@ -152,8 +152,8 @@ export async function createShowcaseEntryAction(
     }
 
     let organizationId: ObjectId | undefined;
-    if (input.organizationId && ObjectId.isValid(input.organizationId)) {
-      organizationId = new ObjectId(input.organizationId);
+    if (input.organizationId && input.organizationId.trim() && ObjectId.isValid(input.organizationId.trim())) {
+      organizationId = new ObjectId(input.organizationId.trim());
     }
 
     const entry = await createShowcaseEntry({
@@ -187,7 +187,18 @@ export async function createShowcaseEntryAction(
       showcaseEntryId: entry._id?.toString(),
     };
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : "Failed to create showcase entry.";
+    if ((err as { errInfo?: { details?: unknown } })?.errInfo?.details) {
+      console.error(
+        "[createShowcaseEntryAction] Validation failure details:",
+        JSON.stringify((err as { errInfo: { details: unknown } }).errInfo.details, null, 2)
+      );
+    }
+    const msg =
+      err instanceof Error
+        ? err.message.includes("Document failed validation")
+          ? "Document failed validation. Please verify all fields are valid."
+          : err.message
+        : "Failed to create showcase entry.";
     return { success: false, error: msg };
   }
 }
@@ -320,10 +331,14 @@ export async function updateShowcaseEntryAction(
     }
 
     let organizationId: ObjectId | null | undefined;
-    if (input.organizationId === null || input.organizationId === "") {
+    if (
+      input.organizationId === null ||
+      input.organizationId === "" ||
+      (typeof input.organizationId === "string" && !input.organizationId.trim())
+    ) {
       organizationId = null;
-    } else if (input.organizationId && ObjectId.isValid(input.organizationId)) {
-      organizationId = new ObjectId(input.organizationId);
+    } else if (input.organizationId && ObjectId.isValid(input.organizationId.trim())) {
+      organizationId = new ObjectId(input.organizationId.trim());
     }
 
     await updateShowcaseEntry(showcaseEntryId, {
@@ -351,7 +366,18 @@ export async function updateShowcaseEntryAction(
 
     return { success: true };
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : "Failed to update showcase entry.";
+    if ((err as { errInfo?: { details?: unknown } })?.errInfo?.details) {
+      console.error(
+        "[updateShowcaseEntryAction] Validation failure details:",
+        JSON.stringify((err as { errInfo: { details: unknown } }).errInfo.details, null, 2)
+      );
+    }
+    const msg =
+      err instanceof Error
+        ? err.message.includes("Document failed validation")
+          ? "Document failed validation. Please verify all fields are valid."
+          : err.message
+        : "Failed to update showcase entry.";
     return { success: false, error: msg };
   }
 }
