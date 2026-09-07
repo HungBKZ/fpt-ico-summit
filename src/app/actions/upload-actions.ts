@@ -1,7 +1,8 @@
 "use server";
 
 import { v2 as cloudinary } from "cloudinary";
-import { requirePartner } from "@/lib/auth/authorization";
+import { ObjectId } from "mongodb";
+import { requirePartner, requireAdmin } from "@/lib/auth/authorization";
 import { getOrganizationById } from "@/lib/db/repositories/organizations";
 
 export interface CloudinaryUploadAuthorization {
@@ -114,3 +115,71 @@ export async function getCloudinaryUploadSignatureAction(
     return { success: false, error: msg };
   }
 }
+
+/**
+ * Server Action: Generates a secure, short-lived Cloudinary upload signature for Partner Showcase logos.
+ * Strictly checks that caller is an authenticated ADMIN.
+ * Target folder: fpt-ico-summit/showcase/logos/{showcaseEntryId}
+ * Max file size: 5 MB (standard for logo assets).
+ */
+export async function getAdminShowcaseUploadSignatureAction(
+  showcaseEntryId: string
+): Promise<{
+  success: boolean;
+  authorization?: CloudinaryUploadAuthorization;
+  error?: string;
+}> {
+  try {
+    await requireAdmin();
+
+    if (!showcaseEntryId || !ObjectId.isValid(showcaseEntryId)) {
+      return { success: false, error: "Invalid showcase entry ID." };
+    }
+
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+    const apiKey = process.env.CLOUDINARY_API_KEY;
+    const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+    if (!cloudName || !apiKey || !apiSecret) {
+      return {
+        success: false,
+        error: "Cloudinary credentials (CLOUDINARY_CLOUD_NAME / CLOUDINARY_API_KEY / CLOUDINARY_API_SECRET) are missing on the server environment.",
+      };
+    }
+
+    const folder = `fpt-ico-summit/showcase/logos/${showcaseEntryId}`;
+    const uploadPreset =
+      process.env.CLOUDINARY_SHOWCASE_LOGO_PRESET ||
+      process.env.CLOUDINARY_LOGO_PRESET ||
+      "fpt_ico_partner_logo";
+    const maxFileSize = 5 * 1024 * 1024; // 5 MB
+    const timestamp = Math.floor(Date.now() / 1000);
+    const allowedFormats = "jpg,jpeg,png,webp";
+
+    const paramsToSign: Record<string, string | number> = {
+      folder,
+      timestamp,
+      upload_preset: uploadPreset,
+    };
+
+    const signature = cloudinary.utils.api_sign_request(paramsToSign, apiSecret);
+
+    return {
+      success: true,
+      authorization: {
+        cloudName,
+        apiKey,
+        timestamp,
+        folder,
+        signature,
+        uploadPreset,
+        allowedFormats,
+        maxFileSize,
+      },
+    };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Failed to generate showcase upload signature.";
+    return { success: false, error: msg };
+  }
+}
+

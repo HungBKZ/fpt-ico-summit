@@ -49,7 +49,11 @@ export type AuditAction =
   | "SUMMIT_ACTIVITY_UNSELECTED"
   | "SUMMIT_ACTIVITY_ATTENDANCE_MARKED"
   | "SUMMIT_ACTIVITY_ATTENDANCE_REMOVED"
-  | "SUMMIT_REPORT_EXPORTED";
+  | "SUMMIT_REPORT_EXPORTED"
+  | "SHOWCASE_ENTRY_CREATED"
+  | "SHOWCASE_ENTRY_UPDATED"
+  | "SHOWCASE_ENTRY_VISIBILITY_CHANGED"
+  | "SHOWCASE_LOGO_UPDATED";
 
 export interface AuditLog {
   _id?: ObjectId;
@@ -68,6 +72,9 @@ export interface AuditLog {
 
   /** Target Organization ID affected (if applicable) */
   organizationId?: ObjectId;
+
+  /** Target PartnerShowcaseEntry ID affected (if applicable) */
+  showcaseEntryId?: ObjectId;
 
   /**
    * Additional non-sensitive contextual metadata.

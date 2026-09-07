@@ -744,7 +744,76 @@ async function run() {
     await ensureIndex(attendanceCol, { activityId: 1, attendedAt: -1 }, { name: "idx_attendance_activity_time" });
     await ensureIndex(attendanceCol, { activityId: 1, source: 1 }, { name: "idx_attendance_activity_source" });
 
-    console.log("MongoDB Phase 5E initialization completed successfully.");
+    // ── 14. partnerShowcaseEntries ──────────────────────────────────────────
+    const showcaseVal = {
+      $and: [
+        {
+          $jsonSchema: {
+            bsonType: "object",
+            required: [
+              "displayName",
+              "relationshipStatus",
+              "isVisible",
+              "displayOrder",
+              "displayConsentConfirmed",
+              "createdBy",
+              "createdAt",
+              "updatedAt",
+            ],
+            properties: {
+              displayName: { bsonType: "string", minLength: 1 },
+              country: { bsonType: "string" },
+              websiteUrl: { bsonType: "string" },
+              logo: {
+                bsonType: "object",
+                required: ["publicId", "secureUrl"],
+                properties: {
+                  publicId: { bsonType: "string", minLength: 1 },
+                  secureUrl: { bsonType: "string", minLength: 1 },
+                  width: { bsonType: ["int", "double", "long"] },
+                  height: { bsonType: ["int", "double", "long"] },
+                },
+              },
+              relationshipStatus: { enum: ["INVITED", "CONFIRMED", "NETWORK_PARTNER"] },
+              isVisible: { bsonType: "bool" },
+              displayOrder: { bsonType: ["int", "double", "long"] },
+              organizationId: { bsonType: ["objectId", "null"] },
+              displayConsentConfirmed: { bsonType: "bool" },
+              createdBy: { bsonType: "objectId" },
+              createdAt: { bsonType: "date" },
+              updatedAt: { bsonType: "date" },
+            },
+          },
+        },
+        {
+          $or: [
+            { isVisible: false },
+            {
+              $and: [
+                { isVisible: true },
+                { displayConsentConfirmed: true },
+                { "logo.publicId": { $type: "string" } },
+                { "logo.secureUrl": { $type: "string" } },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    const showcaseCol = await initCollection(db, "partnerShowcaseEntries", showcaseVal);
+    await ensureIndex(showcaseCol, { isVisible: 1, displayOrder: 1 }, { name: "idx_showcase_visible_order" });
+    await ensureIndex(showcaseCol, { relationshipStatus: 1 }, { name: "idx_showcase_relationship_status" });
+    await ensureIndex(
+      showcaseCol,
+      { organizationId: 1 },
+      {
+        name: "uniq_showcase_org_id",
+        unique: true,
+        partialFilterExpression: { organizationId: { $type: "objectId" } },
+      }
+    );
+
+    console.log("MongoDB initialization with Partner Showcase completed successfully.");
   } catch (err) {
     console.error("MongoDB initialization failed:", err.message);
     process.exit(1);
