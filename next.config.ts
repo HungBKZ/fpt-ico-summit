@@ -24,6 +24,15 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // Cap workers on local Windows developer environments to prevent Node.js 24 worker thread memory crashes
+  ...(process.platform === "win32" && !process.env.VERCEL
+    ? {
+        experimental: {
+          cpus: 1,
+          workerThreads: false,
+        },
+      }
+    : {}),
 };
 
 export default nextConfig;

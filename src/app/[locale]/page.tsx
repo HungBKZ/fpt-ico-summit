@@ -9,6 +9,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { HeroSection } from "@/components/sections/HeroSection";
 import { StatsStrip } from "@/components/sections/StatsStrip";
+import { PartnerShowcaseMarquee } from "@/components/sections/PartnerShowcaseMarquee";
 import { PillarsSection } from "@/components/sections/PillarsSection";
 import { ExperienceGrid } from "@/components/sections/ExperienceGrid";
 import { ProgramOverview } from "@/components/sections/ProgramOverview";
@@ -47,6 +48,7 @@ export default async function LocalizedHomePage({
       <main id="main-content" tabIndex={-1} style={{ flex: 1 }}>
         <HeroSection locale={locale} dict={dict} />
         <StatsStrip locale={locale} dict={dict} />
+        <PartnerShowcaseMarquee locale={locale} dict={dict} />
 
         <PillarsSection locale={locale} dict={dict} />
         <ExperienceGrid locale={locale} dict={dict} />

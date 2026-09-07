@@ -301,6 +301,34 @@
     top: 1rem;
   }
 
+  /* Infinite Marquee Animation for Partner Showcase */
+  @keyframes marquee-scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-100%);
+    }
+  }
+
+  .animate-marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee-scroll 42s linear infinite;
+  }
+
+  .animate-marquee-track:hover,
+  .marquee-track-wrapper:hover .animate-marquee-track {
+    animation-play-state: paused;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-marquee-track {
+      animation: none !important;
+      transform: none !important;
+    }
+  }
+
   /* Alternate section background */
   .bg-alt {
     background: linear-gradient(180deg, var(--color-bg-alt) 0%, #edf2fb 100%);

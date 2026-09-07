@@ -385,6 +385,9 @@ async function run() {
               "SUMMIT_ACTIVITY_SUBMITTED",
               "SUMMIT_ACTIVITY_CHANGES_REQUESTED",
               "SUMMIT_ACTIVITY_CONTENT_APPROVED",
+              "WORKSHOP_TOPIC_SUBMITTED",
+              "WORKSHOP_TOPIC_ACCEPTED",
+              "WORKSHOP_TOPIC_CHANGES_REQUESTED",
               "SUMMIT_PARTICIPANT_CHECKED_IN",
               "SUMMIT_BOOTH_ASSIGNED",
               "SUMMIT_BOOTH_UPDATED",
@@ -396,12 +399,17 @@ async function run() {
               "SUMMIT_ACTIVITY_ATTENDANCE_MARKED",
               "SUMMIT_ACTIVITY_ATTENDANCE_REMOVED",
               "SUMMIT_REPORT_EXPORTED",
+              "SHOWCASE_ENTRY_CREATED",
+              "SHOWCASE_ENTRY_UPDATED",
+              "SHOWCASE_ENTRY_VISIBILITY_CHANGED",
+              "SHOWCASE_LOGO_UPDATED",
             ],
           },
           actorUserId: { bsonType: "objectId" },
           targetUserId: { bsonType: "objectId" },
           accountRequestId: { bsonType: "objectId" },
           organizationId: { bsonType: "objectId" },
+          showcaseEntryId: { bsonType: "objectId" },
           metadata: { bsonType: "object" },
           createdAt: { bsonType: "date" },
         },
@@ -744,7 +752,75 @@ async function run() {
     await ensureIndex(attendanceCol, { activityId: 1, attendedAt: -1 }, { name: "idx_attendance_activity_time" });
     await ensureIndex(attendanceCol, { activityId: 1, source: 1 }, { name: "idx_attendance_activity_source" });
 
-    console.log("MongoDB Phase 5E initialization completed successfully.");
+    // ── 14. partnerShowcaseEntries ──────────────────────────────────────────
+    const showcaseVal = {
+      $and: [
+        {
+          $jsonSchema: {
+            bsonType: "object",
+            required: [
+              "displayName",
+              "relationshipStatus",
+              "isVisible",
+              "displayOrder",
+              "displayConsentConfirmed",
+              "createdBy",
+              "createdAt",
+              "updatedAt",
+            ],
+            properties: {
+              displayName: { bsonType: "string", minLength: 1 },
+              country: { bsonType: ["string", "null"] },
+              websiteUrl: { bsonType: ["string", "null"] },
+              logo: {
+                bsonType: ["object", "null"],
+                properties: {
+                  publicId: { bsonType: "string", minLength: 1 },
+                  secureUrl: { bsonType: "string", minLength: 1 },
+                  width: { bsonType: ["int", "double", "long", "null"] },
+                  height: { bsonType: ["int", "double", "long", "null"] },
+                },
+              },
+              relationshipStatus: { enum: ["INVITED", "CONFIRMED", "NETWORK_PARTNER"] },
+              isVisible: { bsonType: "bool" },
+              displayOrder: { bsonType: ["int", "double", "long"] },
+              organizationId: { bsonType: ["objectId", "null"] },
+              displayConsentConfirmed: { bsonType: "bool" },
+              createdBy: { bsonType: "objectId" },
+              createdAt: { bsonType: "date" },
+              updatedAt: { bsonType: "date" },
+            },
+          },
+        },
+        {
+          $or: [
+            { isVisible: false },
+            {
+              $and: [
+                { isVisible: true },
+                { displayConsentConfirmed: true },
+                { "logo.publicId": { $type: "string", $ne: "" } },
+                { "logo.secureUrl": { $type: "string", $ne: "" } },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    const showcaseCol = await initCollection(db, "partnerShowcaseEntries", showcaseVal);
+    await ensureIndex(showcaseCol, { isVisible: 1, displayOrder: 1 }, { name: "idx_showcase_visible_order" });
+    await ensureIndex(showcaseCol, { relationshipStatus: 1 }, { name: "idx_showcase_relationship_status" });
+    await ensureIndex(
+      showcaseCol,
+      { organizationId: 1 },
+      {
+        name: "uniq_showcase_org_id",
+        unique: true,
+        partialFilterExpression: { organizationId: { $type: "objectId" } },
+      }
+    );
+
+    console.log("MongoDB initialization with Partner Showcase completed successfully.");
   } catch (err) {
     console.error("MongoDB initialization failed:", err.message);
     process.exit(1);

@@ -43,6 +43,9 @@ export const COLLECTIONS = {
 
   /** Staff-verified optional Workshop & Stage Performance attendance records (Phase 5E) */
   SUMMIT_ACTIVITY_ATTENDANCES: "summitActivityAttendances",
+
+  /** Admin-managed partner logo showcase entries */
+  PARTNER_SHOWCASE_ENTRIES: "partnerShowcaseEntries",
 } as const;
 
 export type CollectionName = (typeof COLLECTIONS)[keyof typeof COLLECTIONS];

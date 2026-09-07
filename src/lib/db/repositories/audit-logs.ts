@@ -15,6 +15,7 @@ export interface CreateAuditLogInput {
   targetUserId?: ObjectId;
   accountRequestId?: ObjectId;
   organizationId?: ObjectId;
+  showcaseEntryId?: ObjectId;
   metadata?: Record<string, unknown>;
 }
 
@@ -64,6 +65,7 @@ export async function createAuditEntry(
   if (input.targetUserId) doc.targetUserId = input.targetUserId;
   if (input.accountRequestId) doc.accountRequestId = input.accountRequestId;
   if (input.organizationId) doc.organizationId = input.organizationId;
+  if (input.showcaseEntryId) doc.showcaseEntryId = input.showcaseEntryId;
 
   const sanitizedMeta = sanitizeMetadata(input.metadata);
   if (sanitizedMeta && Object.keys(sanitizedMeta).length > 0) {
