@@ -3,6 +3,7 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import {
   programDays,
   continuousActivities,
+  partnerArrivalNotice,
   type ProgramDay,
   type TimeSlot,
 } from "@/data/program";
@@ -68,6 +69,7 @@ function DayCard({ day, locale, dict }: { day: ProgramDay; locale: Locale; dict:
   const hasSlots = Object.keys(day.slots).length > 0;
   const dayLabelStr = getLocalizedText(day.dayLabel, locale);
   const titleStr = getLocalizedText(day.title, locale);
+  const subtitleStr = getLocalizedText(day.subtitle, locale);
   const dateStr = getLocalizedText(day.date, locale);
   const descStr = getLocalizedText(day.description, locale);
 
@@ -78,7 +80,7 @@ function DayCard({ day, locale, dict }: { day: ProgramDay; locale: Locale; dict:
   };
 
   return (
-    <article className="program-day-card" aria-label={`${dayLabelStr}: ${titleStr}`}>
+    <article className="program-day-card flex flex-col h-full" aria-label={`${dayLabelStr} — ${titleStr}`}>
       {/* Header */}
       <div className={`program-day-header program-day-header--${day.icon}`}>
         <div className={`program-day-badge program-day-badge--${day.icon}`}>
@@ -86,26 +88,49 @@ function DayCard({ day, locale, dict }: { day: ProgramDay; locale: Locale; dict:
           {dayLabelStr}
         </div>
         <p className="program-day-date">{dateStr}</p>
-        <h3 className="program-day-title">{titleStr}</h3>
-        <p className="program-day-desc">{descStr}</p>
+        <h3 className="program-day-title text-base sm:text-lg font-bold text-slate-900 leading-snug">
+          {titleStr}
+        </h3>
+        {subtitleStr && (
+          <p className="text-xs font-semibold text-blue-700 mt-1 uppercase tracking-wider">
+            {subtitleStr}
+          </p>
+        )}
+        <p className="program-day-desc text-xs text-slate-600 mt-2 leading-relaxed">
+          {descStr}
+        </p>
       </div>
 
       {/* Slot activity lists */}
       {hasSlots && (
-        <div className="program-day-slots">
+        <div className="program-day-slots flex-1 flex flex-col">
           {slotOrder.map((slot) => {
             const activities = day.slots[slot];
             if (!activities || activities.length === 0) return null;
             return (
-              <div key={slot}>
+              <div key={slot} className="mb-4 last:mb-0">
                 <p className="program-slot-label">{slotLabels[slot]}</p>
-                <ul className="program-slot-activities">
+                <ul className="program-slot-activities space-y-2">
                   {activities.map((activity, actIdx) => {
                     const actTitle = getLocalizedText(activity.title, locale);
                     return (
-                      <li key={`${actTitle}-${actIdx}`} className="program-activity-item">
-                        <span className="program-activity-dot" aria-hidden="true" />
-                        {actTitle}
+                      <li key={`${actTitle}-${actIdx}`} className="program-activity-item flex items-start gap-2 text-xs sm:text-sm text-slate-700">
+                        <span className="program-activity-dot mt-1.5 shrink-0" aria-hidden="true" />
+                        <div className="flex-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                          {activity.time && (
+                            <span className="font-semibold text-slate-900 text-xs px-1.5 py-0.5 bg-slate-100 rounded border border-slate-200/80 shrink-0">
+                              {activity.time}
+                            </span>
+                          )}
+                          <span className="font-medium text-slate-800 leading-snug">
+                            {actTitle}
+                          </span>
+                          {activity.isOptional && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200/80">
+                              {locale === "vi" ? "Không bắt buộc" : "Optional"}
+                            </span>
+                          )}
+                        </div>
                       </li>
                     );
                   })}
@@ -120,6 +145,10 @@ function DayCard({ day, locale, dict }: { day: ProgramDay; locale: Locale; dict:
 }
 
 export function ProgramOverview({ locale, dict }: ProgramOverviewProps) {
+  const arrivalTag = getLocalizedText(partnerArrivalNotice.tag, locale);
+  const arrivalTitle = getLocalizedText(partnerArrivalNotice.title, locale);
+  const arrivalDesc = getLocalizedText(partnerArrivalNotice.description, locale);
+
   return (
     <section
       id="program"
@@ -141,6 +170,39 @@ export function ProgramOverview({ locale, dict }: ProgramOverviewProps) {
             />
           </RevealOnScroll>
         </div>
+
+        {/* 19 Nov Partner Logistics Callout */}
+        <RevealOnScroll delay={40}>
+          <div className="mb-6 p-3.5 sm:p-4 bg-white border border-slate-200/90 rounded-2xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-slate-700">
+            <div className="flex items-start sm:items-center gap-3">
+              <span className="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-blue-50 text-blue-600 shrink-0">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                  <polyline points="10 9 9 9 8 9" />
+                </svg>
+              </span>
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
+                    {arrivalTag}
+                  </span>
+                  <span className="text-xs sm:text-sm font-bold text-slate-900">
+                    {arrivalTitle}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  {arrivalDesc}
+                </p>
+              </div>
+            </div>
+            <div className="text-[11px] text-slate-500 shrink-0 font-medium sm:text-right pl-11 sm:pl-0">
+              {locale === "vi" ? "Lưu ý hậu cần đối tác" : "Partner Logistics"}
+            </div>
+          </div>
+        </RevealOnScroll>
 
         {/* Day cards */}
         <div className="program-days-grid">
@@ -178,6 +240,7 @@ export function ProgramOverview({ locale, dict }: ProgramOverviewProps) {
             />
             {dict.program.continuousTitle}
           </p>
+
           <div className="program-continuous">
             {continuousActivities.map((activity, idx) => {
               const actTitle = getLocalizedText(activity.title, locale);

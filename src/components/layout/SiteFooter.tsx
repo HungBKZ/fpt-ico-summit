@@ -49,6 +49,7 @@ export function SiteFooter({ locale, dict, isDashboard = false }: SiteFooterProp
     { label: dict.nav.program,      href: "#program" },
     { label: dict.nav.explore,      href: "#explore" },
     { label: dict.nav.partners,     href: "#partners" },
+    { label: dict.nav.packages || (locale === "vi" ? "Gói tham gia" : "Packages"), href: "#packages" },
     { label: dict.nav.scholarships, href: "#scholarships" },
     { label: dict.nav.venue,        href: "#venue" },
     { label: dict.nav.faq,          href: "#faq" },

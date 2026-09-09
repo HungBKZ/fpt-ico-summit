@@ -20,6 +20,7 @@ export function RegistrationCta({ locale, dict }: RegistrationCtaProps) {
       aria-labelledby="reg-heading"
       className="reg-cta-section"
     >
+      <div id="registration" style={{ position: "absolute", top: "-80px" }} aria-hidden="true" />
       {/* Diagonal brand motif */}
       <div className="brand-motif" aria-hidden="true" />
 

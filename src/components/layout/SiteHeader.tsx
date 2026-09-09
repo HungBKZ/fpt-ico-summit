@@ -34,6 +34,7 @@ export function SiteHeader({ locale, dict }: SiteHeaderProps) {
     { label: dict.nav.program,      href: "#program" },
     { label: dict.nav.explore,      href: "#explore" },
     { label: dict.nav.partners,     href: "#partners" },
+    { label: dict.nav.packages || (locale === "vi" ? "Gói tham gia" : "Packages"), href: "#packages" },
     { label: dict.nav.scholarships,  href: "#scholarships" },
     { label: dict.nav.venue,        href: "#venue" },
     { label: dict.nav.faq,          href: "#faq" },
@@ -48,7 +49,7 @@ export function SiteHeader({ locale, dict }: SiteHeaderProps) {
 
   // Lightweight IntersectionObserver scrollspy
   useEffect(() => {
-    const sectionIds = ["about", "program", "explore", "partners", "scholarships", "venue", "faq"];
+    const sectionIds = ["about", "program", "explore", "partners", "packages", "scholarships", "venue", "faq"];
     const elements = sectionIds
       .map((id) => document.getElementById(id))
       .filter((el): el is HTMLElement => el !== null);

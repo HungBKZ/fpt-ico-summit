@@ -9,7 +9,13 @@ interface MekongSectionProps {
   dict: Dictionary;
 }
 
-export function MekongSection({ dict }: MekongSectionProps) {
+export function MekongSection({ locale, dict }: MekongSectionProps) {
+  const chipText = dict.mekong.chip || (
+    locale === "vi"
+      ? "22 tháng 11, 2026 · Trải nghiệm văn hóa ngoài khuôn viên"
+      : "22 November 2026 · Off-campus cultural experience"
+  );
+
   return (
     <section
       id="mekong"
@@ -46,7 +52,7 @@ export function MekongSection({ dict }: MekongSectionProps) {
       <div className="site-container mekong-content">
         <div
           style={{
-            maxWidth: "600px",
+            maxWidth: "640px",
             display: "flex",
             flexDirection: "column",
             gap: "1.5rem",
@@ -76,7 +82,7 @@ export function MekongSection({ dict }: MekongSectionProps) {
             {dict.mekong.subtitle}
           </p>
 
-          {/* PRE-EVENT callout chip */}
+          {/* 22 Nov callout chip */}
           <div
             style={{
               display: "inline-flex",
@@ -112,7 +118,7 @@ export function MekongSection({ dict }: MekongSectionProps) {
                 letterSpacing: "0.03em",
               }}
             >
-              PRE-EVENT · 20 November 2026
+              {chipText}
             </span>
           </div>
         </div>

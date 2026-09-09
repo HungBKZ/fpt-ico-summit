@@ -15,6 +15,7 @@ export type Dictionary = {
     program: string;
     explore: string;
     partners: string;
+    packages?: string;
     scholarships: string;
     venue: string;
     faq: string;
@@ -101,7 +102,31 @@ export type Dictionary = {
     tabs: { all: string; university: string; consulate: string };
     emptyState: string;
   };
-  mekong: { eyebrow: string; title: string; subtitle: string; cta360: string };
+  packages: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    supportingNote?: string;
+    tabs: { partner: string; consular: string };
+    cta: string;
+    ctaNote: string;
+    viewFullBenefits: string;
+    hideFullBenefits: string;
+    boothSupportNote: string;
+    hotelNights: string;
+    delegatesLabel: string;
+    included: string;
+    notIncluded: string;
+    allBenefitsTitle: string;
+    closeDetails: string;
+    keyBenefitsLabel?: string;
+    centralCta?: {
+      title: string;
+      description: string;
+      button: string;
+    };
+  };
+  mekong: { eyebrow: string; title: string; subtitle: string; cta360: string; chip?: string };
   venue: {
     eyebrow: string;
     title: string;
