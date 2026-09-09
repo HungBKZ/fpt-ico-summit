@@ -37,8 +37,8 @@ export interface PackageItem {
 }
 
 export const boothSupportNote: LocalizedText = {
-  en: "Each booth is supported by 02 FPT students.",
-  vi: "Mỗi gian hàng được hỗ trợ bởi 02 sinh viên FPT.",
+  en: "Each consular booth is supported by 02 FPT student assistants.",
+  vi: "Mỗi gian hàng Lãnh sự được hỗ trợ bởi 02 sinh viên FPT.",
 };
 
 export const standardPackages: PackageItem[] = [
@@ -64,8 +64,8 @@ export const standardPackages: PackageItem[] = [
       vi: "2 đại biểu · 3 đêm (Khách sạn 3 sao)",
     },
     booth: {
-      en: "Dedicated booth 3 × 3 m (Supported by 02 FPT students)",
-      vi: "Gian hàng riêng 3 × 3 m (Được hỗ trợ bởi 02 sinh viên FPT)",
+      en: "Dedicated booth 3 × 3 m",
+      vi: "Gian hàng riêng 3 × 3 m",
     },
     delegates: {
       en: "2 official representatives",
@@ -77,7 +77,7 @@ export const standardPackages: PackageItem[] = [
     },
     keyHighlights: [
       { en: "3-day Summit access for 2 representatives", vi: "Tham dự trọn vẹn 3 ngày cho 2 đại biểu" },
-      { en: "3-star accommodation: 2 representatives / 3 nights", vi: "Khách sạn 3 sao: 2 đại biểu / 3 đêm" },
+      { en: "Hotel accommodation: 2 representatives / 3 nights", vi: "Khách sạn lưu trú: 2 đại biểu / 3 đêm" },
       { en: "Dedicated 3 × 3 m booth", vi: "Gian hàng triển lãm riêng 3 × 3 m" },
       { en: "Opening Ceremony priority seating", vi: "Vị trí ưu tiên tại Lễ Khai mạc" },
       { en: "Mekong Discovery Day: 2 representatives", vi: "Ngày Khám phá Mekong: 2 đại biểu" },
@@ -176,7 +176,7 @@ export const standardPackages: PackageItem[] = [
       },
       {
         category: { en: "Exhibition Booth", vi: "Gian hàng Triển lãm" },
-        value: { en: "Dedicated booth 3 × 3 m (Supported by 02 FPT students)", vi: "Gian hàng riêng 3 × 3 m (Hỗ trợ bởi 02 sinh viên FPT)" },
+        value: { en: "Dedicated booth 3 × 3 m", vi: "Gian hàng riêng 3 × 3 m" },
         isIncluded: true,
       },
       {
@@ -213,8 +213,8 @@ export const standardPackages: PackageItem[] = [
       vi: "1 đại biểu · 3 đêm (Khách sạn 3 sao)",
     },
     booth: {
-      en: "Shared booth 1.5 × 3 m (Supported by 02 FPT students)",
-      vi: "Gian hàng chia sẻ 1.5 × 3 m (Được hỗ trợ bởi 02 sinh viên FPT)",
+      en: "Shared booth 1.5 × 3 m",
+      vi: "Gian hàng chia sẻ 1.5 × 3 m",
     },
     delegates: {
       en: "1 official representative",
@@ -226,7 +226,7 @@ export const standardPackages: PackageItem[] = [
     },
     keyHighlights: [
       { en: "3-day Summit access for 1 representative", vi: "Tham dự trọn vẹn 3 ngày cho 1 đại biểu" },
-      { en: "3-star accommodation: 1 representative / 3 nights", vi: "Khách sạn 3 sao: 1 đại biểu / 3 đêm" },
+      { en: "Hotel accommodation: 1 representative / 3 nights", vi: "Khách sạn lưu trú: 1 đại biểu / 3 đêm" },
       { en: "Shared 1.5 × 3 m booth", vi: "Gian hàng chia sẻ 1.5 × 3 m" },
       { en: "Opening Ceremony reserved seating", vi: "Vị trí đặt trước tại Lễ Khai mạc" },
       { en: "Mekong Discovery Day: 1 representative", vi: "Ngày Khám phá Mekong: 1 đại biểu" },
@@ -325,7 +325,7 @@ export const standardPackages: PackageItem[] = [
       },
       {
         category: { en: "Exhibition Booth", vi: "Gian hàng Triển lãm" },
-        value: { en: "Shared booth 1.5 × 3 m (Supported by 02 FPT students)", vi: "Gian hàng chia sẻ 1.5 × 3 m (Hỗ trợ bởi 02 sinh viên FPT)" },
+        value: { en: "Shared booth 1.5 × 3 m", vi: "Gian hàng chia sẻ 1.5 × 3 m" },
         isIncluded: true,
       },
       {
@@ -372,7 +372,7 @@ export const standardPackages: PackageItem[] = [
     },
     keyHighlights: [
       { en: "3-day Summit access for 1 representative", vi: "Tham dự trọn vẹn 3 ngày cho 1 đại biểu" },
-      { en: "3-star accommodation: 1 representative / 3 nights", vi: "Khách sạn 3 sao: 1 đại biểu / 3 đêm" },
+      { en: "Hotel accommodation: 1 representative / 3 nights", vi: "Khách sạn lưu trú: 1 đại biểu / 3 đêm" },
       { en: "Welcome Luncheon & Opening Ceremony", vi: "Tiệc trưa Chào mừng & Lễ Khai mạc" },
       { en: "Mekong Discovery Day: 1 representative", vi: "Ngày Khám phá Mekong: 1 đại biểu" },
       { en: "Workshop / session participation", vi: "Tham dự hội thảo & các phiên chuyên đề" },
@@ -518,7 +518,7 @@ export const standardPackages: PackageItem[] = [
     },
     keyHighlights: [
       { en: "1-day Main Summit access for 1 representative", vi: "Tham dự Ngày Hội nghị Chính cho 1 đại biểu" },
-      { en: "3-star accommodation: 1 representative / 1 night", vi: "Khách sạn 3 sao: 1 đại biểu / 1 đêm" },
+      { en: "Hotel accommodation: 1 representative / 1 night", vi: "Khách sạn lưu trú: 1 đại biểu / 1 đêm" },
       { en: "Opening Ceremony", vi: "Tham dự Lễ Khai mạc" },
       { en: "Welcome Luncheon", vi: "Tiệc trưa Chào mừng" },
       { en: "International networking", vi: "Kết nối & giao lưu quốc tế" },
@@ -657,7 +657,7 @@ export const consularPackages: PackageItem[] = [
       vi: "2 đại biểu · 3 đêm (Khách sạn 3 sao)",
     },
     booth: {
-      en: "Special booth 3 × 3 m (Supported by 02 FPT students)",
+      en: "Special booth 3 × 3 m (Supported by 02 FPT student assistants)",
       vi: "Gian hàng đặc biệt 3 × 3 m (Được hỗ trợ bởi 02 sinh viên FPT)",
     },
     delegates: {
@@ -670,7 +670,7 @@ export const consularPackages: PackageItem[] = [
     },
     keyHighlights: [
       { en: "3-day Summit access for 2 consular representatives", vi: "Tham dự trọn vẹn 3 ngày cho 2 đại biểu lãnh sự" },
-      { en: "3-star accommodation: 2 representatives / 3 nights", vi: "Khách sạn 3 sao: 2 đại biểu / 3 đêm" },
+      { en: "Hotel accommodation: 2 representatives / 3 nights", vi: "Khách sạn lưu trú: 2 đại biểu / 3 đêm" },
       { en: "Dedicated Consular Booth (3 × 3 m)", vi: "Gian hàng Ngoại giao riêng biệt (3 × 3 m)" },
       { en: "Opening Ceremony priority seating & Welcome Luncheon", vi: "Vị trí ưu tiên Lễ Khai mạc & Tiệc trưa Chào mừng" },
       { en: "Farewell Dinner (2 reps) & Tourism Connection Forum", vi: "Tiệc Giao lưu Chia tay (2 đại biểu) & Diễn đàn Du lịch" },
@@ -684,7 +684,7 @@ export const consularPackages: PackageItem[] = [
       },
       {
         category: { en: "Special Booth", vi: "Gian hàng Đặc biệt" },
-        value: { en: "3 × 3 m (Supported by 02 FPT students)", vi: "3 × 3 m (Hỗ trợ bởi 02 sinh viên FPT)" },
+        value: { en: "3 × 3 m (Supported by 02 FPT student assistants)", vi: "3 × 3 m (Hỗ trợ bởi 02 sinh viên FPT)" },
         isIncluded: true,
       },
       {
@@ -806,7 +806,7 @@ export const consularPackages: PackageItem[] = [
       vi: "2 đại biểu · 1 đêm (Khách sạn 3 sao)",
     },
     booth: {
-      en: "Special booth 3 × 3 m (Supported by 02 FPT students)",
+      en: "Special booth 3 × 3 m (Supported by 02 FPT student assistants)",
       vi: "Gian hàng đặc biệt 3 × 3 m (Được hỗ trợ bởi 02 sinh viên FPT)",
     },
     delegates: {
@@ -819,7 +819,7 @@ export const consularPackages: PackageItem[] = [
     },
     keyHighlights: [
       { en: "1-day Main Summit access for 2 consular representatives", vi: "Tham dự Ngày Hội nghị Chính cho 2 đại biểu lãnh sự" },
-      { en: "3-star accommodation: 2 representatives / 1 night", vi: "Khách sạn 3 sao: 2 đại biểu / 1 đêm" },
+      { en: "Hotel accommodation: 2 representatives / 1 night", vi: "Khách sạn lưu trú: 2 đại biểu / 1 đêm" },
       { en: "Dedicated Consular Booth (3 × 3 m)", vi: "Gian hàng Ngoại giao riêng biệt (3 × 3 m)" },
       { en: "Opening Ceremony priority seating & Welcome Luncheon", vi: "Vị trí ưu tiên Lễ Khai mạc & Tiệc trưa Chào mừng" },
       { en: "High-level bilateral meetings & networking", vi: "Đối thoại cấp cao & kết nối hợp tác" },
@@ -833,7 +833,7 @@ export const consularPackages: PackageItem[] = [
       },
       {
         category: { en: "Special Booth", vi: "Gian hàng Đặc biệt" },
-        value: { en: "3 × 3 m (Supported by 02 FPT students)", vi: "3 × 3 m (Hỗ trợ bởi 02 sinh viên FPT)" },
+        value: { en: "3 × 3 m (Supported by 02 FPT student assistants)", vi: "3 × 3 m (Hỗ trợ bởi 02 sinh viên FPT)" },
         isIncluded: true,
       },
       {

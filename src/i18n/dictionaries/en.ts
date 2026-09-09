@@ -11,6 +11,7 @@ export const en: Dictionary = {
     explore: "Explore",
     partners: "Partners",
     packages: "Packages",
+    more: "More",
     scholarships: "Scholarships",
     venue: "Venue",
     faq: "FAQ",
