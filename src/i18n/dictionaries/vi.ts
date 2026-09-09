@@ -10,6 +10,7 @@ export const vi: Dictionary = {
     program: "Chương trình",
     explore: "Khám phá",
     partners: "Đối tác",
+    packages: "Gói tham gia",
     scholarships: "Học bổng",
     venue: "Địa điểm",
     faq: "Hỏi đáp",
@@ -47,7 +48,7 @@ export const vi: Dictionary = {
     stat1: {
       number: "4,000+",
       label: "Lượt học sinh, sinh viên dự kiến",
-      desc: "4.000 hoặc nhiều hơn lượt học sinh, sinh viên dự kiến tham dự",
+      desc: "Hơn 4.000 học sinh, sinh viên (1.000+ sinh viên Đại học FPT & 3.000+ học sinh THPT)",
     },
     stat2: {
       number: "42",
@@ -137,9 +138,9 @@ export const vi: Dictionary = {
       afternoon: "Buổi chiều",
       evening: "Buổi tối",
     },
-    continuousTitle: "Diễn ra xuyên suốt 21–22 tháng 11",
+    continuousTitle: "Diễn ra xuyên suốt 20–21 tháng 11",
     continuousSubtitle:
-      "Hoạt động liên tục trong Ngày 1 & Ngày 2",
+      "Hoạt động triển lãm, tư vấn và hội thảo liên tục tại khuôn viên trường",
   },
   expo: {
     eyebrow: "Triển lãm Quốc tế",
@@ -166,6 +167,35 @@ export const vi: Dictionary = {
     emptyState:
       "Các đối tác đã được xác nhận sẽ được cập nhật tại đây.",
   },
+  packages: {
+    eyebrow: "Gói Tham Dự",
+    title: "Gói Hợp tác & Tham dự Lãnh sự",
+    subtitle:
+      "Khám phá các hình thức tham gia được thiết kế dành cho các trường đại học, viện nghiên cứu và đại diện quốc tế.",
+    supportingNote: "Liên hệ Ban Tổ chức để nhận thông tin chi tiết về điều kiện và quy trình tham gia.",
+    tabs: {
+      partner: "Gói Đối tác Tiêu chuẩn",
+      consular: "Tham dự Lãnh sự",
+    },
+    cta: "Liên hệ Ban Tổ chức",
+    ctaNote: "Liên hệ Ban Tổ chức để được tư vấn chi tiết về hình thức tham gia.",
+    viewFullBenefits: "Xem Toàn bộ Quyền lợi",
+    hideFullBenefits: "Thu gọn",
+    boothSupportNote: "Mỗi gian hàng được hỗ trợ bởi 02 sinh viên FPT.",
+    hotelNights: "Lưu trú Khách sạn",
+    delegatesLabel: "Đại biểu Chính thức",
+    included: "Bao gồm",
+    notIncluded: "Không bao gồm",
+    allBenefitsTitle: "Bảng Đối chiếu Chi tiết Toàn bộ Quyền lợi",
+    closeDetails: "Đóng chi tiết",
+    keyBenefitsLabel: "Đặc quyền Nổi bật",
+    centralCta: {
+      title: "Cần tư vấn hình thức tham gia phù hợp?",
+      description:
+        "Phòng Hợp tác Quốc tế sẵn sàng hỗ trợ đơn vị lựa chọn phương án tham gia phù hợp với nhu cầu hợp tác và kết nối.",
+      button: "Liên hệ Ban Tổ chức",
+    },
+  },
   scholarships: {
     eyebrow: "Học bổng",
     title: "Lộ trình tài trợ cho học tập và trao đổi quốc tế.",
@@ -181,10 +211,11 @@ export const vi: Dictionary = {
   },
   mekong: {
     eyebrow: "Trải nghiệm Mekong",
-    title: "Gặp gỡ Mekong bên ngoài hội trường",
+    title: "Khám phá Mekong ngoài không gian hội nghị",
     subtitle:
-      "Hội nghị tạo không gian để du khách quốc tế tiếp cận văn hóa, con người và nét đặc trưng sông nước Cần Thơ cùng vùng ĐBSCL thông qua hành trình khám phá văn hóa.",
+      "Ngày 22/11, các đại biểu có thể trải nghiệm văn hóa và đời sống cộng đồng Đồng bằng sông Cửu Long thông qua hành trình khám phá chợ nổi và tham quan Cồn Sơn.",
     cta360: "Khám phá Campus 360°",
+    chip: "22 tháng 11, 2026 · Trải nghiệm văn hóa ngoài khuôn viên",
   },
   venue: {
     eyebrow: "Địa điểm",

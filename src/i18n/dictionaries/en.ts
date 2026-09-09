@@ -10,6 +10,7 @@ export const en: Dictionary = {
     program: "Program",
     explore: "Explore",
     partners: "Partners",
+    packages: "Packages",
     scholarships: "Scholarships",
     venue: "Venue",
     faq: "FAQ",
@@ -47,7 +48,7 @@ export const en: Dictionary = {
     stat1: {
       number: "4,000+",
       label: "Expected student participants",
-      desc: "4,000 or more expected student participants",
+      desc: "4,000+ expected students (1,000+ FPT University students & 3,000+ high school students)",
     },
     stat2: {
       number: "42",
@@ -137,9 +138,9 @@ export const en: Dictionary = {
       afternoon: "Afternoon",
       evening: "Evening",
     },
-    continuousTitle: "Running throughout 21–22 November",
+    continuousTitle: "Running throughout 20–21 November",
     continuousSubtitle:
-      "Continuous activities during Summit Days 1 & 2",
+      "Continuous exhibition, consultation & workshop activities on campus",
   },
   expo: {
     eyebrow: "International Expo",
@@ -166,6 +167,35 @@ export const en: Dictionary = {
     emptyState:
       "Confirmed partners will appear here as participation is verified.",
   },
+  packages: {
+    eyebrow: "Participation Packages",
+    title: "Partner & Consular Packages",
+    subtitle:
+      "Explore participation options designed for universities, institutions and invited international representatives.",
+    supportingNote: "Contact the Organizing Committee for participation details.",
+    tabs: {
+      partner: "Standard Partner Packages",
+      consular: "Consular Participation",
+    },
+    cta: "Contact Organizing Committee",
+    ctaNote: "Contact the Organizing Committee for participation details.",
+    viewFullBenefits: "View Full Benefits",
+    hideFullBenefits: "Hide Details",
+    boothSupportNote: "Each booth is supported by 02 FPT students.",
+    hotelNights: "Hotel Stay",
+    delegatesLabel: "Official Representatives",
+    included: "Included",
+    notIncluded: "Not included",
+    allBenefitsTitle: "Comprehensive Benefit Comparison",
+    closeDetails: "Close Details",
+    keyBenefitsLabel: "Key Benefits",
+    centralCta: {
+      title: "Need help choosing the right participation option?",
+      description:
+        "Our International Cooperation Office can help identify the most suitable participation arrangement for your institution.",
+      button: "Contact Organizing Committee",
+    },
+  },
   scholarships: {
     eyebrow: "Scholarships",
     title: "Funding pathways for international study and exchange.",
@@ -183,8 +213,9 @@ export const en: Dictionary = {
     eyebrow: "The Mekong Experience",
     title: "Meet the Mekong beyond the conference hall",
     subtitle:
-      "The summit also creates space for international guests to encounter the culture, people and river-based character of Can Tho and the Mekong Delta through the program's cultural discovery journey.",
+      "On 22 November, participating delegates can experience the culture and community of the Mekong Delta through a floating market experience and a visit to Con Son Islet.",
     cta360: "Explore Campus in 360°",
+    chip: "22 November 2026 · Off-campus cultural experience",
   },
   venue: {
     eyebrow: "The Venue",

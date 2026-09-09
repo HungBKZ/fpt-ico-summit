@@ -16,6 +16,7 @@ import { ProgramOverview } from "@/components/sections/ProgramOverview";
 import { ExpoSection } from "@/components/sections/ExpoSection";
 import { WorkshopSection } from "@/components/sections/WorkshopSection";
 import { PartnersSection } from "@/components/sections/PartnersSection";
+import { PackagesSection } from "@/components/sections/PackagesSection";
 import { ScholarshipsSection } from "@/components/sections/ScholarshipsSection";
 import { MekongSection } from "@/components/sections/MekongSection";
 import { VenueSection } from "@/components/sections/VenueSection";
@@ -58,6 +59,7 @@ export default async function LocalizedHomePage({
         <WorkshopSection locale={locale} dict={dict} />
 
         <PartnersSection locale={locale} dict={dict} />
+        <PackagesSection locale={locale} dict={dict} />
         <ScholarshipsSection locale={locale} dict={dict} />
         <MekongSection locale={locale} dict={dict} />
         <VenueSection locale={locale} dict={dict} />

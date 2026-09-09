@@ -39,7 +39,11 @@ export function ExpoSection({ locale, dict }: ExpoSectionProps) {
             </RevealOnScroll>
 
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-              {["42 planned areas", dict.hero.datesValue].map((fact) => (
+              {[
+                locale === "vi" ? "42 khu vực & gian hàng" : "42 planned areas",
+                locale === "vi" ? "02 sinh viên hỗ trợ/gian hàng" : "02 student supporters per booth",
+                dict.hero.datesValue,
+              ].map((fact) => (
                 <span
                   key={fact}
                   style={{
