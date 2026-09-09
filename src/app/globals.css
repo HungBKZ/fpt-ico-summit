@@ -456,6 +456,13 @@
   .nav-link:focus-visible::after {
     transform: scaleX(1);
   }
+  .nav-link[data-active="true"] {
+    color: var(--color-blue);
+    font-weight: 600;
+  }
+  .nav-link[data-active="true"]::after {
+    transform: scaleX(1);
+  }
 
   /* Primary CTA button (Navy/Royal blue dominant — FPT ICO Summit palette) */
   .btn-primary {

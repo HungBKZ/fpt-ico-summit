@@ -11,6 +11,7 @@ export const vi: Dictionary = {
     explore: "Khám phá",
     partners: "Đối tác",
     packages: "Gói tham gia",
+    more: "Thêm",
     scholarships: "Học bổng",
     venue: "Địa điểm",
     faq: "Hỏi đáp",

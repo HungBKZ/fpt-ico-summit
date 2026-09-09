@@ -16,6 +16,7 @@ export type Dictionary = {
     explore: string;
     partners: string;
     packages?: string;
+    more?: string;
     scholarships: string;
     venue: string;
     faq: string;

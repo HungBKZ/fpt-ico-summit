@@ -22,23 +22,31 @@ interface SiteHeaderProps {
 
 export function SiteHeader({ locale, dict }: SiteHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("");
   const menuRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
+  const moreDropdownRef = useRef<HTMLLIElement>(null);
 
   const hasRegistration = isRegistrationOpen(siteConfig.registrationUrl);
 
-  const navLinks = [
-    { label: dict.nav.about,        href: "#about" },
-    { label: dict.nav.program,      href: "#program" },
-    { label: dict.nav.explore,      href: "#explore" },
-    { label: dict.nav.partners,     href: "#partners" },
-    { label: dict.nav.packages || (locale === "vi" ? "Gói tham gia" : "Packages"), href: "#packages" },
-    { label: dict.nav.scholarships,  href: "#scholarships" },
-    { label: dict.nav.venue,        href: "#venue" },
-    { label: dict.nav.faq,          href: "#faq" },
+  const primaryNavLinks = [
+    { label: dict.nav.about, href: "#about", id: "about" },
+    { label: dict.nav.program, href: "#program", id: "program" },
+    { label: dict.nav.explore, href: "#explore", id: "explore" },
+    { label: dict.nav.partners, href: "#partners", id: "partners" },
+    { label: dict.nav.packages || (locale === "vi" ? "Gói tham gia" : "Packages"), href: "#packages", id: "packages" },
   ];
+
+  const moreNavLinks = [
+    { label: dict.nav.scholarships, href: "#scholarships", id: "scholarships" },
+    { label: dict.nav.venue, href: "#venue", id: "venue" },
+    { label: dict.nav.faq, href: "#faq", id: "faq" },
+  ];
+
+  const allNavLinks = [...primaryNavLinks, ...moreNavLinks];
+  const isMoreActive = moreNavLinks.some((item) => item.id === activeSection);
 
   // Sticky header transition on scroll
   useEffect(() => {
@@ -74,6 +82,33 @@ export function SiteHeader({ locale, dict }: SiteHeaderProps) {
     return () => observer.disconnect();
   }, []);
 
+  // Close "More" dropdown on outside click
+  useEffect(() => {
+    function handleMoreOutside(e: MouseEvent) {
+      if (moreDropdownRef.current && !moreDropdownRef.current.contains(e.target as Node)) {
+        setMoreOpen(false);
+      }
+    }
+    if (moreOpen) {
+      document.addEventListener("mousedown", handleMoreOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleMoreOutside);
+    };
+  }, [moreOpen]);
+
+  // Close "More" dropdown on Escape
+  useEffect(() => {
+    if (!moreOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setMoreOpen(false);
+      }
+    };
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [moreOpen]);
+
   // Close mobile menu on Escape
   useEffect(() => {
     if (!menuOpen) return;
@@ -87,7 +122,7 @@ export function SiteHeader({ locale, dict }: SiteHeaderProps) {
     return () => document.removeEventListener("keydown", handleKey);
   }, [menuOpen]);
 
-  // Close menu on outside click
+  // Close mobile menu on outside click
   useEffect(() => {
     if (!menuOpen) return;
     const handleClick = (e: MouseEvent) => {
@@ -121,7 +156,7 @@ export function SiteHeader({ locale, dict }: SiteHeaderProps) {
             alignItems: "center",
             justifyContent: "space-between",
             height: scrolled ? "3.875rem" : "4.5rem",
-            gap: "1.5rem",
+            gap: "1.25rem",
             transition: "height 250ms ease",
           }}
         >
@@ -153,7 +188,7 @@ export function SiteHeader({ locale, dict }: SiteHeaderProps) {
             />
           </Link>
 
-          {/* ── Desktop nav with scrollspy ───────────────────────────── */}
+          {/* ── Compact Desktop Nav with More Dropdown ───────────────── */}
           <nav aria-label="Main navigation" className="hidden lg:flex" style={{ flex: 1, justifyContent: "center" }}>
             <ul
               style={{
@@ -163,9 +198,8 @@ export function SiteHeader({ locale, dict }: SiteHeaderProps) {
                 whiteSpace: "nowrap",
               }}
             >
-              {navLinks.map(({ label, href }) => {
-                const sectionId = href.replace("#", "");
-                const isActive = activeSection === sectionId;
+              {primaryNavLinks.map(({ label, href, id }) => {
+                const isActive = activeSection === id;
                 return (
                   <li key={href}>
                     <a
@@ -178,13 +212,118 @@ export function SiteHeader({ locale, dict }: SiteHeaderProps) {
                   </li>
                 );
               })}
+
+              {/* More ▾ Dropdown */}
+              <li ref={moreDropdownRef} style={{ position: "relative" }}>
+                <button
+                  type="button"
+                  onClick={() => setMoreOpen((prev) => !prev)}
+                  aria-expanded={moreOpen}
+                  aria-haspopup="true"
+                  className="nav-link"
+                  data-active={isMoreActive ? "true" : "false"}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.25rem",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                  }}
+                >
+                  <span>{dict.nav.more || (locale === "vi" ? "Thêm" : "More")}</span>
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                    style={{
+                      transition: "transform 150ms ease",
+                      transform: moreOpen ? "rotate(180deg)" : "rotate(0deg)",
+                    }}
+                  >
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </button>
+
+                {moreOpen && (
+                  <div
+                    role="menu"
+                    style={{
+                      position: "absolute",
+                      top: "calc(100% + 0.5rem)",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      minWidth: "175px",
+                      backgroundColor: "#FFFFFF",
+                      borderRadius: "var(--radius-md)",
+                      border: "1px solid rgba(11, 23, 54, 0.10)",
+                      boxShadow: "0 10px 25px -5px rgba(11, 23, 54, 0.12), 0 4px 10px rgba(11, 23, 54, 0.04)",
+                      padding: "0.4rem",
+                      zIndex: 60,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.2rem",
+                    }}
+                  >
+                    {moreNavLinks.map(({ label, href, id }) => {
+                      const isActive = activeSection === id;
+                      return (
+                        <a
+                          key={href}
+                          href={href}
+                          role="menuitem"
+                          onClick={() => setMoreOpen(false)}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            padding: "0.5rem 0.75rem",
+                            borderRadius: "var(--radius-sm)",
+                            fontSize: "var(--text-sm)",
+                            fontWeight: isActive ? 600 : 500,
+                            color: isActive ? "var(--color-blue)" : "var(--color-navy)",
+                            backgroundColor: isActive ? "rgba(26, 94, 168, 0.08)" : "transparent",
+                            textDecoration: "none",
+                            transition: "background-color 150ms ease, color 150ms ease",
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!isActive) e.currentTarget.style.backgroundColor = "rgba(26, 94, 168, 0.05)";
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!isActive) e.currentTarget.style.backgroundColor = "transparent";
+                          }}
+                        >
+                          <span>{label}</span>
+                          {isActive && (
+                            <span
+                              style={{
+                                width: "6px",
+                                height: "6px",
+                                borderRadius: "999px",
+                                backgroundColor: "var(--color-blue)",
+                              }}
+                            />
+                          )}
+                        </a>
+                      );
+                    })}
+                  </div>
+                )}
+              </li>
             </ul>
           </nav>
 
-          {/* ── Desktop Controls (Switcher + Auth + CTA) ────────────────────── */}
-          <div className="hidden md:flex" style={{ flexShrink: 0, alignItems: "center", gap: "0.875rem" }}>
+          {/* ── Desktop Controls: Switcher + Sign In + Primary CTA ─────── */}
+          <div className="hidden lg:flex" style={{ flexShrink: 0, alignItems: "center", gap: "0.875rem" }}>
             <LanguageSwitcher currentLocale={locale} ariaLabel={dict.nav.switchLanguage} />
-            <ClientAuthControl locale={locale} dict={dict} />
+            <ClientAuthControl locale={locale} dict={dict} hideCreateAccount={true} />
 
             {hasRegistration ? (
               <a
@@ -232,7 +371,7 @@ export function SiteHeader({ locale, dict }: SiteHeaderProps) {
             )}
           </div>
 
-          {/* ── Mobile hamburger ──────────────────────────────────────── */}
+          {/* ── Mobile Hamburger Toggle ───────────────────────────────── */}
           <button
             ref={toggleRef}
             type="button"
@@ -240,7 +379,7 @@ export function SiteHeader({ locale, dict }: SiteHeaderProps) {
             aria-expanded={menuOpen}
             aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
             onClick={() => setMenuOpen((o) => !o)}
-            className="md:hidden"
+            className="lg:hidden"
             style={{
               alignItems: "center",
               justifyContent: "center",
@@ -272,7 +411,7 @@ export function SiteHeader({ locale, dict }: SiteHeaderProps) {
           </button>
         </div>
 
-        {/* ── Mobile menu panel ─────────────────────────────────────────── */}
+        {/* ── Full Mobile Menu Panel ─────────────────────────────────── */}
         <div
           id="mobile-menu"
           role="navigation"
@@ -282,16 +421,18 @@ export function SiteHeader({ locale, dict }: SiteHeaderProps) {
           style={{
             display: menuOpen ? "block" : "none",
             borderTop: "1px solid rgba(26, 94, 168, 0.12)",
-            paddingBlock: "1rem",
+            padding: "1rem 0.75rem 1.25rem",
             backgroundColor: "rgba(250, 250, 248, 0.98)",
             borderRadius: "0 0 var(--radius-md) var(--radius-md)",
             boxShadow: "0 12px 32px -8px rgb(11 23 54 / 0.16)",
+            maxHeight: "calc(100vh - 5rem)",
+            overflowY: "auto",
           }}
         >
+          {/* Primary & Secondary Links List */}
           <ul style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-            {navLinks.map(({ label, href }) => {
-              const sectionId = href.replace("#", "");
-              const isActive = activeSection === sectionId;
+            {allNavLinks.map(({ label, href, id }) => {
+              const isActive = activeSection === id;
               return (
                 <li key={href}>
                   <a
@@ -308,19 +449,26 @@ export function SiteHeader({ locale, dict }: SiteHeaderProps) {
             })}
           </ul>
 
+          {/* Account Area + Primary CTA + Language Switcher */}
           <div
             style={{
-              marginTop: "1rem",
-              paddingInline: "0.75rem",
+              marginTop: "1.25rem",
+              paddingTop: "1rem",
+              borderTop: "1px solid rgba(11, 23, 54, 0.08)",
               display: "flex",
               flexDirection: "column",
-              gap: "0.75rem",
+              gap: "0.875rem",
             }}
           >
-            <div style={{ display: "flex", justifyContent: "flex-start", paddingLeft: "0.25rem" }}>
-              <LanguageSwitcher currentLocale={locale} ariaLabel={dict.nav.switchLanguage} />
-            </div>
+            {/* Account Area: Sign In & Create Account or Session */}
+            <ClientAuthControl
+              locale={locale}
+              dict={dict}
+              mobileLayout={true}
+              onNavigate={() => setMenuOpen(false)}
+            />
 
+            {/* Primary Action Button: Register Now */}
             {hasRegistration ? (
               <a
                 href={siteConfig.registrationUrl}
@@ -358,6 +506,18 @@ export function SiteHeader({ locale, dict }: SiteHeaderProps) {
                 {dict.nav.registrationOpensSoon}
               </p>
             )}
+
+            {/* Language Switcher */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                paddingTop: "0.5rem",
+                borderTop: "1px dashed rgba(11, 23, 54, 0.08)",
+              }}
+            >
+              <LanguageSwitcher currentLocale={locale} ariaLabel={dict.nav.switchLanguage} />
+            </div>
           </div>
         </div>
       </div>

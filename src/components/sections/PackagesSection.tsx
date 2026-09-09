@@ -397,48 +397,50 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
           })}
         </div>
 
-        {/* Subtle Booth Support Note beneath cards */}
-        <div
-          style={{
-            marginTop: "var(--space-6)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
+        {/* Subtle Booth Support Note beneath cards - ONLY for Consular packages */}
+        {activeTab === "consular" && (
           <div
             style={{
-              display: "inline-flex",
+              marginTop: "var(--space-6)",
+              display: "flex",
               alignItems: "center",
-              gap: "0.5rem",
-              padding: "8px 18px",
-              backgroundColor: "rgba(0, 102, 204, 0.04)",
-              border: "1px solid rgba(0, 102, 204, 0.15)",
-              borderRadius: "10px",
-              fontSize: "0.8125rem",
-              color: "var(--color-text-secondary)",
-              maxWidth: "640px",
+              justifyContent: "center",
             }}
           >
-            <svg
-              aria-hidden="true"
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#0066CC"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{ flexShrink: 0 }}
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                padding: "8px 18px",
+                backgroundColor: "rgba(0, 102, 204, 0.04)",
+                border: "1px solid rgba(0, 102, 204, 0.15)",
+                borderRadius: "10px",
+                fontSize: "0.8125rem",
+                color: "var(--color-text-secondary)",
+                maxWidth: "640px",
+              }}
             >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="16" x2="12" y2="12" />
-              <line x1="12" y1="8" x2="12.01" y2="8" />
-            </svg>
-            <span>{boothSupportNote[locale]}</span>
+              <svg
+                aria-hidden="true"
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#0066CC"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ flexShrink: 0 }}
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="16" x2="12" y2="12" />
+                <line x1="12" y1="8" x2="12.01" y2="8" />
+              </svg>
+              <span>{boothSupportNote[locale]}</span>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Centralized Institutional Contact CTA */}
         <div
@@ -616,8 +618,8 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
               </button>
             </div>
 
-            {/* Booth support alert in modal */}
-            {selectedPackage.booth && (
+            {/* Booth support alert in modal - ONLY for consular packages */}
+            {selectedPackage.tierType === "consular" && (
               <div
                 style={{
                   padding: "0.75rem 1rem",
