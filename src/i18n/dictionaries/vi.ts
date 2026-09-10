@@ -750,4 +750,9 @@ export const vi: Dictionary = {
     step2Title: "Logo Chính thức & Hiển thị",
     step1Helper: "Vui lòng lưu thông tin đơn vị trước để hệ thống tạo vị trí tải logo chính thức một cách an toàn.",
   },
+  partnerDashboardTooltips: {
+    orgProfile: "Thông tin chính thức về tổ chức của bạn (tên, quốc gia, loại hình) được hiển thị công khai sau khi được duyệt.",
+    scholarships: "Danh sách các cơ hội học bổng do tổ chức bạn cung cấp cho học sinh, sinh viên tham dự Summit.",
+    summitActivities: "Các hoạt động (workshop, biểu diễn sân khấu...) mà tổ chức bạn đăng ký tổ chức trong khuôn khổ Summit.",
+  },
 };

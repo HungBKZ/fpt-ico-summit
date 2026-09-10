@@ -750,4 +750,9 @@ export const en: Dictionary = {
     step2Title: "Official Logo & Visibility",
     step1Helper: "Save the organization details first to securely create an upload location for its official logo.",
   },
+  partnerDashboardTooltips: {
+    orgProfile: "Your organization's official details (name, country, type), shown publicly once approved.",
+    scholarships: "The scholarship opportunities your organization offers to students attending the Summit.",
+    summitActivities: "The activities (workshops, stage performances, etc.) your organization is registered to run at the Summit.",
+  },
 };
