@@ -5,12 +5,7 @@ import Image from "next/image";
 import {
   getConfirmedConsulates,
 } from "@/data/consulates";
-import {
-  getConfirmedUniversities,
-  universityCountryKeys,
-  getCountryLabel,
-  CountryKey,
-} from "@/data/universities";
+import { getConfirmedUniversities } from "@/data/universities";
 import { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/types";
 import { PartnerDetailModal, type PublicPartnerDetail } from "@/components/public/PartnerDetailModal";
@@ -45,7 +40,6 @@ const INITIAL_VISIBLE_COUNT = 3;
 
 export function PartnersSection({ locale, dict }: PartnersSectionProps) {
   const [activeTab, setActiveTab] = useState<PartnerTab>("All");
-  const [selectedCountry, setSelectedCountry] = useState<string>("All");
   const [dbPartners, setDbPartners] = useState<PublicPartner[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
@@ -106,12 +100,6 @@ export function PartnersSection({ locale, dict }: PartnersSectionProps) {
   const filteredPartners = allPartners.filter((p) => {
     if (activeTab === "Consulates" && p.type !== "CONSULATE") return false;
     if (activeTab === "Universities" && p.type !== "UNIVERSITY") return false;
-    if (
-      selectedCountry !== "All" &&
-      p.country.toLowerCase() !== selectedCountry.toLowerCase()
-    ) {
-      return false;
-    }
     return true;
   });
 
@@ -122,7 +110,6 @@ export function PartnersSection({ locale, dict }: PartnersSectionProps) {
   const typeLabel = (type: PublicPartner["type"]) =>
     type === "UNIVERSITY" ? dict.partners.tabs.universities : dict.partners.tabs.consulates;
 
-  const allCountriesLabel = locale === "vi" ? "Tất cả quốc gia" : "All Countries";
   const visitWebsiteLabel = locale === "vi" ? "Xem website" : "Visit website";
 
   return (
@@ -168,7 +155,6 @@ export function PartnersSection({ locale, dict }: PartnersSectionProps) {
                 aria-selected={activeTab === t.key}
                 onClick={() => {
                   setActiveTab(t.key as PartnerTab);
-                  setSelectedCountry("All");
                   setShowAll(false);
                 }}
                 className={`py-1.5 px-4 rounded-full text-xs font-bold transition-colors duration-200 ${
@@ -182,43 +168,6 @@ export function PartnersSection({ locale, dict }: PartnersSectionProps) {
             ))}
           </div>
         </div>
-
-        {/* Country Filters (when Universities or All tab active) */}
-        {activeTab !== "Consulates" && (
-          <div className="flex justify-center flex-wrap gap-1.5 mb-10">
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedCountry("All");
-                setShowAll(false);
-              }}
-              className={`py-1 px-3 rounded-full text-[11px] font-semibold transition ${
-                selectedCountry === "All"
-                  ? "bg-[#fbf9f5] text-[#12213b]"
-                  : "border-[0.5px] border-white/12 text-slate-400 hover:text-white"
-              }`}
-            >
-              {allCountriesLabel}
-            </button>
-            {universityCountryKeys.map((ck) => (
-              <button
-                key={ck}
-                type="button"
-                onClick={() => {
-                  setSelectedCountry(ck);
-                  setShowAll(false);
-                }}
-                className={`py-1 px-3 rounded-full text-[11px] font-semibold transition ${
-                  selectedCountry === ck
-                    ? "bg-[#fbf9f5] text-[#12213b]"
-                    : "border-[0.5px] border-white/12 text-slate-400 hover:text-white"
-                }`}
-              >
-                {getCountryLabel(ck as CountryKey, locale)}
-              </button>
-            ))}
-          </div>
-        )}
 
         {/* Loading Skeleton */}
         {loading ? (
