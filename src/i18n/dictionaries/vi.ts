@@ -167,6 +167,8 @@ export const vi: Dictionary = {
     },
     emptyState:
       "Các đối tác đã được xác nhận sẽ được cập nhật tại đây.",
+    viewAllLabel: "Xem tất cả đối tác",
+    showLessLabel: "Thu gọn",
   },
   packages: {
     eyebrow: "Gói Tham Dự",

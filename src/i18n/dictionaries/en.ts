@@ -167,6 +167,8 @@ export const en: Dictionary = {
     },
     emptyState:
       "Confirmed partners will appear here as participation is verified.",
+    viewAllLabel: "View all partners",
+    showLessLabel: "Show less",
   },
   packages: {
     eyebrow: "Participation Packages",
