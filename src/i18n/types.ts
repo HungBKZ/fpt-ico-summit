@@ -95,6 +95,8 @@ export type Dictionary = {
     subtitle: string;
     tabs: { all: string; universities: string; consulates: string };
     emptyState: string;
+    viewAllLabel: string;
+    showLessLabel: string;
   };
   scholarships: {
     eyebrow: string;
