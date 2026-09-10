@@ -271,13 +271,13 @@ export function PartnersSection({ locale, dict }: PartnersSectionProps) {
                   {/* Logo Badge Overlay & Badges */}
                   <div className="-mt-8 px-5 flex items-end justify-between gap-3 relative z-10">
                     {logoUrl ? (
-                      <div className="w-14 h-14 relative rounded-xl border border-slate-200 bg-white p-1.5 shadow-md flex items-center justify-center shrink-0">
+                      <div className="w-14 h-14 relative rounded-xl border border-slate-200 bg-white p-1.5 shadow-md flex items-center justify-center shrink-0 overflow-hidden">
                         <Image
                           src={optimizeCloudinaryLogoUrl(logoUrl)}
                           alt={`${p.name} logo`}
                           fill
                           sizes="56px"
-                          className="object-contain p-0.5"
+                          className="object-contain p-0.5 rounded-lg"
                           unoptimized={!logoUrl.includes("res.cloudinary.com")}
                         />
                       </div>

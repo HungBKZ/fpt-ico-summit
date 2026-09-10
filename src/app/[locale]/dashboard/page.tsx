@@ -10,6 +10,7 @@ import { getOrganizationById } from "@/lib/db/repositories/organizations";
 import { getMemberRegistrationStatusAction } from "@/app/actions/registration-actions";
 import { MemberProfileCompletionForm } from "@/components/member/MemberProfileCompletionForm";
 import { MemberActivitySelectionSummary } from "@/components/member/MemberActivitySelectionSummary";
+import { InfoTooltip } from "@/components/ui/InfoTooltip";
 
 export default async function DashboardPage({
   params,
@@ -205,8 +206,9 @@ export default async function DashboardPage({
                   <div className="p-5 bg-slate-50 hover:bg-slate-100/70 transition rounded-2xl border border-slate-200 flex flex-col justify-between space-y-4">
                     <div className="space-y-3">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                        <span className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                           {dict.nav?.orgProfile || "Organization Profile"}
+                          <InfoTooltip text={dict.partnerDashboardTooltips.orgProfile} />
                         </span>
                         {getStatusBadge()}
                       </div>
@@ -237,8 +239,9 @@ export default async function DashboardPage({
                   <div className="p-5 bg-slate-50 hover:bg-slate-100/70 transition rounded-2xl border border-slate-200 flex flex-col justify-between space-y-4">
                     <div className="space-y-3">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                        <span className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                           {dict.nav?.scholarshipOpportunities || "Scholarship Opportunities"}
+                          <InfoTooltip text={dict.partnerDashboardTooltips.scholarships} />
                         </span>
                         <span className="text-xs font-bold text-slate-700 bg-white px-2 py-0.5 rounded-full border border-slate-200">
                           {partnerScholarships.length} {locale === "vi" ? "mục" : "total"}
@@ -285,8 +288,9 @@ export default async function DashboardPage({
                   <div className="p-5 bg-slate-50 hover:bg-slate-100/70 transition rounded-2xl border border-slate-200 flex flex-col justify-between space-y-4">
                     <div className="space-y-3">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                        <span className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                           {dict.nav?.summitActivities || "Summit Activities"}
+                          <InfoTooltip text={dict.partnerDashboardTooltips.summitActivities} />
                         </span>
                         <span className="text-xs font-bold text-slate-700 bg-white px-2 py-0.5 rounded-full border border-slate-200">
                           {partnerActivities.length} {locale === "vi" ? "mục" : "total"}

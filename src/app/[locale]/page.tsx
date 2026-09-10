@@ -52,13 +52,13 @@ export default async function LocalizedHomePage({
         <PartnerShowcaseMarquee locale={locale} dict={dict} />
 
         <PillarsSection locale={locale} dict={dict} />
+        <PartnersSection locale={locale} dict={dict} />
         <ExperienceGrid locale={locale} dict={dict} />
 
         <ProgramOverview locale={locale} dict={dict} />
         <ExpoSection locale={locale} dict={dict} />
         <WorkshopSection locale={locale} dict={dict} />
 
-        <PartnersSection locale={locale} dict={dict} />
         <PackagesSection locale={locale} dict={dict} />
         <ScholarshipsSection locale={locale} dict={dict} />
         <MekongSection locale={locale} dict={dict} />

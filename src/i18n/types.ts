@@ -642,6 +642,11 @@ export type Dictionary = {
     step2Title: string;
     step1Helper: string;
   };
+  partnerDashboardTooltips: {
+    orgProfile: string;
+    scholarships: string;
+    summitActivities: string;
+  };
 };
 
 /**
