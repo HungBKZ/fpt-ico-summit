@@ -54,15 +54,15 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
       aria-labelledby="packages-heading"
       className="packages-section"
       style={{
-        padding: "var(--space-24) 0",
-        backgroundColor: "var(--color-surface)",
+        padding: "6rem 0",
+        backgroundColor: "var(--color-bg-page)",
         borderTop: "1px solid var(--color-border)",
         position: "relative",
       }}
     >
       <div className="site-container">
         {/* Section Header - Left-aligned, Institutional Prospectus Style */}
-        <div style={{ maxWidth: "760px", marginBottom: "var(--space-12)" }}>
+        <div style={{ maxWidth: "760px", marginBottom: "3rem" }}>
           <p
             style={{
               fontFamily: "var(--font-sans)",
@@ -70,8 +70,8 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
               fontWeight: 700,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
-              color: "var(--color-primary)",
-              marginBottom: "var(--space-3)",
+              color: "var(--color-blue)",
+              marginBottom: "0.75rem",
             }}
           >
             {dict.packages.eyebrow}
@@ -79,13 +79,13 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
           <h2
             id="packages-heading"
             style={{
-              fontFamily: "var(--font-heading)",
+              fontFamily: "var(--font-display)",
               fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)",
               fontWeight: 700,
               color: "var(--color-navy)",
               lineHeight: 1.2,
               letterSpacing: "-0.02em",
-              marginBottom: "var(--space-4)",
+              marginBottom: "1rem",
             }}
           >
             {dict.packages.title}
@@ -96,7 +96,7 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
               fontSize: "var(--text-base)",
               color: "var(--color-text-secondary)",
               lineHeight: 1.65,
-              marginBottom: "var(--space-3)",
+              marginBottom: "0.75rem",
             }}
           >
             {dict.packages.subtitle}
@@ -117,7 +117,7 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
         {/* Category Switcher: Refined Segmented Control */}
         <div
           style={{
-            marginBottom: "var(--space-10)",
+            marginBottom: "2.5rem",
             display: "flex",
             alignItems: "center",
           }}
@@ -127,7 +127,7 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
             aria-label={dict.packages.eyebrow}
             style={{
               display: "inline-flex",
-              backgroundColor: "var(--color-surface-subtle)",
+              backgroundColor: "var(--color-bg-alt)",
               padding: "4px",
               borderRadius: "10px",
               border: "1px solid var(--color-border)",
@@ -227,7 +227,7 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
                   <div style={{ marginBottom: "1.125rem" }}>
                     <h3
                       style={{
-                        fontFamily: "var(--font-heading)",
+                        fontFamily: "var(--font-display)",
                         fontSize: "1.375rem",
                         fontWeight: 700,
                         color: "var(--color-navy)",
@@ -354,7 +354,7 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
                     style={{
                       width: "100%",
                       padding: "10px 14px",
-                      backgroundColor: "var(--color-surface-subtle)",
+                      backgroundColor: "var(--color-bg-alt)",
                       border: "1px solid var(--color-border)",
                       borderRadius: "8px",
                       fontFamily: "var(--font-sans)",
@@ -369,11 +369,11 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
                       gap: "0.375rem",
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "var(--color-surface)";
+                      e.currentTarget.style.backgroundColor = "var(--color-bg-page)";
                       e.currentTarget.style.borderColor = "var(--color-navy)";
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "var(--color-surface-subtle)";
+                      e.currentTarget.style.backgroundColor = "var(--color-bg-alt)";
                       e.currentTarget.style.borderColor = "var(--color-border)";
                     }}
                   >
@@ -398,55 +398,53 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
           })}
         </div>
 
-        {/* Subtle Booth Support Note beneath cards - ONLY for Consular packages */}
-        {activeTab === "consular" && (
+        {/* Subtle Booth Support Note beneath cards - shown for both Standard and Consular packages */}
+        <div
+          style={{
+            marginTop: "2rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <div
             style={{
-              marginTop: "var(--space-8)",
-              display: "flex",
+              display: "inline-flex",
               alignItems: "center",
-              justifyContent: "center",
+              gap: "0.625rem",
+              padding: "10px 20px",
+              backgroundColor: "rgba(0, 102, 204, 0.04)",
+              border: "1px solid rgba(0, 102, 204, 0.15)",
+              borderRadius: "10px",
+              fontSize: "0.8125rem",
+              color: "var(--color-text-secondary)",
+              maxWidth: "640px",
             }}
           >
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.625rem",
-                padding: "10px 20px",
-                backgroundColor: "rgba(0, 102, 204, 0.04)",
-                border: "1px solid rgba(0, 102, 204, 0.15)",
-                borderRadius: "10px",
-                fontSize: "0.8125rem",
-                color: "var(--color-text-secondary)",
-                maxWidth: "640px",
-              }}
+            <svg
+              aria-hidden="true"
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#0066CC"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ flexShrink: 0 }}
             >
-              <svg
-                aria-hidden="true"
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#0066CC"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ flexShrink: 0 }}
-              >
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="16" x2="12" y2="12" />
-                <line x1="12" y1="8" x2="12.01" y2="8" />
-              </svg>
-              <span>{boothSupportNote[locale]}</span>
-            </div>
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            <span>{boothSupportNote[locale]}</span>
           </div>
-        )}
+        </div>
 
         {/* Centralized Institutional Contact CTA */}
         <div
           style={{
-            marginTop: "var(--space-12)",
+            marginTop: "3rem",
             padding: "2.5rem 2.25rem",
             backgroundColor: "#FFFFFF",
             border: "1px solid var(--color-border)",
@@ -460,7 +458,7 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
         >
           <h3
             style={{
-              fontFamily: "var(--font-heading)",
+              fontFamily: "var(--font-display)",
               fontSize: "1.25rem",
               fontWeight: 700,
               color: "var(--color-navy)",
@@ -488,7 +486,9 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
                 : "Our International Cooperation Office can help identify the most suitable participation arrangement for your institution.")}
           </p>
           <a
-            href="#registration"
+            href="https://www.facebook.com/profile.php?id=61577438391152&locale=vi_VN"
+            target="_blank"
+            rel="noopener noreferrer"
             className="btn btn-primary"
             style={{
               display: "inline-flex",
@@ -567,7 +567,7 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
                 <h3
                   id="modal-pkg-title"
                   style={{
-                    fontFamily: "var(--font-heading)",
+                    fontFamily: "var(--font-display)",
                     fontSize: "1.5rem",
                     fontWeight: 700,
                     color: "var(--color-navy)",
@@ -682,7 +682,7 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
             >
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem" }}>
                 <thead>
-                  <tr style={{ backgroundColor: "var(--color-surface-subtle)" }}>
+                  <tr style={{ backgroundColor: "var(--color-bg-alt)" }}>
                     <th
                       style={{
                         padding: "12px 16px",
@@ -712,7 +712,7 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
                     <tr
                       key={idx}
                       style={{
-                        backgroundColor: idx % 2 === 0 ? "#FFFFFF" : "var(--color-surface-subtle)",
+                        backgroundColor: idx % 2 === 0 ? "#FFFFFF" : "var(--color-bg-alt)",
                         borderBottom:
                           idx === selectedPackage.allBenefits.length - 1
                             ? "none"
@@ -761,7 +761,7 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
                 onClick={() => setSelectedPackage(null)}
                 style={{
                   padding: "8px 18px",
-                  backgroundColor: "var(--color-surface-subtle)",
+                  backgroundColor: "var(--color-bg-alt)",
                   border: "1px solid var(--color-border)",
                   borderRadius: "8px",
                   fontSize: "0.8125rem",
@@ -774,7 +774,9 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
               </button>
 
               <a
-                href="#registration"
+                href="https://www.facebook.com/profile.php?id=61577438391152&locale=vi_VN"
+                target="_blank"
+                rel="noopener noreferrer"
                 onClick={() => setSelectedPackage(null)}
                 className="btn btn-primary"
                 style={{
