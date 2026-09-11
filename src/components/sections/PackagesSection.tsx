@@ -54,15 +54,15 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
       aria-labelledby="packages-heading"
       className="packages-section"
       style={{
-        padding: "var(--space-24) 0",
-        backgroundColor: "var(--color-surface)",
+        padding: "6rem 0",
+        backgroundColor: "var(--color-bg-page)",
         borderTop: "1px solid var(--color-border)",
         position: "relative",
       }}
     >
       <div className="site-container">
         {/* Section Header - Left-aligned, Institutional Prospectus Style */}
-        <div style={{ maxWidth: "760px", marginBottom: "var(--space-10)" }}>
+        <div style={{ maxWidth: "760px", marginBottom: "3rem" }}>
           <p
             style={{
               fontFamily: "var(--font-sans)",
@@ -70,8 +70,8 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
               fontWeight: 700,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
-              color: "var(--color-primary)",
-              marginBottom: "var(--space-2)",
+              color: "var(--color-blue)",
+              marginBottom: "0.75rem",
             }}
           >
             {dict.packages.eyebrow}
@@ -79,13 +79,13 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
           <h2
             id="packages-heading"
             style={{
-              fontFamily: "var(--font-heading)",
+              fontFamily: "var(--font-display)",
               fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)",
               fontWeight: 700,
               color: "var(--color-navy)",
               lineHeight: 1.2,
               letterSpacing: "-0.02em",
-              marginBottom: "var(--space-3)",
+              marginBottom: "1rem",
             }}
           >
             {dict.packages.title}
@@ -95,8 +95,8 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
               fontFamily: "var(--font-sans)",
               fontSize: "var(--text-base)",
               color: "var(--color-text-secondary)",
-              lineHeight: 1.6,
-              marginBottom: "var(--space-2)",
+              lineHeight: 1.65,
+              marginBottom: "0.75rem",
             }}
           >
             {dict.packages.subtitle}
@@ -106,7 +106,7 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
               fontFamily: "var(--font-sans)",
               fontSize: "var(--text-sm)",
               color: "var(--color-text-muted)",
-              lineHeight: 1.5,
+              lineHeight: 1.6,
               margin: 0,
             }}
           >
@@ -117,7 +117,7 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
         {/* Category Switcher: Refined Segmented Control */}
         <div
           style={{
-            marginBottom: "var(--space-8)",
+            marginBottom: "2.5rem",
             display: "flex",
             alignItems: "center",
           }}
@@ -127,7 +127,7 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
             aria-label={dict.packages.eyebrow}
             style={{
               display: "inline-flex",
-              backgroundColor: "var(--color-surface-subtle)",
+              backgroundColor: "var(--color-bg-alt)",
               padding: "4px",
               borderRadius: "10px",
               border: "1px solid var(--color-border)",
@@ -195,14 +195,15 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
                 className="package-card"
                 style={{
                   backgroundColor: "#FFFFFF",
-                  borderRadius: "18px",
+                  borderRadius: "20px",
                   border: "1px solid var(--color-border)",
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "space-between",
                   position: "relative",
                   overflow: "hidden",
-                  transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+                  boxShadow: "0 1px 2px rgba(15, 23, 42, 0.03)",
+                  transition: "border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease",
                 }}
               >
                 {/* Package-specific top accent bar */}
@@ -216,25 +217,25 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
 
                 <div
                   style={{
-                    padding: "1.75rem 1.5rem 1.25rem",
+                    padding: "2rem 1.75rem 1.5rem",
                     display: "flex",
                     flexDirection: "column",
                     flexGrow: 1,
                   }}
                 >
                   {/* Card Header: Package Name & Access Duration */}
-                  <div style={{ marginBottom: "0.875rem" }}>
+                  <div style={{ marginBottom: "1.125rem" }}>
                     <h3
                       style={{
-                        fontFamily: "var(--font-heading)",
+                        fontFamily: "var(--font-display)",
                         fontSize: "1.375rem",
                         fontWeight: 700,
                         color: "var(--color-navy)",
                         textTransform: "uppercase",
-                        letterSpacing: "-0.01em",
+                        letterSpacing: "0.01em",
                         margin: 0,
-                        marginBottom: "0.375rem",
-                        lineHeight: 1.25,
+                        marginBottom: "0.5rem",
+                        lineHeight: 1.3,
                       }}
                     >
                       {pkg.name}
@@ -261,9 +262,9 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
                       fontFamily: "var(--font-sans)",
                       fontSize: "0.875rem",
                       color: "var(--color-text-secondary)",
-                      lineHeight: 1.5,
+                      lineHeight: 1.6,
                       margin: 0,
-                      marginBottom: "1.25rem",
+                      marginBottom: "1.5rem",
                       flexGrow: 0,
                     }}
                   >
@@ -273,7 +274,7 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
                   {/* Key Benefits Highlight Area */}
                   <div
                     style={{
-                      paddingTop: "1rem",
+                      paddingTop: "1.25rem",
                       borderTop: "1px solid var(--color-border)",
                       marginTop: "auto",
                       flexGrow: 1,
@@ -287,7 +288,7 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
                         letterSpacing: "0.08em",
                         color: "var(--color-text-muted)",
                         margin: 0,
-                        marginBottom: "0.875rem",
+                        marginBottom: "1rem",
                       }}
                     >
                       {dict.packages.keyBenefitsLabel || (locale === "vi" ? "Đặc quyền Tiêu biểu" : "Key Benefits")}
@@ -300,7 +301,7 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
                         margin: 0,
                         display: "flex",
                         flexDirection: "column",
-                        gap: "0.625rem",
+                        gap: "0.75rem",
                       }}
                     >
                       {pkg.keyHighlights.map((hl, idx) => (
@@ -342,7 +343,7 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
                 {/* Card Footer: View Full Benefits Action */}
                 <div
                   style={{
-                    padding: "1rem 1.5rem 1.5rem",
+                    padding: "1.25rem 1.75rem 1.75rem",
                     borderTop: "1px solid var(--color-border)",
                     backgroundColor: "#FFFFFF",
                   }}
@@ -352,8 +353,8 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
                     onClick={() => setSelectedPackage(pkg)}
                     style={{
                       width: "100%",
-                      padding: "9px 14px",
-                      backgroundColor: "var(--color-surface-subtle)",
+                      padding: "10px 14px",
+                      backgroundColor: "var(--color-bg-alt)",
                       border: "1px solid var(--color-border)",
                       borderRadius: "8px",
                       fontFamily: "var(--font-sans)",
@@ -368,11 +369,11 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
                       gap: "0.375rem",
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "var(--color-surface)";
+                      e.currentTarget.style.backgroundColor = "var(--color-bg-page)";
                       e.currentTarget.style.borderColor = "var(--color-navy)";
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "var(--color-surface-subtle)";
+                      e.currentTarget.style.backgroundColor = "var(--color-bg-alt)";
                       e.currentTarget.style.borderColor = "var(--color-border)";
                     }}
                   >
@@ -397,59 +398,57 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
           })}
         </div>
 
-        {/* Subtle Booth Support Note beneath cards - ONLY for Consular packages */}
-        {activeTab === "consular" && (
+        {/* Subtle Booth Support Note beneath cards - shown for both Standard and Consular packages */}
+        <div
+          style={{
+            marginTop: "2rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <div
             style={{
-              marginTop: "var(--space-6)",
-              display: "flex",
+              display: "inline-flex",
               alignItems: "center",
-              justifyContent: "center",
+              gap: "0.625rem",
+              padding: "10px 20px",
+              backgroundColor: "rgba(0, 102, 204, 0.04)",
+              border: "1px solid rgba(0, 102, 204, 0.15)",
+              borderRadius: "10px",
+              fontSize: "0.8125rem",
+              color: "var(--color-text-secondary)",
+              maxWidth: "640px",
             }}
           >
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                padding: "8px 18px",
-                backgroundColor: "rgba(0, 102, 204, 0.04)",
-                border: "1px solid rgba(0, 102, 204, 0.15)",
-                borderRadius: "10px",
-                fontSize: "0.8125rem",
-                color: "var(--color-text-secondary)",
-                maxWidth: "640px",
-              }}
+            <svg
+              aria-hidden="true"
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#0066CC"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ flexShrink: 0 }}
             >
-              <svg
-                aria-hidden="true"
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#0066CC"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ flexShrink: 0 }}
-              >
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="16" x2="12" y2="12" />
-                <line x1="12" y1="8" x2="12.01" y2="8" />
-              </svg>
-              <span>{boothSupportNote[locale]}</span>
-            </div>
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            <span>{boothSupportNote[locale]}</span>
           </div>
-        )}
+        </div>
 
         {/* Centralized Institutional Contact CTA */}
         <div
           style={{
-            marginTop: "var(--space-10)",
-            padding: "2.25rem 2rem",
+            marginTop: "3rem",
+            padding: "2.5rem 2.25rem",
             backgroundColor: "#FFFFFF",
             border: "1px solid var(--color-border)",
-            borderRadius: "16px",
+            borderRadius: "18px",
             textAlign: "center",
             maxWidth: "760px",
             marginLeft: "auto",
@@ -459,11 +458,11 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
         >
           <h3
             style={{
-              fontFamily: "var(--font-heading)",
+              fontFamily: "var(--font-display)",
               fontSize: "1.25rem",
               fontWeight: 700,
               color: "var(--color-navy)",
-              marginBottom: "0.5rem",
+              marginBottom: "0.75rem",
             }}
           >
             {dict.packages.centralCta?.title ||
@@ -476,9 +475,9 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
               fontFamily: "var(--font-sans)",
               fontSize: "0.9375rem",
               color: "var(--color-text-secondary)",
-              lineHeight: 1.6,
+              lineHeight: 1.65,
               maxWidth: "620px",
-              margin: "0 auto 1.5rem",
+              margin: "0 auto 1.75rem",
             }}
           >
             {dict.packages.centralCta?.description ||
@@ -487,7 +486,9 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
                 : "Our International Cooperation Office can help identify the most suitable participation arrangement for your institution.")}
           </p>
           <a
-            href="#registration"
+            href="https://www.facebook.com/profile.php?id=61577438391152&locale=vi_VN"
+            target="_blank"
+            rel="noopener noreferrer"
             className="btn btn-primary"
             style={{
               display: "inline-flex",
@@ -529,13 +530,13 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
           <div
             style={{
               backgroundColor: "#FFFFFF",
-              borderRadius: "18px",
+              borderRadius: "20px",
               maxWidth: "700px",
               width: "100%",
               maxHeight: "85vh",
               overflowY: "auto",
               boxShadow: "0 20px 40px rgba(0, 0, 0, 0.2)",
-              padding: "2rem",
+              padding: "2.25rem",
               position: "relative",
             }}
           >
@@ -545,9 +546,10 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
                 display: "flex",
                 alignItems: "flex-start",
                 justifyContent: "space-between",
-                marginBottom: "1.5rem",
+                marginBottom: "1.75rem",
                 borderBottom: "1px solid var(--color-border)",
-                paddingBottom: "1rem",
+                paddingBottom: "1.25rem",
+                gap: "1rem",
               }}
             >
               <div>
@@ -565,12 +567,13 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
                 <h3
                   id="modal-pkg-title"
                   style={{
-                    fontFamily: "var(--font-heading)",
+                    fontFamily: "var(--font-display)",
                     fontSize: "1.5rem",
                     fontWeight: 700,
                     color: "var(--color-navy)",
-                    marginTop: "0.25rem",
-                    marginBottom: "0.25rem",
+                    marginTop: "0.375rem",
+                    marginBottom: "0.5rem",
+                    lineHeight: 1.3,
                   }}
                 >
                   {selectedPackage.name}
@@ -579,6 +582,7 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
                   style={{
                     fontSize: "0.8125rem",
                     color: "var(--color-text-secondary)",
+                    lineHeight: 1.5,
                     margin: 0,
                   }}
                 >
@@ -622,16 +626,17 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
             {selectedPackage.tierType === "consular" && (
               <div
                 style={{
-                  padding: "0.75rem 1rem",
+                  padding: "0.875rem 1.125rem",
                   backgroundColor: "rgba(0, 102, 204, 0.04)",
                   border: "1px solid rgba(0, 102, 204, 0.15)",
-                  borderRadius: "8px",
+                  borderRadius: "10px",
                   fontSize: "0.8125rem",
+                  lineHeight: 1.5,
                   color: "var(--color-navy)",
-                  marginBottom: "1.25rem",
+                  marginBottom: "1.5rem",
                   display: "flex",
                   alignItems: "center",
-                  gap: "0.5rem",
+                  gap: "0.625rem",
                 }}
               >
                 <svg
@@ -659,7 +664,7 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
                 fontSize: "0.875rem",
                 fontWeight: 700,
                 color: "var(--color-navy)",
-                marginBottom: "0.75rem",
+                marginBottom: "1rem",
                 textTransform: "uppercase",
                 letterSpacing: "0.04em",
               }}
@@ -670,17 +675,17 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
             <div
               style={{
                 border: "1px solid var(--color-border)",
-                borderRadius: "10px",
+                borderRadius: "12px",
                 overflow: "hidden",
-                marginBottom: "1.5rem",
+                marginBottom: "1.75rem",
               }}
             >
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem" }}>
                 <thead>
-                  <tr style={{ backgroundColor: "var(--color-surface-subtle)" }}>
+                  <tr style={{ backgroundColor: "var(--color-bg-alt)" }}>
                     <th
                       style={{
-                        padding: "10px 14px",
+                        padding: "12px 16px",
                         textAlign: "left",
                         fontWeight: 600,
                         color: "var(--color-text-secondary)",
@@ -691,7 +696,7 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
                     </th>
                     <th
                       style={{
-                        padding: "10px 14px",
+                        padding: "12px 16px",
                         textAlign: "right",
                         fontWeight: 600,
                         color: "var(--color-text-secondary)",
@@ -707,7 +712,7 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
                     <tr
                       key={idx}
                       style={{
-                        backgroundColor: idx % 2 === 0 ? "#FFFFFF" : "var(--color-surface-subtle)",
+                        backgroundColor: idx % 2 === 0 ? "#FFFFFF" : "var(--color-bg-alt)",
                         borderBottom:
                           idx === selectedPackage.allBenefits.length - 1
                             ? "none"
@@ -716,7 +721,7 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
                     >
                       <td
                         style={{
-                          padding: "10px 14px",
+                          padding: "12px 16px",
                           fontWeight: 500,
                           color: "var(--color-text-primary)",
                         }}
@@ -725,7 +730,7 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
                       </td>
                       <td
                         style={{
-                          padding: "10px 14px",
+                          padding: "12px 16px",
                           textAlign: "right",
                           fontWeight: 600,
                           color: item.isIncluded
@@ -756,7 +761,7 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
                 onClick={() => setSelectedPackage(null)}
                 style={{
                   padding: "8px 18px",
-                  backgroundColor: "var(--color-surface-subtle)",
+                  backgroundColor: "var(--color-bg-alt)",
                   border: "1px solid var(--color-border)",
                   borderRadius: "8px",
                   fontSize: "0.8125rem",
@@ -769,7 +774,9 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
               </button>
 
               <a
-                href="#registration"
+                href="https://www.facebook.com/profile.php?id=61577438391152&locale=vi_VN"
+                target="_blank"
+                rel="noopener noreferrer"
                 onClick={() => setSelectedPackage(null)}
                 className="btn btn-primary"
                 style={{
@@ -791,13 +798,13 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
         .packages-grid {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 20px;
+          gap: 24px;
         }
 
         @media (min-width: 768px) {
           .packages-grid {
             grid-template-columns: repeat(2, 1fr);
-            gap: 24px;
+            gap: 28px;
           }
         }
 
@@ -807,7 +814,7 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
           }
           .packages-grid.grid-2 {
             grid-template-columns: repeat(2, 1fr);
-            max-width: 820px;
+            max-width: 860px;
             margin-left: auto;
             margin-right: auto;
           }
@@ -815,7 +822,8 @@ export function PackagesSection({ locale, dict }: PackagesSectionProps) {
 
         .package-card:hover {
           border-color: #cbd5e1 !important;
-          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05) !important;
+          box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08) !important;
+          transform: translateY(-2px);
         }
       `}</style>
     </section>
