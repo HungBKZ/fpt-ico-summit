@@ -229,6 +229,8 @@ export const vi: Dictionary = {
     dateLabel: "Thời gian diễn ra",
     datesValue: "20–22 tháng 11, 2026",
     getDirections: "Xem đường đi",
+    openInMaps: "Mở trong Google Maps",
+    mapAriaLabel: "Mở vị trí Trường Đại học FPT Cần Thơ trong Google Maps",
   },
   souvenirs: {
     eyebrow: "Ẩm thực & Quà lưu niệm",

@@ -138,6 +138,8 @@ export type Dictionary = {
     dateLabel: string;
     datesValue: string;
     getDirections: string;
+    openInMaps: string;
+    mapAriaLabel: string;
   };
   souvenirs: { eyebrow: string; title: string; subtitle: string };
   faq: { eyebrow: string; title: string; subtitle: string };

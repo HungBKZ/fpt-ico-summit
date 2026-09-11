@@ -229,6 +229,8 @@ export const en: Dictionary = {
     dateLabel: "Event dates",
     datesValue: "20–22 November 2026",
     getDirections: "Get Directions",
+    openInMaps: "Open in Google Maps",
+    mapAriaLabel: "Open FPT University Can Tho Campus location in Google Maps",
   },
   souvenirs: {
     eyebrow: "Food & Souvenirs",
