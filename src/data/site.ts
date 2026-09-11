@@ -21,6 +21,15 @@ export const siteConfig = {
   /** Full postal address. */
   address: "600 Nguyen Van Cu Noi Dai, An Binh, Can Tho City, Vietnam",
 
+  /** Campus coordinates, verified via the official Google Maps listing. */
+  coordinates: {
+    lat: 10.0124518,
+    lng: 105.7324316,
+  },
+
+  /** Official Google Maps short link for the campus — used for "Get Directions" / "Open in Google Maps". */
+  campusMapsUrl: "https://maps.app.goo.gl/kGQm6Yv4wX4f25627",
+
   /** ICO contact email. */
   email: "FPTUCT.HTQT@fe.edu.vn",
 

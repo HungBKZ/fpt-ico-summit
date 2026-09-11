@@ -16,12 +16,14 @@ interface FaqSectionProps {
 }
 
 function FaqAccordionItem({
+  index,
   questionStr,
   answerStr,
   id,
   isOpen,
   onToggle,
 }: {
+  index: number;
   questionStr: string;
   answerStr: string;
   id: string;
@@ -88,19 +90,26 @@ function FaqAccordionItem({
         className="faq-trigger"
         onClick={handleToggle}
       >
-        <span>{questionStr}</span>
-        <svg
-          className="faq-chevron"
-          aria-hidden="true"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
+        <span className="faq-trigger-content">
+          <span className="faq-index" aria-hidden="true">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+          <span className="faq-question-text">{questionStr}</span>
+        </span>
+        <span className="faq-chevron-wrap">
+          <svg
+            className="faq-chevron"
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </span>
       </button>
 
       <div
@@ -135,7 +144,7 @@ export function FaqSection({ locale, dict }: FaqSectionProps) {
         <div className="faq-layout">
 
           {/* Left — intro */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>
             <RevealOnScroll>
               <SectionHeading
                 id="faq-heading"
@@ -151,29 +160,42 @@ export function FaqSection({ locale, dict }: FaqSectionProps) {
               fontSize: "var(--text-sm)",
               color: "var(--color-text-secondary)",
               lineHeight: "var(--leading-normal)",
-              maxWidth: "36ch",
+              maxWidth: "38ch",
             }}>
               {dict.faq.subtitle}
             </p>
 
             <a
               href={mailtoHref(siteConfig.email, "FPT ICO Summit 2026 Enquiry")}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.375rem",
-                fontSize: "var(--text-sm)",
-                fontWeight: 600,
-                color: "var(--color-blue)",
-                textDecoration: "none",
-                transition: "color var(--transition-fast)",
-              }}
+              className="faq-contact-card"
             >
-              {siteConfig.email}
+              <span className="faq-contact-icon" aria-hidden="true">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M4 4h16v16H4z" opacity="0" />
+                  <path d="M22 6l-10 7L2 6" />
+                  <rect x="2" y="4" width="20" height="16" rx="2" />
+                </svg>
+              </span>
+              <span style={{ minWidth: 0 }}>
+                <span className="faq-contact-label">
+                  {locale === "vi" ? "Vẫn còn thắc mắc?" : "Still have questions?"}
+                </span>
+                <span className="faq-contact-email">{siteConfig.email}</span>
+              </span>
               <svg
                 aria-hidden="true"
-                width="14"
-                height="14"
+                className="faq-contact-arrow"
+                width="16"
+                height="16"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -199,6 +221,7 @@ export function FaqSection({ locale, dict }: FaqSectionProps) {
                 <RevealOnScroll key={item.id} delay={index * 70}>
                   <div role="listitem">
                     <FaqAccordionItem
+                      index={index}
                       id={item.id}
                       questionStr={qStr}
                       answerStr={aStr}
