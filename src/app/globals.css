@@ -2404,3 +2404,218 @@
     }
   }
 }
+
+/* ── Diamond tier badge: faceted gradient, sweeping shine, twinkling sparkles ── */
+.diamond-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  overflow: hidden;
+  isolation: isolate;
+  color: #ffffff;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+  background: linear-gradient(115deg, #0b2e5e 0%, #1a5ea8 28%, #6db4f5 50%, #1a5ea8 72%, #0b2e5e 100%);
+  box-shadow:
+    0 0 0 1px rgba(26, 94, 168, 0.35),
+    0 4px 14px -2px rgba(58, 127, 212, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  text-shadow: 0 1px 2px rgba(11, 23, 54, 0.45);
+}
+
+.diamond-badge::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 45%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.75), transparent);
+  transform: translateX(-160%) skewX(-20deg);
+  animation: diamondShine 3.6s ease-in-out infinite;
+}
+
+.diamond-badge__gem {
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 3px rgba(190, 225, 255, 0.9));
+}
+
+.diamond-badge__spark {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background: #ffffff;
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+  animation: diamondTwinkle 2.4s ease-in-out infinite;
+}
+
+@keyframes diamondShine {
+  0%, 55% { transform: translateX(-160%) skewX(-20deg); }
+  100% { transform: translateX(380%) skewX(-20deg); }
+}
+
+@keyframes diamondTwinkle {
+  0%, 100% { opacity: 0; transform: scale(0.4); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .diamond-badge::after { animation: none; opacity: 0; }
+  .diamond-badge__spark { animation: none; opacity: 0.8; transform: none; }
+}
+
+/* ── Gold / Silver tier badges: brushed-metal gradient with a slow, subtle shine ── */
+.metal-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  overflow: hidden;
+  isolation: isolate;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: 999px;
+}
+
+.metal-badge::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  transform: translateX(-160%) skewX(-20deg);
+  animation: diamondShine 6s ease-in-out infinite;
+}
+
+.metal-badge--gold {
+  color: #4a3200;
+  border: 1px solid #b8860b;
+  background: linear-gradient(115deg, #d9b04a 0%, #f6e3a1 35%, #e2b94f 60%, #b8860b 100%);
+  box-shadow: 0 2px 8px -2px rgba(184, 134, 11, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.metal-badge--silver {
+  color: #2d3748;
+  border: 1px solid #8593a6;
+  background: linear-gradient(115deg, #b4bdca 0%, #f1f4f8 38%, #cfd6df 62%, #8593a6 100%);
+  box-shadow: 0 2px 8px -2px rgba(100, 116, 139, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .metal-badge::after { animation: none; opacity: 0; }
+}
+
+/* ── Sponsorship tier cards: plain white at rest, tier-specific effect on hover ── */
+.tier-card {
+  --tier-sheen: rgba(255, 255, 255, 0.6);
+  --tier-spark: #ffffff;
+  transition: transform 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
+}
+
+.tier-card--diamond {
+  --tier-sheen: rgba(157, 208, 255, 0.5);
+  --tier-spark: #3a9bff;
+}
+.tier-card--gold {
+  --tier-sheen: rgba(233, 196, 90, 0.22);
+  --tier-spark: #d9a521;
+}
+.tier-card--silver {
+  --tier-sheen: rgba(160, 174, 192, 0.16);
+  --tier-spark: #94a3b8;
+}
+
+/* Light sweep across the card */
+.tier-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 38%, var(--tier-sheen) 50%, transparent 62%);
+  transform: translateX(-110%);
+}
+
+.tier-card:hover,
+.tier-card:focus-within {
+  transform: translateY(-2px);
+}
+.tier-card--gold:hover,
+.tier-card--gold:focus-within {
+  transform: translateY(-3px);
+}
+.tier-card--diamond:hover,
+.tier-card--diamond:focus-within {
+  transform: translateY(-6px);
+}
+.tier-card:hover::before,
+.tier-card:focus-within::before {
+  transform: translateX(110%);
+  transition: transform 1100ms ease;
+}
+
+.tier-card--diamond:hover::before,
+.tier-card--diamond:focus-within::before {
+  transition-duration: 800ms;
+}
+.tier-card--silver:hover::before,
+.tier-card--silver:focus-within::before {
+  transition-duration: 1600ms;
+}
+
+.tier-card--diamond:hover,
+.tier-card--diamond:focus-within {
+  border-color: #3a7fd4 !important;
+  box-shadow: 0 0 0 2px rgba(109, 180, 245, 0.85), 0 24px 52px -16px rgba(58, 127, 212, 0.8),
+    0 0 56px rgba(109, 180, 245, 0.55);
+}
+.tier-card--gold:hover,
+.tier-card--gold:focus-within {
+  border-color: #c9962b !important;
+  box-shadow: 0 0 0 1px rgba(233, 196, 90, 0.5), 0 14px 30px -16px rgba(184, 134, 11, 0.4),
+    0 0 18px rgba(233, 196, 90, 0.18);
+}
+.tier-card--silver:hover,
+.tier-card--silver:focus-within {
+  border-color: #8593a6 !important;
+  box-shadow: 0 10px 24px -16px rgba(71, 85, 105, 0.35);
+}
+
+/* Sparks: star shapes that pop, drift outwards and fade while hovering */
+.tier-card__spark {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  background: var(--tier-spark);
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+}
+.tier-card:hover .tier-card__spark,
+.tier-card:focus-within .tier-card__spark {
+  animation: tierSpark 1.8s ease-out infinite;
+}
+
+@keyframes tierSpark {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.2) rotate(0deg); }
+  30% { opacity: 1; transform: translate(calc(var(--dx) * 0.4), calc(var(--dy) * 0.4)) scale(1) rotate(45deg); }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.4) rotate(90deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tier-card,
+  .tier-card:hover,
+  .tier-card:focus-within {
+    transform: none;
+  }
+  .tier-card::before { display: none; }
+  .tier-card:hover .tier-card__spark,
+  .tier-card:focus-within .tier-card__spark {
+    animation: none;
+    opacity: 0.7;
+  }
+}
