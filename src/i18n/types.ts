@@ -16,6 +16,7 @@ export type Dictionary = {
     explore: string;
     partners: string;
     packages?: string;
+    sponsorship: string;
     more?: string;
     scholarships: string;
     venue: string;
@@ -97,6 +98,31 @@ export type Dictionary = {
     emptyState: string;
     viewAllLabel: string;
     showLessLabel: string;
+  };
+  sponsorship: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    featured: string;
+    feeLabel: string;
+    keyBenefitsLabel: string;
+    tierNames: { diamond: string; gold: string; silver: string };
+    compareTitle: string;
+    compareSubtitle: string;
+    benefitColumn: string;
+    included: string;
+    notIncluded: string;
+    disclaimer: string;
+    sponsorsTitle: string;
+    sponsorsSubtitle: string;
+    sampleBadge: string;
+    viewDetails: string;
+    closeModal: string;
+    visitWebsiteCta: string;
+    tagsLabel: string;
+    highlightLabel: string;
+    socialsLabel: string;
+    emptyTitle: string;
   };
   scholarships: {
     eyebrow: string;

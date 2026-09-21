@@ -20,6 +20,9 @@ interface SiteHeaderProps {
   dict: Dictionary;
 }
 
+/** Section anchors tracked by the scrollspy, in page order. Keep in sync with `navSections`. */
+const SECTION_IDS = ["about", "partners", "explore", "program", "packages", "sponsorship", "scholarships", "venue", "faq"];
+
 export function SiteHeader({ locale, dict }: SiteHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -28,24 +31,29 @@ export function SiteHeader({ locale, dict }: SiteHeaderProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const moreDropdownRef = useRef<HTMLLIElement>(null);
+  const moreButtonRef = useRef<HTMLButtonElement>(null);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
 
   const hasRegistration = isRegistrationOpen(siteConfig.registrationUrl);
 
-  const primaryNavLinks = [
-    { label: dict.nav.about, href: "#about", id: "about" },
-    { label: dict.nav.program, href: "#program", id: "program" },
-    { label: dict.nav.explore, href: "#explore", id: "explore" },
-    { label: dict.nav.partners, href: "#partners", id: "partners" },
-    { label: dict.nav.packages || (locale === "vi" ? "Gói tham gia" : "Packages"), href: "#packages", id: "packages" },
-  ];
+  // Single list in the same order as the sections appear on the page.
+  // `primary` items sit in the desktop bar; the rest go to the "More" dropdown.
+  // The mobile menu shows everything in page order.
+  const navSections = [
+    { label: dict.nav.about, id: "about", primary: true },
+    { label: dict.nav.partners, id: "partners", primary: true },
+    { label: dict.nav.explore, id: "explore", primary: false },
+    { label: dict.nav.program, id: "program", primary: true },
+    { label: dict.nav.packages || (locale === "vi" ? "Gói tham gia" : "Packages"), id: "packages", primary: true },
+    { label: dict.nav.sponsorship, id: "sponsorship", primary: true },
+    { label: dict.nav.scholarships, id: "scholarships", primary: false },
+    { label: dict.nav.venue, id: "venue", primary: false },
+    { label: dict.nav.faq, id: "faq", primary: false },
+  ].map((item) => ({ ...item, href: `#${item.id}` }));
 
-  const moreNavLinks = [
-    { label: dict.nav.scholarships, href: "#scholarships", id: "scholarships" },
-    { label: dict.nav.venue, href: "#venue", id: "venue" },
-    { label: dict.nav.faq, href: "#faq", id: "faq" },
-  ];
-
-  const allNavLinks = [...primaryNavLinks, ...moreNavLinks];
+  const primaryNavLinks = navSections.filter((item) => item.primary);
+  const moreNavLinks = navSections.filter((item) => !item.primary);
+  const allNavLinks = navSections;
   const isMoreActive = moreNavLinks.some((item) => item.id === activeSection);
 
   // Sticky header transition on scroll
@@ -57,8 +65,7 @@ export function SiteHeader({ locale, dict }: SiteHeaderProps) {
 
   // Lightweight IntersectionObserver scrollspy
   useEffect(() => {
-    const sectionIds = ["about", "program", "explore", "partners", "packages", "scholarships", "venue", "faq"];
-    const elements = sectionIds
+    const elements = SECTION_IDS
       .map((id) => document.getElementById(id))
       .filter((el): el is HTMLElement => el !== null);
 
@@ -103,11 +110,28 @@ export function SiteHeader({ locale, dict }: SiteHeaderProps) {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setMoreOpen(false);
+        moreButtonRef.current?.focus();
       }
     };
     document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
   }, [moreOpen]);
+
+  // Keyboard support for the "More" menu: arrows move between items.
+  const focusMoreItem = (target: "first" | "last" | "next" | "prev") => {
+    const items = Array.from(moreMenuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []);
+    if (items.length === 0) return;
+    const index = items.indexOf(document.activeElement as HTMLElement);
+    const next =
+      target === "first" ? 0 : target === "last" ? items.length - 1 : target === "next" ? (index + 1) % items.length : (index - 1 + items.length) % items.length;
+    items[next].focus();
+  };
+
+  // Focus the first item when the menu is opened from the keyboard.
+  const openMoreFromKey = () => {
+    setMoreOpen(true);
+    requestAnimationFrame(() => focusMoreItem("first"));
+  };
 
   // Close mobile menu on Escape
   useEffect(() => {
@@ -206,6 +230,7 @@ export function SiteHeader({ locale, dict }: SiteHeaderProps) {
                       href={href}
                       className="nav-link"
                       data-active={isActive ? "true" : "false"}
+                      aria-current={isActive ? "location" : undefined}
                     >
                       {label}
                     </a>
@@ -214,9 +239,23 @@ export function SiteHeader({ locale, dict }: SiteHeaderProps) {
               })}
 
               {/* More ▾ Dropdown */}
-              <li ref={moreDropdownRef} style={{ position: "relative" }}>
+              <li
+                ref={moreDropdownRef}
+                style={{ position: "relative" }}
+                onBlur={(e) => {
+                  // Close when keyboard focus leaves the dropdown.
+                  if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setMoreOpen(false);
+                }}
+              >
                 <button
+                  ref={moreButtonRef}
                   type="button"
+                  onKeyDown={(e) => {
+                    if (e.key === "ArrowDown") {
+                      e.preventDefault();
+                      openMoreFromKey();
+                    }
+                  }}
                   onClick={() => setMoreOpen((prev) => !prev)}
                   aria-expanded={moreOpen}
                   aria-haspopup="true"
@@ -254,7 +293,21 @@ export function SiteHeader({ locale, dict }: SiteHeaderProps) {
 
                 {moreOpen && (
                   <div
+                    ref={moreMenuRef}
                     role="menu"
+                    onKeyDown={(e) => {
+                      const map: Record<string, "next" | "prev" | "first" | "last"> = {
+                        ArrowDown: "next",
+                        ArrowUp: "prev",
+                        Home: "first",
+                        End: "last",
+                      };
+                      const action = map[e.key];
+                      if (action) {
+                        e.preventDefault();
+                        focusMoreItem(action);
+                      }
+                    }}
                     style={{
                       position: "absolute",
                       top: "calc(100% + 0.5rem)",
@@ -279,6 +332,7 @@ export function SiteHeader({ locale, dict }: SiteHeaderProps) {
                           key={href}
                           href={href}
                           role="menuitem"
+                          aria-current={isActive ? "location" : undefined}
                           onClick={() => setMoreOpen(false)}
                           style={{
                             display: "flex",
@@ -440,6 +494,7 @@ export function SiteHeader({ locale, dict }: SiteHeaderProps) {
                     onClick={() => setMenuOpen(false)}
                     className="nav-link"
                     data-active={isActive ? "true" : "false"}
+                    aria-current={isActive ? "location" : undefined}
                     style={{ fontSize: "var(--text-base)", padding: "0.625rem 0.75rem" }}
                   >
                     {label}
