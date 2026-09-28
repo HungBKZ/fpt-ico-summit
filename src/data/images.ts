@@ -153,7 +153,7 @@ export const images = {
    */
   ogHome: {
     src: "https://res.cloudinary.com/dvucotc8z/image/upload/v1786512975/A14-ICO-Summit_ldtgju.png",
-    alt: "FPT ICO Summit 2026 social preview image for the event homepage",
+    alt: "Mekong Edutourism Summit 2026 social preview image for the event homepage",
     placeholderLabel: "A14 · OG / Social preview",
   } satisfies SiteImage,
 
@@ -196,7 +196,7 @@ export const images = {
    */
   summitLogoColor: {
     src: "https://res.cloudinary.com/dvucotc8z/image/upload/v1786700475/FPT_ICO_SUMMIT_3_ej5w3m.png",
-    alt: "FPT ICO Summit 2026 official logo",
+    alt: "Mekong Edutourism Summit 2026 official logo",
   } satisfies SiteImage,
 
   /**
@@ -205,7 +205,7 @@ export const images = {
    */
   summitLogoWhite: {
     src: "https://res.cloudinary.com/dvucotc8z/image/upload/v1786700428/FPT_ICO_SUMMIT_2_i4ahzx.png",
-    alt: "FPT ICO Summit 2026 official logo (white version)",
+    alt: "Mekong Edutourism Summit 2026 official logo (white version)",
   } satisfies SiteImage,
 
   /**
@@ -214,7 +214,7 @@ export const images = {
    */
   attendeePass: {
     src: "https://res.cloudinary.com/dvucotc8z/image/upload/v1786697995/5_wnhl2y.png",
-    alt: "FPT ICO Summit 2026 official event attendee pass",
+    alt: "Mekong Edutourism Summit 2026 official event attendee pass",
   } satisfies SiteImage,
 
   /**
@@ -223,7 +223,7 @@ export const images = {
    */
   souvenirTote: {
     src: "https://res.cloudinary.com/dvucotc8z/image/upload/v1786697995/6_iejysu.png",
-    alt: "FPT ICO Summit 2026 official tote bag souvenir",
+    alt: "Mekong Edutourism Summit 2026 official tote bag souvenir",
   } satisfies SiteImage,
 
   /**
@@ -233,7 +233,7 @@ export const images = {
    */
   summitKeyVisual: {
     src: "https://res.cloudinary.com/dvucotc8z/image/upload/v1786697995/KV_gbps3v.png",
-    alt: "FPT ICO Summit 2026 official key visual",
+    alt: "Mekong Edutourism Summit 2026 official key visual",
   } satisfies SiteImage,
 
   /**
@@ -243,7 +243,7 @@ export const images = {
    */
   registrationQr: {
     src: "https://res.cloudinary.com/dvucotc8z/image/upload/v1786698313/QR_pbytrr.jpg",
-    alt: "QR code to register for FPT ICO Summit 2026",
+    alt: "QR code to register for Mekong Edutourism Summit 2026",
   } satisfies SiteImage,
 
   // ---------------------------------------------------------------------------
@@ -257,7 +257,7 @@ export const images = {
    */
   badgeHanging: {
     src: "https://res.cloudinary.com/dvucotc8z/image/upload/v1786703011/FPT_ICO_SUMMIT_6_if6wzx.png",
-    alt: "FPT ICO Summit 2026 official attendee badge hanging mockup",
+    alt: "Mekong Edutourism Summit 2026 official attendee badge hanging mockup",
   } satisfies SiteImage,
 
   /**
@@ -267,7 +267,7 @@ export const images = {
    */
   toteMockup: {
     src: "https://res.cloudinary.com/dvucotc8z/image/upload/v1786703011/FPT_ICO_SUMMIT_4_dyiail.png",
-    alt: "FPT ICO Summit 2026 official Summit tote bag",
+    alt: "Mekong Edutourism Summit 2026 official Summit tote bag",
   } satisfies SiteImage,
 
   /**
@@ -277,7 +277,7 @@ export const images = {
    */
   badgeFlat: {
     src: "https://res.cloudinary.com/dvucotc8z/image/upload/v1786703011/FPT_ICO_SUMMIT_5_pii5ks.png",
-    alt: "FPT ICO Summit 2026 attendee badge flat artwork",
+    alt: "Mekong Edutourism Summit 2026 attendee badge flat artwork",
   } satisfies SiteImage,
 
   /**
@@ -287,7 +287,7 @@ export const images = {
    */
   eventPoster: {
     src: "https://res.cloudinary.com/dvucotc8z/image/upload/v1786703010/FPT_ICO_SUMMIT_7_tw2pa7.png",
-    alt: "FPT ICO Summit 2026 official event poster",
+    alt: "Mekong Edutourism Summit 2026 official event poster",
   } satisfies SiteImage,
 } as const;
 

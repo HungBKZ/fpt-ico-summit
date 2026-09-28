@@ -37,7 +37,7 @@ export function StaffShell({
                 Summit Operations
               </span>
               <span className="text-[10px] text-slate-400 block mt-0.5 font-medium">
-                FPT ICO Summit 2026
+                Mekong Edutourism Summit 2026
               </span>
             </div>
           </div>
@@ -80,7 +80,7 @@ export function StaffShell({
 
       {/* Footer */}
       <footer className="bg-slate-900 text-slate-400 text-[11px] py-4 border-t border-slate-800 text-center">
-        FPT ICO Summit 2026 Operations Portal — FPT University Can Tho Campus.
+        Mekong Edutourism Summit 2026 Operations Portal — FPT University Can Tho Campus.
       </footer>
     </div>
   );

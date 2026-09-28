@@ -145,14 +145,14 @@ export function StaffReportsConsole({
       {/* Header */}
       <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-2xs">
         <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider block">
-          FPT ICO Summit {editionYear}
+          Mekong Edutourism Summit {editionYear}
         </span>
         <h1 className="text-xl md:text-2xl font-bold text-slate-900 mt-0.5">
           {rDict?.title || "Reports & Exports Center"}
         </h1>
         <p className="text-xs text-slate-500 mt-1">
           {rDict?.subtitle ||
-            "Operational metrics summary and exports for FPT ICO Summit."}
+            "Operational metrics summary and exports for Mekong Edutourism Summit."}
         </p>
       </div>
 

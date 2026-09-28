@@ -166,7 +166,7 @@ export function FaqSection({ locale, dict }: FaqSectionProps) {
             </p>
 
             <a
-              href={mailtoHref(siteConfig.email, "FPT ICO Summit 2026 Enquiry")}
+              href={mailtoHref(siteConfig.email, "Mekong Edutourism Summit 2026 Enquiry")}
               className="faq-contact-card"
             >
               <span className="faq-contact-icon" aria-hidden="true">

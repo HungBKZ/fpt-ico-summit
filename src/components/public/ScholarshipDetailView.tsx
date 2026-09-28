@@ -69,7 +69,7 @@ export function ScholarshipDetailView({ scholarship, locale }: ScholarshipDetail
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-indigo-950 to-slate-900 flex items-center justify-center p-6 text-center">
             <span className="text-xs font-black tracking-widest text-amber-400 uppercase">
-              FPT ICO SUMMIT 2026 OFFICIAL SCHOLARSHIP
+              MEKONG EDUTOURISM SUMMIT 2026 OFFICIAL SCHOLARSHIP
             </span>
           </div>
         )}

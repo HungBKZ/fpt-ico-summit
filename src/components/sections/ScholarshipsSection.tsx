@@ -246,7 +246,7 @@ export function ScholarshipsSection({ locale, dict }: ScholarshipsSectionProps) 
                         </svg>
                         <div className="text-center z-10">
                           <span className="text-[10px] font-black tracking-widest text-amber-400 uppercase block">
-                            FPT ICO SUMMIT 2026
+                            MEKONG EDUTOURISM SUMMIT 2026
                           </span>
                           <span className="text-xs font-bold text-white/80 block mt-0.5">
                             Official Scholarship Opportunity

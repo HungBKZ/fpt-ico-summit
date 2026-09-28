@@ -246,7 +246,7 @@ export function ClientAuthControl({
             >
               {dict.nav.changePassword}
             </Link>
-            <a
+            <Link
               href="/api/auth/signout"
               style={{
                 fontSize: "11px",
@@ -256,7 +256,7 @@ export function ClientAuthControl({
               }}
             >
               {dict.nav.signOut}
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -434,12 +434,12 @@ export function ClientAuthControl({
 
           <hr style={{ margin: "0.35rem 0", borderColor: "rgba(0,0,0,0.06)" }} />
 
-          <a
+          <Link
             href={`/api/auth/signout`}
             className="px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 transition"
           >
             {dict.nav.signOut}
-          </a>
+          </Link>
         </div>
       )}
     </div>

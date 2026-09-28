@@ -135,7 +135,7 @@ export function AdminSidebar({
               Admin Portal
             </span>
             <span className="text-[10px] text-slate-400 block mt-0.5 font-medium">
-              FPT ICO Summit 2026
+              Mekong Edutourism Summit 2026
             </span>
           </div>
         </Link>

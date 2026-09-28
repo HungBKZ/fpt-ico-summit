@@ -16,8 +16,8 @@ export const faqItems: FaqItem[] = [
   {
     id: "who-can-attend",
     question: {
-      en: "Who can attend FPT ICO Summit 2026?",
-      vi: "Ai có thể tham dự FPT ICO Summit 2026?",
+      en: "Who can attend Mekong Edutourism Summit 2026?",
+      vi: "Ai có thể tham dự Mekong Edutourism Summit 2026?",
     },
     answer: {
       en: "The summit is designed for high-school and university students, educators, and anyone interested in international education and cultural exchange. International education partners, consulates, and institutional guests are also warmly welcomed.",
@@ -31,8 +31,8 @@ export const faqItems: FaqItem[] = [
       vi: "Sự kiện được tổ chức ở đâu?",
     },
     answer: {
-      en: "FPT ICO Summit 2026 takes place at FPT University Can Tho Campus, 600 Nguyen Van Cu Noi Dai, An Binh, Can Tho City, Vietnam.",
-      vi: "FPT ICO Summit 2026 diễn ra tại Trường Đại học FPT Phân hiệu Cần Thơ, số 600 đường Nguyễn Văn Cừ nối dài, phường An Bình, quận Ninh Kiều, TP. Cần Thơ, Việt Nam.",
+      en: "Mekong Edutourism Summit 2026 takes place at FPT University Can Tho Campus, 600 Nguyen Van Cu Noi Dai, An Binh, Can Tho City, Vietnam.",
+      vi: "Mekong Edutourism Summit 2026 diễn ra tại Trường Đại học FPT Phân hiệu Cần Thơ, số 600 đường Nguyễn Văn Cừ nối dài, phường An Bình, quận Ninh Kiều, TP. Cần Thơ, Việt Nam.",
     },
   },
   {
@@ -64,8 +64,8 @@ export const faqItems: FaqItem[] = [
       vi: "Sự kiện có mở cho các đối tác quốc tế không?",
     },
     answer: {
-      en: "Yes. FPT ICO Summit 2026 actively welcomes international universities, education organizations, and consulates as participants. To enquire about partnership or participation, please contact us at FPTUCT.HTQT@fe.edu.vn.",
-      vi: "Có. FPT ICO Summit 2026 nồng nhiệt chào đón sự tham gia của các trường đại học, tổ chức giáo dục và cơ quan lãnh sự quốc tế. Để tìm hiểu thêm về hợp tác và tham gia gian hàng, vui lòng liên hệ qua email FPTUCT.HTQT@fe.edu.vn.",
+      en: "Yes. Mekong Edutourism Summit 2026 actively welcomes international universities, education organizations, and consulates as participants. To enquire about partnership or participation, please contact us at FPTUCT.HTQT@fe.edu.vn.",
+      vi: "Có. Mekong Edutourism Summit 2026 nồng nhiệt chào đón sự tham gia của các trường đại học, tổ chức giáo dục và cơ quan lãnh sự quốc tế. Để tìm hiểu thêm về hợp tác và tham gia gian hàng, vui lòng liên hệ qua email FPTUCT.HTQT@fe.edu.vn.",
     },
   },
   {
@@ -75,8 +75,8 @@ export const faqItems: FaqItem[] = [
       vi: "Sự kiện sẽ diễn ra vào thời gian nào?",
     },
     answer: {
-      en: "FPT ICO Summit 2026 runs from 20 to 22 November 2026 at FPT University Can Tho Campus.",
-      vi: "FPT ICO Summit 2026 diễn ra từ ngày 20 đến ngày 22 tháng 11 năm 2026 tại Trường Đại học FPT Phân hiệu Cần Thơ.",
+      en: "Mekong Edutourism Summit 2026 runs from 20 to 22 November 2026 at FPT University Can Tho Campus.",
+      vi: "Mekong Edutourism Summit 2026 diễn ra từ ngày 20 đến ngày 22 tháng 11 năm 2026 tại Trường Đại học FPT Phân hiệu Cần Thơ.",
     },
   },
 ];

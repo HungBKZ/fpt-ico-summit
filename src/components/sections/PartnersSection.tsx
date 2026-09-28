@@ -219,7 +219,7 @@ export function PartnersSection({ locale, dict }: PartnersSectionProps) {
                       ) : (
                         <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-950 flex items-center justify-center">
                           <span className="text-[9px] font-black tracking-widest text-[#d9a24b] uppercase">
-                            FPT ICO SUMMIT 2026
+                            MEKONG EDUTOURISM SUMMIT 2026
                           </span>
                         </div>
                       )}
@@ -271,8 +271,8 @@ export function PartnersSection({ locale, dict }: PartnersSectionProps) {
                       ) : (
                         <p className="text-[12.5px] text-[#5b6478]/70 italic line-clamp-2 leading-relaxed">
                           {locale === "vi"
-                            ? "Đối tác chính thức đồng hành cùng FPT ICO Summit 2026."
-                            : "Official partner institution participating in FPT ICO Summit 2026."}
+                            ? "Đối tác chính thức đồng hành cùng Mekong Edutourism Summit 2026."
+                            : "Official partner institution participating in Mekong Edutourism Summit 2026."}
                         </p>
                       )}
 

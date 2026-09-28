@@ -27,7 +27,7 @@ export default async function AdminLoginPage({
             ICO
           </div>
           <h1 className="text-xl font-bold text-slate-900">
-            FPT ICO Summit Admin Portal
+            Mekong Edutourism Summit Admin Portal
           </h1>
           <p className="text-xs text-slate-500 mt-1">
             Restricted System Administration Console

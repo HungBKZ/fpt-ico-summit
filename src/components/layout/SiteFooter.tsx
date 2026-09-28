@@ -3,10 +3,8 @@
  * Supports full public marketing footer and compact dashboard portal footer.
  */
 
-import Image from "next/image";
 import Link from "next/link";
 import { siteConfig } from "@/data/site";
-import { images } from "@/data/images";
 import { mailtoHref } from "@/lib/utils";
 import { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/types";
@@ -33,7 +31,7 @@ export function SiteFooter({ locale, dict, isDashboard = false }: SiteFooterProp
       >
         <div className="site-container max-w-5xl flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
           <p className="font-medium text-slate-300">
-            FPT ICO Summit 2026 · International Cooperation Office
+            Mekong Edutourism Summit 2026 · International Cooperation Office
           </p>
           <p className="text-slate-400 font-medium">
             FPT University Can Tho Campus
@@ -81,21 +79,35 @@ export function SiteFooter({ locale, dict, isDashboard = false }: SiteFooterProp
             <Link
               href={`/${locale}`}
               aria-label={`${siteConfig.name} — home`}
-              style={{ display: "inline-flex", alignItems: "center" }}
+              style={{
+                display: "inline-flex",
+                flexDirection: "column",
+                lineHeight: 1.15,
+                textDecoration: "none",
+              }}
             >
-              <Image
-                src={images.summitLogoWhite.src!}
-                alt={images.summitLogoWhite.alt}
-                width={160}
-                height={48}
+              <span
                 style={{
-                  height: "2.75rem",
-                  width: "auto",
-                  maxWidth: "160px",
-                  objectFit: "contain",
-                  display: "block",
+                  fontFamily: "var(--font-display, inherit)",
+                  fontWeight: 700,
+                  fontSize: "1.125rem",
+                  color: "#ffffff",
+                  letterSpacing: "-0.015em",
                 }}
-              />
+              >
+                Mekong Edutourism Summit
+              </span>
+              <span
+                style={{
+                  fontFamily: "var(--font-display, inherit)",
+                  fontWeight: 700,
+                  fontSize: "0.8125rem",
+                  color: "var(--color-orange)",
+                  letterSpacing: "0.04em",
+                }}
+              >
+                2026
+              </span>
             </Link>
 
             <p
@@ -159,7 +171,7 @@ export function SiteFooter({ locale, dict, isDashboard = false }: SiteFooterProp
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
               <a
-                href={mailtoHref(siteConfig.email, "FPT ICO Summit 2026 Enquiry")}
+                href={mailtoHref(siteConfig.email, "Mekong Edutourism Summit 2026 Enquiry")}
                 className="footer-link"
                 style={{ fontSize: "var(--text-sm)", wordBreak: "break-all" }}
               >

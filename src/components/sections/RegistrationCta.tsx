@@ -125,29 +125,38 @@ export function RegistrationCta({ locale, dict }: RegistrationCtaProps) {
               {/* Contact nudge */}
               <p className="reg-cta-contact" style={{ marginTop: "1.5rem" }}>
                 {locale === "vi" ? "Có thắc mắc về tham gia hoặc hợp tác? " : "Questions about participation or partnership? "}
-                <a href={mailtoHref(siteConfig.email, "FPT ICO Summit 2026 Enquiry")}>
+                <a href={mailtoHref(siteConfig.email, "Mekong Edutourism Summit 2026 Enquiry")}>
                   {siteConfig.email}
                 </a>
               </p>
             </div>
           </RevealOnScroll>
 
-          {/* ── RIGHT: hanging badge mockup (C1) ──────────────────────── */}
+          {/* ── RIGHT: Venue photograph (Neutral approved asset) ────────── */}
           <RevealOnScroll className="reg-right" delay={120}>
-            <Image
-              src={images.badgeHanging.src!}
-              alt={images.badgeHanging.alt}
-              width={440}
-              height={560}
+            <div
               style={{
                 width: "100%",
-                maxWidth: "400px",
-                height: "auto",
-                display: "block",
-                objectFit: "contain",
-                filter: "drop-shadow(0 24px 48px rgba(0,0,0,0.50))",
+                maxWidth: "440px",
+                borderRadius: "var(--radius-lg)",
+                overflow: "hidden",
+                boxShadow: "0 24px 48px rgba(0, 0, 0, 0.40)",
+                border: "1px solid rgba(255, 255, 255, 0.12)",
               }}
-            />
+            >
+              <Image
+                src={images.campus.src!}
+                alt={images.campus.alt}
+                width={560}
+                height={375}
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  display: "block",
+                  objectFit: "cover",
+                }}
+              />
+            </div>
           </RevealOnScroll>
 
         </div>

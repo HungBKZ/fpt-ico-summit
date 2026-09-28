@@ -5,10 +5,8 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { siteConfig } from "@/data/site";
-import { images } from "@/data/images";
 import { isRegistrationOpen } from "@/lib/utils";
 import { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/types";
@@ -184,32 +182,42 @@ export function SiteHeader({ locale, dict }: SiteHeaderProps) {
             transition: "height 250ms ease",
           }}
         >
-          {/* ── Logo ──────────────────────────────────────────────────── */}
+          {/* ── Temporary Event Wordmark ─────────────────────────────── */}
           <Link
             href={`/${locale}`}
             aria-label={`${siteConfig.name} — home`}
             style={{
               display: "flex",
-              alignItems: "center",
+              flexDirection: "column",
+              lineHeight: 1.15,
               flexShrink: 0,
               textDecoration: "none",
             }}
           >
-            <Image
-              src={images.summitLogoColor.src!}
-              alt={images.summitLogoColor.alt}
-              width={260}
-              height={70}
-              priority
+            <span
               style={{
-                height: scrolled ? "2.65rem" : "3.15rem",
-                width: "auto",
-                maxWidth: "260px",
-                objectFit: "contain",
-                display: "block",
-                transition: "height 250ms ease",
+                fontFamily: "var(--font-display, inherit)",
+                fontWeight: 700,
+                fontSize: scrolled ? "0.9375rem" : "1.0625rem",
+                color: "var(--color-navy)",
+                letterSpacing: "-0.015em",
+                whiteSpace: "nowrap",
+                transition: "font-size 250ms ease",
               }}
-            />
+            >
+              Mekong Edutourism Summit
+            </span>
+            <span
+              style={{
+                fontFamily: "var(--font-display, inherit)",
+                fontWeight: 700,
+                fontSize: "0.75rem",
+                color: "var(--color-orange)",
+                letterSpacing: "0.04em",
+              }}
+            >
+              2026
+            </span>
           </Link>
 
           {/* ── Compact Desktop Nav with More Dropdown ───────────────── */}

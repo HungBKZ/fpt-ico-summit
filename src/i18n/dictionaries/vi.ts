@@ -37,7 +37,7 @@ export const vi: Dictionary = {
     titleLine2: "Kiến tạo Cơ hội",
     titleAccent2: "Toàn cầu.",
     description:
-      "FPT ICO Summit 2026 kết nối học sinh, sinh viên, các trường đại học, cơ quan lãnh sự và đối tác toàn cầu cho giáo dục quốc tế, giao lưu văn hóa và học tập sẵn sàng cho tương lai.",
+      "Mekong Edutourism Summit 2026 kết nối học sinh, sinh viên, các trường đại học, cơ quan lãnh sự và đối tác toàn cầu cho giáo dục quốc tế, giao lưu văn hóa và học tập sẵn sàng cho tương lai thông qua các hoạt động trực tuyến, kết hợp và tại khuôn viên.",
     ctaExplore: "Khám phá Summit",
     cta360: "Khám phá Campus 360°",
     ctaRegister: "Đăng ký ngay",
@@ -69,10 +69,10 @@ export const vi: Dictionary = {
     },
   },
   pillars: {
-    eyebrow: "Tại sao chọn FPT ICO Summit",
+    eyebrow: "Tại sao chọn Mekong Edutourism Summit",
     title: "Nơi giáo dục quốc tế trở thành một trải nghiệm.",
     subtitle:
-      "FPT ICO Summit 2026 được thiết kế không chỉ là một triển lãm. Sự kiện tạo ra không gian chung nơi học sinh, sinh viên có thể khám phá các lộ trình du học toàn cầu, trải nghiệm văn hóa trực tiếp, xây dựng sự tự tin đa văn hóa và kết nối với cộng đồng giáo dục quốc tế.",
+      "Mekong Edutourism Summit 2026 được thiết kế không chỉ là một triển lãm. Sự kiện tạo ra không gian chung nơi học sinh, sinh viên có thể khám phá các lộ trình du học toàn cầu, trải nghiệm văn hóa trực tiếp, xây dựng sự tự tin đa văn hóa và kết nối với cộng đồng giáo dục quốc tế.",
     items: {
       p1: {
         title: "Kết nối Văn hóa",
@@ -96,7 +96,7 @@ export const vi: Dictionary = {
     eyebrow: "Trải nghiệm Summit",
     title: "Sáu phương thức khám phá, kết nối và phát triển.",
     subtitle:
-      "FPT ICO Summit 2026 được xây dựng xoay quanh các trải nghiệm — mỗi trải nghiệm được thiết kế để kết nối học sinh, nhà giáo dục và đối tác toàn cầu một cách ý nghĩa.",
+      "Mekong Edutourism Summit 2026 được xây dựng xoay quanh các trải nghiệm — mỗi trải nghiệm được thiết kế để kết nối học sinh, nhà giáo dục và đối tác toàn cầu một cách ý nghĩa.",
     cards: {
       expo: {
         category: "Triển lãm",
@@ -134,7 +134,7 @@ export const vi: Dictionary = {
     eyebrow: "Chương trình",
     title: "Ba ngày khám phá, kết nối và giao lưu.",
     subtitle:
-      "FPT ICO Summit 2026 diễn ra trong ba ngày — mỗi ngày mang một dấu ấn riêng, từ khám phá văn hóa đến giao lưu quốc tế, biểu diễn nghệ thuật và lễ bế mạc trọng thể.",
+      "Mekong Edutourism Summit 2026 diễn ra trong ba ngày — mỗi ngày mang một dấu ấn riêng, từ khám phá văn hóa đến giao lưu quốc tế, biểu diễn nghệ thuật và lễ bế mạc trọng thể.",
     slots: {
       morning: "Buổi sáng",
       afternoon: "Buổi chiều",
@@ -148,7 +148,7 @@ export const vi: Dictionary = {
     eyebrow: "Triển lãm Quốc tế",
     title: "Một hội nghị. Nhiều phương thức kết nối toàn cầu.",
     subtitle:
-      "Triển lãm Quốc tế được quy hoạch là không gian kết nối trung tâm của FPT ICO Summit 2026, quy tụ giáo dục, văn hóa và kết nối quốc tế ngay tại khuôn viên.",
+      "Triển lãm Quốc tế được quy hoạch là không gian kết nối trung tâm của Mekong Edutourism Summit 2026, quy tụ giáo dục, văn hóa và kết nối quốc tế ngay tại khuôn viên.",
   },
   workshops: {
     eyebrow: "Hội thảo",
@@ -202,7 +202,7 @@ export const vi: Dictionary = {
   },
   sponsorship: {
     eyebrow: "Nhà tài trợ",
-    title: "Đồng hành cùng FPT ICO Summit 2026",
+    title: "Đồng hành cùng Mekong Edutourism Summit 2026",
     subtitle:
       "Ba gói tài trợ giúp thương hiệu của quý đơn vị hiện diện trước cộng đồng học sinh, sinh viên, trường đại học và tổ chức giáo dục quốc tế.",
     featured: "Nổi bật",
@@ -217,7 +217,7 @@ export const vi: Dictionary = {
     disclaimer:
       "Quyền lợi và vị trí tuỳ thuộc vào tình trạng còn trống và xác nhận cuối cùng của Ban Tổ chức.",
     sponsorsTitle: "Nhà tài trợ của chúng tôi",
-    sponsorsSubtitle: "Cảm ơn các đơn vị đã đồng hành cùng FPT ICO Summit 2026.",
+    sponsorsSubtitle: "Cảm ơn các đơn vị đã đồng hành cùng Mekong Edutourism Summit 2026.",
     sampleBadge: "Mẫu",
     viewDetails: "Xem chi tiết",
     closeModal: "Đóng",
@@ -225,7 +225,7 @@ export const vi: Dictionary = {
     tagsLabel: "Chương trình & dịch vụ",
     highlightLabel: "Tại Summit",
     socialsLabel: "Mạng xã hội",
-    emptyTitle: "Hãy là nhà tài trợ đầu tiên của FPT ICO Summit 2026",
+    emptyTitle: "Hãy là nhà tài trợ đầu tiên của Mekong Edutourism Summit 2026",
   },
   scholarships: {
     eyebrow: "Học bổng",
@@ -252,7 +252,7 @@ export const vi: Dictionary = {
     eyebrow: "Địa điểm",
     title: "Trường Đại học FPT Phân hiệu Cần Thơ",
     subtitle:
-      "Khám phá khuôn viên trước khi đến và làm quen với môi trường sẽ diễn ra FPT ICO Summit 2026.",
+      "Khám phá khuôn viên trước khi đến và làm quen với môi trường sẽ diễn ra Mekong Edutourism Summit 2026.",
     addressLabel: "Địa chỉ",
     dateLabel: "Thời gian diễn ra",
     datesValue: "20–22 tháng 11, 2026",
@@ -264,7 +264,7 @@ export const vi: Dictionary = {
     eyebrow: "Ẩm thực & Quà lưu niệm",
     title: "Mang một phần kỷ niệm của summit về nhà.",
     subtitle:
-      "FPT ICO Summit 2026 sẽ có các sản phẩm quà tặng chính thức cùng đa dạng lựa chọn ẩm thực, giải khát tại khuôn viên trong suốt thời gian diễn ra hội nghị.",
+      "Mekong Edutourism Summit 2026 sẽ có các sản phẩm quà tặng chính thức cùng đa dạng lựa chọn ẩm thực, giải khát tại khuôn viên trong suốt thời gian diễn ra hội nghị.",
   },
   faq: {
     eyebrow: "Hỏi đáp",
@@ -274,9 +274,9 @@ export const vi: Dictionary = {
   },
   registration: {
     eyebrow: "Cổng đăng ký đang mở",
-    title: "Trở thành một phần của FPT ICO Summit 2026.",
+    title: "Trở thành một phần của Mekong Edutourism Summit 2026.",
     subtitle:
-      "Đăng ký chỗ của bạn tại FPT ICO Summit 2026 — ba ngày hội giáo dục quốc tế, giao lưu văn hóa và kết nối toàn cầu.",
+      "Đăng ký chỗ của bạn tại Mekong Edutourism Summit 2026 — ba ngày hội giáo dục quốc tế, giao lưu văn hóa và kết nối toàn cầu.",
     cta: "Đăng ký ngay",
     scanQr: "Quét mã để đăng ký",
     datesLabel: "Thời gian",
@@ -285,7 +285,7 @@ export const vi: Dictionary = {
     venueValue: "Trường Đại học FPT Phân hiệu Cần Thơ",
   },
   auth: {
-    loginTitle: "Đăng nhập FPT ICO Summit",
+    loginTitle: "Đăng nhập Mekong Edutourism Summit",
     loginSubtitle: "Nhập thông tin tài khoản của bạn để truy cập trang làm việc.",
     emailLabel: "Email công việc / học tập",
     passwordLabel: "Mật khẩu",
@@ -295,7 +295,7 @@ export const vi: Dictionary = {
   },
   register: {
     title: "Tạo tài khoản Thành viên",
-    subtitle: "Đăng ký dành cho học sinh, sinh viên hoặc cá nhân tham gia cộng đồng FPT ICO Summit.",
+    subtitle: "Đăng ký dành cho học sinh, sinh viên hoặc cá nhân tham gia cộng đồng Mekong Edutourism Summit.",
     nameLabel: "Họ và tên",
     emailLabel: "Địa chỉ Email",
     passwordLabel: "Mật khẩu (Tối thiểu 12 ký tự)",
@@ -328,7 +328,7 @@ export const vi: Dictionary = {
     noteLabel: "Ghi chú / Nhu cầu hợp tác (Không bắt buộc)",
     submitBtn: "Gửi yêu cầu đăng ký",
     submitting: "Đang gửi yêu cầu...",
-    successMessage: "Yêu cầu của bạn đã được gửi và sẽ được Ban tổ chức FPT ICO Summit xem xét.",
+    successMessage: "Yêu cầu của bạn đã được gửi và sẽ được Ban tổ chức Mekong Edutourism Summit xem xét.",
   },
   changePassword: {
     title: "Cập nhật Mật khẩu",
@@ -352,7 +352,7 @@ export const vi: Dictionary = {
   partnerCms: {
     title: "Quản lý Hồ sơ Tổ chức",
     subtitle: "Cập nhật nội dung giới thiệu chính thức, thông tin song ngữ Anh/Việt, logo, website và thông tin liên hệ.",
-    identityNotice: "Vui lòng liên hệ Ban tổ chức FPT ICO Summit để cập nhật thông tin chính thức của đơn vị.",
+    identityNotice: "Vui lòng liên hệ Ban tổ chức Mekong Edutourism Summit để cập nhật thông tin chính thức của đơn vị.",
     logoUrlLabel: "Đường dẫn Logo (HTTPS)",
     websiteUrlLabel: "Website chính thức (HTTPS)",
     publicEmailLabel: "Email liên hệ công khai",
@@ -374,7 +374,7 @@ export const vi: Dictionary = {
     statusChangesRequested: "Cần chỉnh sửa",
     statusPublished: "Đã xuất bản",
     profileGuideTitle: "Hướng dẫn hoàn thiện hồ sơ",
-    profileGuideSubtitle: "Hoàn thiện các thông tin bên dưới để giới thiệu đơn vị một cách chuyên nghiệp. Thông tin được duyệt sẽ hiển thị trên nền tảng FPT ICO Summit.",
+    profileGuideSubtitle: "Hoàn thiện các thông tin bên dưới để giới thiệu đơn vị một cách chuyên nghiệp. Thông tin được duyệt sẽ hiển thị trên nền tảng Mekong Edutourism Summit.",
     profileCompletionText: "hạng mục đã hoàn thành",
     uploadLogoLabel: "Logo chính thức",
     uploadLogoHelp: "Tải lên logo chính thức của đơn vị. Khuyến nghị PNG/JPG/WebP, nền trong suốt hoặc nền trắng, tối đa 5 MB.",
@@ -477,7 +477,7 @@ export const vi: Dictionary = {
     phoneLabel: "Số điện thoại (Không bắt buộc)",
   },
   adminPortal: {
-    portalTitle: "Hệ thống Quản trị FPT ICO Summit",
+    portalTitle: "Hệ thống Quản trị Mekong Edutourism Summit",
     portalSubtitle: "Cổng quản trị nội bộ quản lý nội dung đối tác, tài khoản người dùng và vận hành hội nghị.",
     navOverview: "Tổng quan",
     navPartnerContent: "Hồ sơ Đối tác",
@@ -510,15 +510,15 @@ export const vi: Dictionary = {
     socials: "Kết nối với chúng tôi",
     facebook: "Trang Facebook",
     messenger: "Chat với ICO",
-    copyright: "© 2026 FPT ICO Summit — Phòng Hợp tác Quốc tế, FPT University Can Tho Campus.",
+    copyright: "© 2026 Mekong Edutourism Summit — Phòng Hợp tác Quốc tế, FPT University Can Tho Campus.",
   },
   meta: {
-    title: "FPT ICO Summit 2026 | FPT University Can Tho",
+    title: "Mekong Edutourism Summit 2026 | FPT University Can Tho",
     description:
-      "FPT ICO Summit 2026 kết nối học sinh, sinh viên, các trường đại học, cơ quan lãnh sự và đối tác toàn cầu cho giáo dục quốc tế, giao lưu văn hóa và học tập sẵn sàng cho tương lai. 20–22 tháng 11, 2026, FPT University Can Tho Campus, Việt Nam.",
+      "Mekong Edutourism Summit 2026 kết nối giáo dục quốc tế, văn hóa, du lịch và các đối tác toàn cầu thông qua các hoạt động trực tuyến, kết hợp và các hoạt động của Summit tại khu vực Mekong.",
   },
   memberRegistration: {
-    title: "Đăng ký Tham dự FPT ICO Summit 2026",
+    title: "Đăng ký Tham dự Mekong Edutourism Summit 2026",
     subtitle: "Hoàn tất thông tin đăng ký tham dự các phiên chính của chương trình Summit.",
     participantTypeLabel: "Đối tượng tham dự",
     fptStudentOption: "Sinh viên FPT",
@@ -530,7 +530,7 @@ export const vi: Dictionary = {
     submitBtn: "Xác nhận Đăng ký",
     submitting: "Đang xử lý...",
     confirmedTitle: "Xác nhận Đăng ký Thành công",
-    confirmedMessage: "Bạn đã đăng ký tham dự chính thức FPT ICO Summit 2026.",
+    confirmedMessage: "Bạn đã đăng ký tham dự chính thức Mekong Edutourism Summit 2026.",
     disclaimer:
       "Đăng ký Summit bao gồm các hoạt động chung trong chương trình. Workshop và Biểu diễn sân khấu là các hoạt động tự chọn và sẽ được lựa chọn riêng khi được công bố.",
     viewRegistrationBtn: "Xem Thông tin Đăng ký",
@@ -538,7 +538,7 @@ export const vi: Dictionary = {
   },
   adminRegistrations: {
     title: "Danh sách Đăng ký Summit",
-    subtitle: "Quản lý và thống kê danh sách người tham dự FPT ICO Summit 2026.",
+    subtitle: "Quản lý và thống kê danh sách người tham dự Mekong Edutourism Summit 2026.",
     metricTotal: "Tổng số Đăng ký",
     metricFptStudents: "Sinh viên FPT",
     metricExternal: "Khách ngoài FPT",
@@ -555,7 +555,7 @@ export const vi: Dictionary = {
     emptyList: "Không tìm thấy lượt đăng ký nào phù hợp với bộ lọc.",
   },
   staffDashboard: {
-    title: "Vận hành FPT ICO Summit",
+    title: "Vận hành Mekong Edutourism Summit",
     subtitle: "Trang điều hành dành cho Ban tổ chức / Staff Summit.",
     roleNotice: "Bạn đang đăng nhập với vai trò SUMMIT_STAFF.",
     modulesTitle: "Phân hệ Vận hành",
@@ -567,7 +567,7 @@ export const vi: Dictionary = {
     schedulingDesc: "Quản lý và xếp lịch Workshop cùng Biểu diễn sân khấu.",
   },
   staffCheckIn: {
-    title: "Vận hành FPT ICO Summit 2026 — Console Check-in",
+    title: "Vận hành Mekong Edutourism Summit 2026 — Console Check-in",
     subtitle: "Check-in người tham dự tại sự kiện theo từng ngày Summit.",
     statRegistered: "Đã đăng ký",
     statCheckedIn: "Đã check-in",
@@ -614,7 +614,7 @@ export const vi: Dictionary = {
   },
   partnerActivities: {
     title: "Hoạt động Summit",
-    subtitle: "Đề xuất Workshop và Biểu diễn Sân khấu cho FPT ICO Summit 2026.",
+    subtitle: "Đề xuất Workshop và Biểu diễn Sân khấu cho Mekong Edutourism Summit 2026.",
     proposeWorkshopBtn: "+ Đề xuất Workshop",
     proposePerformanceBtn: "+ Đề xuất Biểu diễn",
     tabsAll: "Tất cả Đề xuất",
@@ -631,7 +631,7 @@ export const vi: Dictionary = {
     materialAccessNotice: "Vui lòng đảm bảo Ban Tổ chức Summit có quyền truy cập các liên kết tài liệu.",
     materialAccessConfirmLabel: "Tôi xác nhận Ban Tổ chức Summit có thể truy cập các liên kết tài liệu đã cung cấp.",
     dataPermissionConfirmLabel: "Tôi xác nhận mình có quyền cung cấp thông tin và tư liệu của diễn giả/người liên hệ phục vụ công tác tổ chức Summit.",
-    unconfirmedParticipationError: "Đơn vị của bạn chưa được xác nhận tham gia FPT ICO Summit 2026. Vui lòng liên hệ Ban Tổ chức trước khi gửi đề xuất Workshop hoặc tiết mục biểu diễn.",
+    unconfirmedParticipationError: "Đơn vị của bạn chưa được xác nhận tham gia Mekong Edutourism Summit 2026. Vui lòng liên hệ Ban Tổ chức trước khi gửi đề xuất Workshop hoặc tiết mục biểu diễn.",
     topicProposalStepTitle: "Bước 1 / 2: Phạm vi & Đề xuất Chủ đề Workshop",
     topicAcceptedBadge: "Chủ đề đã duyệt",
     topicPendingBadge: "Chờ duyệt chủ đề",
@@ -665,14 +665,14 @@ export const vi: Dictionary = {
   },
   memberActivities: {
     title: "Hoạt động Summit Tự chọn",
-    subtitle: "Workshop và Biểu diễn Sân khấu là các hoạt động tự chọn trong khuôn khổ FPT ICO Summit. Bạn có thể tham gia một, nhiều hoặc không chọn hoạt động nào.",
+    subtitle: "Workshop và Biểu diễn Sân khấu là các hoạt động tự chọn trong khuôn khổ Mekong Edutourism Summit. Bạn có thể tham gia một, nhiều hoặc không chọn hoạt động nào.",
     joinBtn: "Tham gia Hoạt động",
     removeBtn: "Hủy chọn",
     selectedLabel: "✓ Đã chọn",
     conflictError: "Hoạt động này trùng thời gian với một hoạt động khác bạn đã chọn.",
     republishedConflictWarning: "Lịch đã được cập nhật — hoạt động này hiện trùng thời gian với một hoạt động khác bạn đã chọn.",
     scheduleUnavailable: "Lịch hoạt động hiện chưa khả dụng",
-    mustRegisterNotice: "Bạn cần đăng ký tham gia FPT ICO Summit trước khi chọn các hoạt động tự chọn.",
+    mustRegisterNotice: "Bạn cần đăng ký tham gia Mekong Edutourism Summit trước khi chọn các hoạt động tự chọn.",
     tabAll: "Tất cả hoạt động",
     tabWorkshops: "Workshops",
     tabPerformances: "Biểu diễn Sân khấu",
@@ -705,7 +705,7 @@ export const vi: Dictionary = {
   },
   staffReports: {
     title: "Trung tâm Báo cáo & Xuất dữ liệu",
-    subtitle: "Tổng quan chỉ số vận hành và xuất tệp dữ liệu cho FPT ICO Summit.",
+    subtitle: "Tổng quan chỉ số vận hành và xuất tệp dữ liệu cho Mekong Edutourism Summit.",
     btnDownloading: "Đang tải xuống...",
     btnDownloadXlsx: "Tải Excel (.xlsx)",
     btnDownloadCsv: "Tải CSV (.csv)",
@@ -718,7 +718,7 @@ export const vi: Dictionary = {
   },
   partnerShowcase: {
     title: "Mạng lưới Đối tác Quốc tế",
-    subtitle: "Các trường, tổ chức và đơn vị quốc tế được mời hoặc xác nhận tham gia FPT ICO Summit 2026.",
+    subtitle: "Các trường, tổ chức và đơn vị quốc tế được mời hoặc xác nhận tham gia Mekong Edutourism Summit 2026.",
   },
   adminShowcase: {
     title: "Quản lý Logo Showcase Đối tác",
@@ -758,7 +758,7 @@ export const vi: Dictionary = {
     fieldStatus: "Quan hệ hợp tác",
     fieldOrder: "Thứ tự hiển thị",
     fieldLinkedOrg: "Liên kết với Tài khoản Tổ chức (Tùy chọn)",
-    fieldConsent: "Tôi xác nhận rằng logo này được phép hiển thị trên trang web FPT ICO Summit.",
+    fieldConsent: "Tôi xác nhận rằng logo này được phép hiển thị trên trang web Mekong Edutourism Summit.",
     fieldVisible: "Hiển thị trên dải logo Trang chủ",
     fieldLogo: "Tệp Logo chính thức",
     uploadLogoBtn: "Tải lên Logo",

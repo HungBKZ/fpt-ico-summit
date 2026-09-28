@@ -48,8 +48,8 @@ export function PartnerShowcaseMarquee({
     title: locale === "vi" ? "Mạng lưới Đối tác Quốc tế" : "Our Global Network",
     subtitle:
       locale === "vi"
-        ? "Các trường, tổ chức và đơn vị quốc tế được mời hoặc xác nhận tham gia FPT ICO Summit 2026."
-        : "Invited and participating institutions connected with FPT ICO Summit 2026.",
+        ? "Các trường, tổ chức và đơn vị quốc tế được mời hoặc xác nhận tham gia Mekong Edutourism Summit 2026."
+        : "Invited and participating institutions connected with Mekong Edutourism Summit 2026.",
   };
 
   // Threshold: 1 visible logo is static centered; 2 or more logos animate as smooth infinite marquee

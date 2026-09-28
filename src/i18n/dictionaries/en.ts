@@ -37,7 +37,7 @@ export const en: Dictionary = {
     titleLine2: "Creating Global",
     titleAccent2: "Opportunities.",
     description:
-      "FPT ICO Summit 2026 brings students, universities, consulates and global partners together for international education, cultural exchange and future-ready learning.",
+      "Mekong Edutourism Summit 2026 brings students, universities, consulates and global partners together for international education, cultural exchange and future-ready learning through online, hybrid and campus activities.",
     ctaExplore: "Explore the Summit",
     cta360: "Explore Campus in 360°",
     ctaRegister: "Register Now",
@@ -69,10 +69,10 @@ export const en: Dictionary = {
     },
   },
   pillars: {
-    eyebrow: "Why FPT ICO Summit",
+    eyebrow: "Why Mekong Edutourism Summit",
     title: "Where international education becomes an experience.",
     subtitle:
-      "FPT ICO Summit 2026 is designed as more than an exhibition. It creates a shared space where students can discover global study pathways, experience cultures directly, build cross-cultural confidence and connect with the international education community.",
+      "Mekong Edutourism Summit 2026 is designed as more than an exhibition. It creates a shared space where students can discover global study pathways, experience cultures directly, build cross-cultural confidence and connect with the international education community.",
     items: {
       p1: {
         title: "Connect Cultures",
@@ -96,7 +96,7 @@ export const en: Dictionary = {
     eyebrow: "Experience the Summit",
     title: "Six ways to discover, connect and grow.",
     subtitle:
-      "FPT ICO Summit 2026 is built around experiences — each one designed to bring students, educators and global partners together in a meaningful way.",
+      "Mekong Edutourism Summit 2026 is built around experiences — each one designed to bring students, educators and global partners together in a meaningful way.",
     cards: {
       expo: {
         category: "Expo",
@@ -134,7 +134,7 @@ export const en: Dictionary = {
     eyebrow: "The Program",
     title: "Three days of discovery, connection and exchange.",
     subtitle:
-      "FPT ICO Summit 2026 runs across three days — each with its own character, from cultural discovery to international exchange, performances and a grand closing celebration.",
+      "Mekong Edutourism Summit 2026 runs across three days — each with its own character, from cultural discovery to international exchange, performances and a grand closing celebration.",
     slots: {
       morning: "Morning",
       afternoon: "Afternoon",
@@ -148,7 +148,7 @@ export const en: Dictionary = {
     eyebrow: "International Expo",
     title: "One summit. Multiple ways to connect globally.",
     subtitle:
-      "The International Expo is planned as the central connection space of FPT ICO Summit 2026, bringing education, culture and international engagement together on campus.",
+      "The International Expo is planned as the central connection space of Mekong Edutourism Summit 2026, bringing education, culture and international engagement together on campus.",
   },
   workshops: {
     eyebrow: "Workshop",
@@ -202,7 +202,7 @@ export const en: Dictionary = {
   },
   sponsorship: {
     eyebrow: "Sponsorship",
-    title: "Partner with FPT ICO Summit 2026",
+    title: "Partner with Mekong Edutourism Summit 2026",
     subtitle:
       "Three sponsorship packages that put your brand in front of students, universities and international education organisations.",
     featured: "Featured",
@@ -217,7 +217,7 @@ export const en: Dictionary = {
     disclaimer:
       "Benefits and placements are subject to availability and final confirmation by the Organizing Committee.",
     sponsorsTitle: "Our Sponsors",
-    sponsorsSubtitle: "Thank you to the organisations supporting FPT ICO Summit 2026.",
+    sponsorsSubtitle: "Thank you to the organisations supporting Mekong Edutourism Summit 2026.",
     sampleBadge: "Sample",
     viewDetails: "View details",
     closeModal: "Close",
@@ -225,7 +225,7 @@ export const en: Dictionary = {
     tagsLabel: "Programs & services",
     highlightLabel: "At the Summit",
     socialsLabel: "Social media",
-    emptyTitle: "Be the first sponsor of FPT ICO Summit 2026",
+    emptyTitle: "Be the first sponsor of Mekong Edutourism Summit 2026",
   },
   scholarships: {
     eyebrow: "Scholarships",
@@ -252,7 +252,7 @@ export const en: Dictionary = {
     eyebrow: "The Venue",
     title: "FPT University Can Tho Campus",
     subtitle:
-      "Explore the campus before you arrive and get familiar with the environment that will host FPT ICO Summit 2026.",
+      "Explore the campus before you arrive and get familiar with the environment that will host Mekong Edutourism Summit 2026.",
     addressLabel: "Address",
     dateLabel: "Event dates",
     datesValue: "20–22 November 2026",
@@ -264,7 +264,7 @@ export const en: Dictionary = {
     eyebrow: "Food & Souvenirs",
     title: "Take a piece of the summit home.",
     subtitle:
-      "FPT ICO Summit 2026 will feature official merchandise alongside a variety of food and refreshment options on campus throughout the summit.",
+      "Mekong Edutourism Summit 2026 will feature official merchandise alongside a variety of food and refreshment options on campus throughout the summit.",
   },
   faq: {
     eyebrow: "FAQ",
@@ -274,9 +274,9 @@ export const en: Dictionary = {
   },
   registration: {
     eyebrow: "Registration is open",
-    title: "Be part of FPT ICO Summit 2026.",
+    title: "Be part of Mekong Edutourism Summit 2026.",
     subtitle:
-      "Secure your place at FPT ICO Summit 2026 — three days of international education, cultural exchange and global connections.",
+      "Secure your place at Mekong Edutourism Summit 2026 — three days of international education, cultural exchange and global connections.",
     cta: "Register Now",
     scanQr: "Scan to register",
     datesLabel: "Dates",
@@ -285,7 +285,7 @@ export const en: Dictionary = {
     venueValue: "FPT University Can Tho Campus",
   },
   auth: {
-    loginTitle: "Sign In to FPT ICO Summit",
+    loginTitle: "Sign In to Mekong Edutourism Summit",
     loginSubtitle: "Enter your credentials to access your account dashboard.",
     emailLabel: "Work Email",
     passwordLabel: "Password",
@@ -295,7 +295,7 @@ export const en: Dictionary = {
   },
   register: {
     title: "Create a Member Account",
-    subtitle: "Sign up as a student or individual member to join the FPT ICO Summit community.",
+    subtitle: "Sign up as a student or individual member to join the Mekong Edutourism Summit community.",
     nameLabel: "Full Name",
     emailLabel: "Email Address",
     passwordLabel: "Password (Min 12 characters)",
@@ -328,7 +328,7 @@ export const en: Dictionary = {
     noteLabel: "Additional Information / Note (Optional)",
     submitBtn: "Submit Account Request",
     submitting: "Submitting request...",
-    successMessage: "Your request has been submitted and will be reviewed by the FPT ICO Summit team.",
+    successMessage: "Your request has been submitted and will be reviewed by the Mekong Edutourism Summit team.",
   },
   changePassword: {
     title: "Update Your Password",
@@ -352,7 +352,7 @@ export const en: Dictionary = {
   partnerCms: {
     title: "Organization Profile Management",
     subtitle: "Update official presentation content, bilingual descriptions, logo, website, and public contact information.",
-    identityNotice: "Contact the FPT ICO Summit team to update official organization details.",
+    identityNotice: "Contact the Mekong Edutourism Summit team to update official organization details.",
     logoUrlLabel: "Logo Image URL (HTTPS)",
     websiteUrlLabel: "Official Website URL (HTTPS)",
     publicEmailLabel: "Public Contact Email",
@@ -374,7 +374,7 @@ export const en: Dictionary = {
     statusChangesRequested: "Changes Requested",
     statusPublished: "Published",
     profileGuideTitle: "Organization Profile Guide",
-    profileGuideSubtitle: "Complete all sections to present your institution effectively. Approved content will be displayed on the FPT ICO Summit platform.",
+    profileGuideSubtitle: "Complete all sections to present your institution effectively. Approved content will be displayed on the Mekong Edutourism Summit platform.",
     profileCompletionText: "sections completed",
     uploadLogoLabel: "Official Logo Upload",
     uploadLogoHelp: "Upload your organization's official logo. PNG/JPG/WebP recommended, transparent or white background, maximum 5 MB.",
@@ -477,7 +477,7 @@ export const en: Dictionary = {
     phoneLabel: "Phone Number (Optional)",
   },
   adminPortal: {
-    portalTitle: "FPT ICO Summit Admin Console",
+    portalTitle: "Mekong Edutourism Summit Admin Console",
     portalSubtitle: "Internal administration portal for managing partner content, user accounts, and summit operations.",
     navOverview: "Overview",
     navPartnerContent: "Partner Content",
@@ -510,15 +510,15 @@ export const en: Dictionary = {
     socials: "Connect With Us",
     facebook: "Facebook Page",
     messenger: "Message ICO",
-    copyright: "© 2026 FPT ICO Summit — International Cooperation Office, FPT University Can Tho Campus.",
+    copyright: "© 2026 Mekong Edutourism Summit — International Cooperation Office, FPT University Can Tho Campus.",
   },
   meta: {
-    title: "FPT ICO Summit 2026 | FPT University Can Tho",
+    title: "Mekong Edutourism Summit 2026 | FPT University Can Tho",
     description:
-      "FPT ICO Summit 2026 brings students, universities, consulates and global partners together for international education, cultural exchange and future-ready learning. 20–22 November 2026, FPT University Can Tho Campus, Vietnam.",
+      "Mekong Edutourism Summit 2026 connects international education, culture, tourism and global partners through online, hybrid and Summit activities across the Mekong region.",
   },
   memberRegistration: {
-    title: "FPT ICO Summit 2026 Registration",
+    title: "Mekong Edutourism Summit 2026 Registration",
     subtitle: "Complete your participant registration to attend official Summit sessions.",
     participantTypeLabel: "Participant Type",
     fptStudentOption: "FPT Student",
@@ -530,7 +530,7 @@ export const en: Dictionary = {
     submitBtn: "Confirm Registration",
     submitting: "Submitting...",
     confirmedTitle: "Registration Confirmed",
-    confirmedMessage: "You are officially registered for FPT ICO Summit 2026.",
+    confirmedMessage: "You are officially registered for Mekong Edutourism Summit 2026.",
     disclaimer:
       "Your Summit registration includes the general Summit program. Workshops and Stage Performances are optional activities and can be selected separately when available.",
     viewRegistrationBtn: "View Registration",
@@ -555,7 +555,7 @@ export const en: Dictionary = {
     emptyList: "No Summit registrations found matching your query.",
   },
   staffDashboard: {
-    title: "FPT ICO Summit Operations",
+    title: "Mekong Edutourism Summit Operations",
     subtitle: "Operational hub for Summit Staff team members.",
     roleNotice: "You are signed in as SUMMIT_STAFF.",
     modulesTitle: "Operational Modules",
@@ -567,7 +567,7 @@ export const en: Dictionary = {
     schedulingDesc: "Workshop and Stage performance master timetable scheduling.",
   },
   staffCheckIn: {
-    title: "FPT ICO Summit 2026 — Check-in Console",
+    title: "Mekong Edutourism Summit 2026 — Check-in Console",
     subtitle: "On-site participant check-in per Summit day.",
     statRegistered: "Registered",
     statCheckedIn: "Checked In",
@@ -614,7 +614,7 @@ export const en: Dictionary = {
   },
   partnerActivities: {
     title: "Summit Activities",
-    subtitle: "Propose optional Workshops and Stage Performances for FPT ICO Summit 2026.",
+    subtitle: "Propose optional Workshops and Stage Performances for Mekong Edutourism Summit 2026.",
     proposeWorkshopBtn: "+ Propose Workshop",
     proposePerformanceBtn: "+ Propose Performance",
     tabsAll: "All Proposals",
@@ -631,7 +631,7 @@ export const en: Dictionary = {
     materialAccessNotice: "Please ensure that all material links are accessible to the Summit organizing team.",
     materialAccessConfirmLabel: "I confirm that the Summit organizing team can access the submitted material links.",
     dataPermissionConfirmLabel: "I confirm that I am authorized to provide the speaker/contact information and media for Summit organization purposes.",
-    unconfirmedParticipationError: "Your organization has not yet been confirmed to participate in FPT ICO Summit 2026. Please contact the Summit organizing team before submitting a Workshop or Performance proposal.",
+    unconfirmedParticipationError: "Your organization has not yet been confirmed to participate in Mekong Edutourism Summit 2026. Please contact the Summit organizing team before submitting a Workshop or Performance proposal.",
     topicProposalStepTitle: "Step 1 of 2: Workshop Scope & Topic Proposal",
     topicAcceptedBadge: "Topic Accepted",
     topicPendingBadge: "Topic Review Pending",
@@ -665,14 +665,14 @@ export const en: Dictionary = {
   },
   memberActivities: {
     title: "Optional Summit Activities",
-    subtitle: "Workshops and Stage Performances are optional activities within the FPT ICO Summit. You may join one, multiple, or none of these activities.",
+    subtitle: "Workshops and Stage Performances are optional activities within the Mekong Edutourism Summit. You may join one, multiple, or none of these activities.",
     joinBtn: "Join Activity",
     removeBtn: "Remove",
     selectedLabel: "✓ Selected",
     conflictError: "This activity overlaps with another activity you have already selected.",
     republishedConflictWarning: "Schedule updated — this activity now overlaps with another activity you selected.",
     scheduleUnavailable: "Schedule currently unavailable",
-    mustRegisterNotice: "Please register for FPT ICO Summit before selecting optional activities.",
+    mustRegisterNotice: "Please register for Mekong Edutourism Summit before selecting optional activities.",
     tabAll: "All Activities",
     tabWorkshops: "Workshops",
     tabPerformances: "Stage Performances",
@@ -705,7 +705,7 @@ export const en: Dictionary = {
   },
   staffReports: {
     title: "Reports & Exports Center",
-    subtitle: "Operational metrics summary and exports for FPT ICO Summit.",
+    subtitle: "Operational metrics summary and exports for Mekong Edutourism Summit.",
     btnDownloading: "Downloading...",
     btnDownloadXlsx: "Download Excel (.xlsx)",
     btnDownloadCsv: "Download CSV (.csv)",
@@ -718,7 +718,7 @@ export const en: Dictionary = {
   },
   partnerShowcase: {
     title: "Our Global Network",
-    subtitle: "Invited and participating institutions connected with FPT ICO Summit 2026.",
+    subtitle: "Invited and participating institutions connected with Mekong Edutourism Summit 2026.",
   },
   adminShowcase: {
     title: "Partner Logo Showcase",
@@ -758,7 +758,7 @@ export const en: Dictionary = {
     fieldStatus: "Relationship Status",
     fieldOrder: "Display Order",
     fieldLinkedOrg: "Link to Organization Account (Optional)",
-    fieldConsent: "I confirm that this logo may be displayed on the FPT ICO Summit website.",
+    fieldConsent: "I confirm that this logo may be displayed on the Mekong Edutourism Summit website.",
     fieldVisible: "Show on Homepage Marquee",
     fieldLogo: "Official Logo Asset",
     uploadLogoBtn: "Upload Logo",

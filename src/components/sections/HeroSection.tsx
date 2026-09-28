@@ -43,7 +43,7 @@ export function HeroSection({ dict }: HeroSectionProps) {
   return (
     <section
       id="hero"
-      aria-label="FPT ICO Summit 2026 introduction"
+      aria-label="Mekong Edutourism Summit 2026 introduction"
       className="hero-section"
     >
       {/* ── Background image ──────── */}

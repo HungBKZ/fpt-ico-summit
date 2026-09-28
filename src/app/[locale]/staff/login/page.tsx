@@ -45,7 +45,7 @@ export default async function StaffLoginPage({
                 ICO
               </div>
               <h1 className="text-xl font-bold text-white">
-                FPT ICO Summit Staff Operations
+                Mekong Edutourism Summit Staff Operations
               </h1>
               <p className="text-slate-400 text-xs mt-1">
                 Sign in with your operational Summit Staff account.

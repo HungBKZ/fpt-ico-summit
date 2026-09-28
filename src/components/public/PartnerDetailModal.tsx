@@ -168,7 +168,7 @@ export function PartnerDetailModal({
           ) : (
             <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-950 flex items-center justify-center">
               <span className="text-xs font-black tracking-widest text-[#d9a24b] uppercase">
-                FPT ICO SUMMIT 2026
+                MEKONG EDUTOURISM SUMMIT 2026
               </span>
             </div>
           )}

@@ -1,6 +1,4 @@
-import Image from "next/image";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { images } from "@/data/images";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/types";
@@ -172,22 +170,53 @@ export function SouvenirSection({ locale, dict }: SouvenirSectionProps) {
             </div>
           </RevealOnScroll>
 
-          {/* Image column — tote bag mockup (C2) */}
+          {/* Showcase card — obsolete branded mockup suppressed pending official merchandise artwork */}
           <RevealOnScroll className="souvenir-image" delay={100}>
-            <Image
-              src={images.toteMockup.src!}
-              alt={images.toteMockup.alt}
-              width={520}
-              height={520}
+            <div
               style={{
                 width: "100%",
                 maxWidth: "460px",
-                height: "auto",
-                objectFit: "contain",
-                display: "block",
-                filter: "drop-shadow(0 20px 40px rgba(11,23,54,0.18))",
+                padding: "2.75rem 2rem",
+                borderRadius: "var(--radius-lg)",
+                backgroundColor: "#ffffff",
+                border: "1px solid var(--color-border)",
+                boxShadow: "0 16px 36px rgba(11, 23, 54, 0.06)",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                textAlign: "center",
+                gap: "1.25rem",
               }}
-            />
+            >
+              <div
+                style={{
+                  width: "4.25rem",
+                  height: "4.25rem",
+                  borderRadius: "50%",
+                  backgroundColor: "var(--color-blue-subtle)",
+                  color: "var(--color-blue)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+                  <line x1="3" y1="6" x2="21" y2="6" />
+                  <path d="M16 10a4 4 0 01-8 0" />
+                </svg>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                <p style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "var(--text-lg)", color: "var(--color-navy)" }}>
+                  {locale === "vi" ? "Bộ sưu tập Quà tặng & Kỷ vật 2026" : "Official 2026 Summit Keepsakes"}
+                </p>
+                <p style={{ fontSize: "var(--text-sm)", color: "var(--color-text-muted)", lineHeight: "var(--leading-relaxed)", maxWidth: "34ch" }}>
+                  {locale === "vi"
+                    ? "Các sản phẩm quà tặng, áo và túi lưu niệm chính thức mang dấu ấn Mekong Edutourism Summit sẽ được giới thiệu tại sự kiện."
+                    : "Official summit merchandise and souvenir packages celebrating the Mekong region will be revealed at the venue."}
+                </p>
+              </div>
+            </div>
           </RevealOnScroll>
 
         </div>

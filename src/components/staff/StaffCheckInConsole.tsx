@@ -112,7 +112,7 @@ export function StaffCheckInConsole({
       {/* Header */}
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs">
         <h1 className="text-xl font-bold text-slate-900">
-          FPT ICO Summit 2026 — Check-in Console
+          Mekong Edutourism Summit 2026 — Check-in Console
         </h1>
         <p className="text-xs text-slate-500 mt-1">
           On-site participant check-in per Summit day.

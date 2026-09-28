@@ -37,7 +37,7 @@ export async function generateXlsxBuffer(
   rows: (unknown[])[]
 ): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = "FPT ICO Summit Platform";
+  workbook.creator = "Mekong Edutourism Summit Platform";
   workbook.created = new Date();
 
   const worksheet = workbook.addWorksheet(sheetName);

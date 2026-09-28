@@ -5,12 +5,36 @@
  * If registrationUrl is empty, the UI must render "Registration opens soon".
  */
 
-export const siteConfig = {
-  /** Public event name — never use the older "Mekong Global Summit" name in UI. */
-  name: "FPT ICO Summit 2026",
+import { brandConfig } from "@/lib/config/brand";
+import { images } from "@/data/images";
 
-  /** Working domain (update when live). */
-  domain: "https://fpticosummit.com",
+// Canonical URL resolution guardrails:
+// - Production: uses NEXT_PUBLIC_SITE_URL if explicitly set and valid, or confirmed VERCEL_PROJECT_PRODUCTION_URL only when VERCEL_ENV is "production".
+// - Preview: returns "" to safely omit metadataBase and canonical alternates (prevents self-canonicalizing to ephemeral preview URLs).
+// - Development: returns "" to omit canonical.
+// - Never blindly falls back to VERCEL_URL or unconfirmed domains.
+const getSiteUrl = (): string => {
+  if (
+    process.env.NEXT_PUBLIC_SITE_URL &&
+    process.env.NEXT_PUBLIC_SITE_URL.startsWith("http")
+  ) {
+    return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
+  }
+  if (
+    process.env.VERCEL_ENV === "production" &&
+    process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  }
+  return "";
+};
+
+export const siteConfig = {
+  /** Public event name. */
+  name: brandConfig.eventNameWithYear,
+
+  /** Configured public domain (empty if unconfigured; avoids claiming unconfirmed domains). */
+  domain: getSiteUrl(),
 
   /** Locked public date range. */
   dates: "20–22 November 2026",
@@ -51,13 +75,13 @@ export const siteConfig = {
 
   /** Page metadata used in layout.tsx. */
   meta: {
-    title: "FPT ICO Summit 2026 | FPT University Can Tho",
+    title: `${brandConfig.eventNameWithYear} | FPT University Can Tho`,
     description:
-      "FPT ICO Summit 2026 brings students, universities, consulates and global partners together for international education, cultural exchange and future-ready learning. 20–22 November 2026, FPT University Can Tho Campus, Vietnam.",
+      "Mekong Edutourism Summit 2026 connects international education, culture, tourism and global partners through online, hybrid and Summit activities across the Mekong region.",
   },
 
-  /** Social / Open Graph — supply a Cloudinary URL when asset A14 is ready. */
-  ogImage: "",
+  /** Social / Open Graph — approved neutral FPT Can Tho campus visual used temporarily until official 1200x630 Mekong OG asset is provided. */
+  ogImage: images.campus.src || "",
 } as const;
 
 export type SiteConfig = typeof siteConfig;

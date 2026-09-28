@@ -494,7 +494,7 @@ export default async function DashboardPage({
                         <div className="flex flex-wrap items-center justify-between gap-4">
                           <div>
                             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-600 text-white uppercase tracking-wider">
-                              FPT ICO SUMMIT 2026
+                              MEKONG EDUTOURISM SUMMIT 2026
                             </span>
                             <h2 className="text-base font-bold text-slate-900 mt-2">
                               {locale === "vi" ? "Đăng ký tham dự Summit đã sẵn sàng" : "Registration is now available"}

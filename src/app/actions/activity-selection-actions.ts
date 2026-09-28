@@ -34,7 +34,7 @@ export async function selectSummitActivityAction(
     if (!registration || registration.status !== "REGISTERED" || !registration._id) {
       return {
         success: false,
-        error: "Please register for FPT ICO Summit before selecting optional activities.",
+        error: "Please register for Mekong Edutourism Summit before selecting optional activities.",
       };
     }
 

@@ -267,7 +267,7 @@ export async function submitTopicProposalAction(
       return {
         success: false,
         error:
-          "Your organization has not yet been confirmed to participate in FPT ICO Summit 2026. Please contact the Summit organizing team before submitting a Workshop or Performance proposal.",
+          "Your organization has not yet been confirmed to participate in Mekong Edutourism Summit 2026. Please contact the Summit organizing team before submitting a Workshop or Performance proposal.",
       };
     }
 
@@ -711,7 +711,7 @@ export async function submitActivityForReviewAction(
       return {
         success: false,
         error:
-          "Your organization has not yet been confirmed to participate in FPT ICO Summit 2026. Please contact the Summit organizing team before submitting a Workshop or Performance proposal.",
+          "Your organization has not yet been confirmed to participate in Mekong Edutourism Summit 2026. Please contact the Summit organizing team before submitting a Workshop or Performance proposal.",
       };
     }
 
