@@ -41,6 +41,8 @@ export type Dictionary = {
     titleAccent1: string;
     titleLine2: string;
     titleAccent2: string;
+    themeLabel: string;
+    theme: string;
     description: string;
     ctaExplore: string;
     cta360: string;

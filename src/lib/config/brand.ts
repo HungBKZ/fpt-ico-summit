@@ -9,6 +9,8 @@ export const brandConfig = {
   eventNameWithYear: "Mekong Edutourism Summit 2026",
   shortName: "Mekong Edutourism Summit",
   year: 2026,
+  themeEn: "AI Technology - Success Pathway to the World",
+  themeVi: "Công nghệ AI - Con đường hội nhập toàn cầu",
   organizer: "FPT University Can Tho Campus",
   office: "International Cooperation Office",
 } as const;

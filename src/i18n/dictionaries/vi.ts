@@ -3,6 +3,7 @@
  */
 
 import type { Dictionary } from "../types";
+import { brandConfig } from "@/lib/config/brand";
 
 export const vi: Dictionary = {
   nav: {
@@ -36,6 +37,8 @@ export const vi: Dictionary = {
     titleAccent1: "Văn hóa.",
     titleLine2: "Kiến tạo Cơ hội",
     titleAccent2: "Toàn cầu.",
+    themeLabel: "Chủ đề chính",
+    theme: brandConfig.themeVi,
     description:
       "Mekong Edutourism Summit 2026 kết nối học sinh, sinh viên, các trường đại học, cơ quan lãnh sự và đối tác toàn cầu cho giáo dục quốc tế, giao lưu văn hóa và học tập sẵn sàng cho tương lai thông qua các hoạt động trực tuyến, kết hợp và tại khuôn viên.",
     ctaExplore: "Khám phá Summit",
@@ -72,7 +75,7 @@ export const vi: Dictionary = {
     eyebrow: "Tại sao chọn Mekong Edutourism Summit",
     title: "Nơi giáo dục quốc tế trở thành một trải nghiệm.",
     subtitle:
-      "Mekong Edutourism Summit 2026 được thiết kế không chỉ là một triển lãm. Sự kiện tạo ra không gian chung nơi học sinh, sinh viên có thể khám phá các lộ trình du học toàn cầu, trải nghiệm văn hóa trực tiếp, xây dựng sự tự tin đa văn hóa và kết nối với cộng đồng giáo dục quốc tế.",
+      "Với chủ đề chính 'Công nghệ AI - Con đường hội nhập toàn cầu', Mekong Edutourism Summit 2026 tạo ra không gian kết nối nơi học sinh, sinh viên khám phá các lộ trình học tập toàn cầu, trải nghiệm văn hóa đa dạng, nâng cao bản lĩnh hội nhập và kết nối cùng mạng lưới giáo dục quốc tế.",
     items: {
       p1: {
         title: "Kết nối Văn hóa",
@@ -515,7 +518,7 @@ export const vi: Dictionary = {
   meta: {
     title: "Mekong Edutourism Summit 2026 | FPT University Can Tho",
     description:
-      "Mekong Edutourism Summit 2026 kết nối giáo dục quốc tế, văn hóa, du lịch và các đối tác toàn cầu thông qua các hoạt động trực tuyến, kết hợp và các hoạt động của Summit tại khu vực Mekong.",
+      "Mekong Edutourism Summit 2026 — Chủ đề: Công nghệ AI - Con đường hội nhập toàn cầu. Kết nối giáo dục quốc tế, văn hóa, du lịch và đối tác toàn cầu tại Trường Đại học FPT Phân hiệu Cần Thơ.",
   },
   memberRegistration: {
     title: "Đăng ký Tham dự Mekong Edutourism Summit 2026",

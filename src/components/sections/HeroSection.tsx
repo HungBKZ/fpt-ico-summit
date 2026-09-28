@@ -116,6 +116,45 @@ export function HeroSection({ dict }: HeroSectionProps) {
             <span className="accent">{dict.hero.titleAccent2}</span>
           </h1>
 
+          {/* Official Event Theme */}
+          <div
+            className="hero-theme-badge hero-desc-animate"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              padding: "0.35rem 0.85rem",
+              borderRadius: "9999px",
+              backgroundColor: "rgba(255, 255, 255, 0.08)",
+              border: "1px solid rgba(255, 255, 255, 0.16)",
+              backdropFilter: "blur(8px)",
+              width: "fit-content",
+            }}
+          >
+            <span
+              style={{
+                fontSize: "0.6875rem",
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                color: "var(--color-orange)",
+              }}
+            >
+              {dict.hero.themeLabel}
+            </span>
+            <span style={{ color: "rgba(255, 255, 255, 0.35)", fontSize: "0.75rem" }} aria-hidden="true">·</span>
+            <span
+              style={{
+                fontSize: "var(--text-sm)",
+                fontWeight: 600,
+                color: "#ffffff",
+                letterSpacing: "0.01em",
+              }}
+            >
+              {dict.hero.theme}
+            </span>
+          </div>
+
           {/* Support copy */}
           <p
             className="hero-desc-animate"

@@ -3,6 +3,7 @@
  */
 
 import type { Dictionary } from "../types";
+import { brandConfig } from "@/lib/config/brand";
 
 export const en: Dictionary = {
   nav: {
@@ -36,6 +37,8 @@ export const en: Dictionary = {
     titleAccent1: "Cultures.",
     titleLine2: "Creating Global",
     titleAccent2: "Opportunities.",
+    themeLabel: "Official Theme",
+    theme: brandConfig.themeEn,
     description:
       "Mekong Edutourism Summit 2026 brings students, universities, consulates and global partners together for international education, cultural exchange and future-ready learning through online, hybrid and campus activities.",
     ctaExplore: "Explore the Summit",
@@ -72,7 +75,7 @@ export const en: Dictionary = {
     eyebrow: "Why Mekong Edutourism Summit",
     title: "Where international education becomes an experience.",
     subtitle:
-      "Mekong Edutourism Summit 2026 is designed as more than an exhibition. It creates a shared space where students can discover global study pathways, experience cultures directly, build cross-cultural confidence and connect with the international education community.",
+      "Under the official theme 'AI Technology - Success Pathway to the World', Mekong Edutourism Summit 2026 creates a shared space where students discover global study pathways, experience cultural exchange, build cross-cultural confidence and connect with international partners.",
     items: {
       p1: {
         title: "Connect Cultures",
@@ -515,7 +518,7 @@ export const en: Dictionary = {
   meta: {
     title: "Mekong Edutourism Summit 2026 | FPT University Can Tho",
     description:
-      "Mekong Edutourism Summit 2026 connects international education, culture, tourism and global partners through online, hybrid and Summit activities across the Mekong region.",
+      "Mekong Edutourism Summit 2026 — Theme: AI Technology - Success Pathway to the World. Connecting international education, culture, tourism and global partners at FPT University Can Tho Campus.",
   },
   memberRegistration: {
     title: "Mekong Edutourism Summit 2026 Registration",

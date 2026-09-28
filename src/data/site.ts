@@ -76,8 +76,7 @@ export const siteConfig = {
   /** Page metadata used in layout.tsx. */
   meta: {
     title: `${brandConfig.eventNameWithYear} | FPT University Can Tho`,
-    description:
-      "Mekong Edutourism Summit 2026 connects international education, culture, tourism and global partners through online, hybrid and Summit activities across the Mekong region.",
+    description: `Mekong Edutourism Summit 2026 — Theme: ${brandConfig.themeEn}. Connecting international education, culture, tourism and global partners at FPT University Can Tho Campus.`,
   },
 
   /** Social / Open Graph — approved neutral FPT Can Tho campus visual used temporarily until official 1200x630 Mekong OG asset is provided. */
