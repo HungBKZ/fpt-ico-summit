@@ -294,18 +294,47 @@ export async function getPublicShowcaseEntries(): Promise<PublicShowcaseEntryDto
       .sort({ displayOrder: 1, createdAt: 1 })
       .toArray();
 
-    return entries.map((entry) => ({
-      id: entry._id?.toString() || "",
-      displayName: entry.displayName,
-      country: entry.country || undefined,
-      websiteUrl: entry.websiteUrl || undefined,
-      logo: {
-        secureUrl: entry.logo!.secureUrl,
-        width: entry.logo!.width,
-        height: entry.logo!.height,
-      },
-      displayOrder: entry.displayOrder,
-    }));
+    // Find linked organizations that have a published active Virtual Booth
+    const orgIds = entries
+      .map((e) => e.organizationId)
+      .filter((id): id is ObjectId => Boolean(id));
+
+    let orgsWithBooth = new Set<string>();
+    if (orgIds.length > 0) {
+      const orgs = await db
+        .collection(COLLECTIONS.ORGANIZATIONS)
+        .find(
+          {
+            _id: { $in: orgIds },
+            isPublished: true,
+            "publishedProfile.virtualBooth.enabled": true,
+          },
+          { projection: { _id: 1 } }
+        )
+        .toArray();
+      orgsWithBooth = new Set(orgs.map((o) => o._id.toString()));
+    }
+
+    return entries.map((entry) => {
+      const orgIdStr = entry.organizationId?.toString();
+      const hasBooth = orgIdStr ? orgsWithBooth.has(orgIdStr) : false;
+
+      return {
+        id: entry._id?.toString() || "",
+        displayName: entry.displayName,
+        country: entry.country || undefined,
+        websiteUrl: entry.websiteUrl || undefined,
+        logo: {
+          secureUrl: entry.logo!.secureUrl,
+          width: entry.logo!.width,
+          height: entry.logo!.height,
+        },
+        displayOrder: entry.displayOrder,
+        partnerId: hasBooth ? orgIdStr : undefined,
+        boothHref: hasBooth ? `/partners/${orgIdStr}` : undefined,
+        linkedOrganizationId: hasBooth ? orgIdStr : undefined,
+      };
+    });
   } catch (err) {
     console.warn("Could not load public showcase entries for static generation:", err);
     return [];

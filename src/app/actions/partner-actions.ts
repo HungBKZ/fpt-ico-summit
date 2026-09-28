@@ -12,6 +12,8 @@ import {
 } from "@/lib/db/repositories/organizations";
 import { confirmActiveEditionParticipation } from "@/lib/db/repositories/organization-participations";
 import { createAuditEntry } from "@/lib/db/repositories/audit-logs";
+import { listPublishedScholarshipsByOrg } from "@/lib/db/repositories/scholarships";
+import { listApprovedActivitiesByOrg } from "@/lib/db/repositories/summit-activities";
 import type {
   OrganizationProfileSnapshot,
   OrganizationMediaAsset,
@@ -165,6 +167,89 @@ export async function savePartnerDraftAction(formData: FormData): Promise<{
     const shortDescriptionVi = String(formData.get("shortDescriptionVi") || "").trim();
     const descriptionVi = String(formData.get("descriptionVi") || "").trim();
 
+    // ── Virtual Booth (MVP Extension) ──────────────────────────────────────────
+    const virtualBoothEnabled =
+      formData.get("virtualBoothEnabled") === "true" ||
+      formData.get("virtualBoothEnabled") === "on";
+    const virtualBoothShortIntro = String(formData.get("virtualBoothShortIntro") || "").trim().slice(0, 400);
+    const virtualBoothDescription = String(formData.get("virtualBoothDescription") || "").trim().slice(0, 4000);
+
+    const rawPrograms = formData.get("virtualBoothProgramsJson");
+    let programs: OrganizationProfileSnapshot["virtualBooth"] extends undefined ? never : NonNullable<OrganizationProfileSnapshot["virtualBooth"]>["programs"] = undefined;
+    if (rawPrograms) {
+      try {
+        const parsed = JSON.parse(String(rawPrograms));
+        if (Array.isArray(parsed)) {
+          programs = parsed
+            .slice(0, 10)
+            .map((p: Record<string, unknown>) => {
+              const title = String(p.title || "").trim().slice(0, 150);
+              const shortDescription = p.shortDescription ? String(p.shortDescription).trim().slice(0, 500) : undefined;
+              const url = p.url ? String(p.url).trim() : undefined;
+              if (url && !isValidPublicUrl(url)) {
+                throw new Error(`Invalid URL for program "${title}". Must start with https:// or http://.`);
+              }
+              return { title, shortDescription, url };
+            })
+            .filter((p) => p.title.length > 0);
+        }
+      } catch (err: unknown) {
+        return { success: false, error: err instanceof Error ? err.message : "Invalid programs format." };
+      }
+    }
+
+    const rawResources = formData.get("virtualBoothResourcesJson");
+    let resources: OrganizationProfileSnapshot["virtualBooth"] extends undefined ? never : NonNullable<OrganizationProfileSnapshot["virtualBooth"]>["resources"] = undefined;
+    if (rawResources) {
+      try {
+        const parsed = JSON.parse(String(rawResources));
+        if (Array.isArray(parsed)) {
+          resources = parsed
+            .slice(0, 10)
+            .map((r: Record<string, unknown>) => {
+              const label = String(r.label || "").trim().slice(0, 100);
+              const url = String(r.url || "").trim();
+              if (!url || !isValidPublicUrl(url)) {
+                throw new Error(`Invalid resource link "${label}". Must be a valid https:// or http:// URL.`);
+              }
+              return { label, url };
+            })
+            .filter((r) => r.label.length > 0 && r.url.length > 0);
+        }
+      } catch (err: unknown) {
+        return { success: false, error: err instanceof Error ? err.message : "Invalid resources format." };
+      }
+    }
+
+    const primaryCtaLabel = String(formData.get("virtualBoothPrimaryCtaLabel") || "").trim().slice(0, 60);
+    const primaryCtaUrl = String(formData.get("virtualBoothPrimaryCtaUrl") || "").trim();
+    if (primaryCtaUrl && !isValidPublicUrl(primaryCtaUrl)) {
+      return { success: false, error: "Call-to-Action URL must be a valid https:// or http:// link." };
+    }
+    const primaryCta =
+      primaryCtaLabel && primaryCtaUrl
+        ? { label: primaryCtaLabel, url: primaryCtaUrl }
+        : undefined;
+
+    let virtualBooth: OrganizationProfileSnapshot["virtualBooth"] = undefined;
+    if (
+      virtualBoothEnabled ||
+      virtualBoothShortIntro ||
+      virtualBoothDescription ||
+      (programs && programs.length > 0) ||
+      (resources && resources.length > 0) ||
+      primaryCta
+    ) {
+      virtualBooth = {
+        enabled: virtualBoothEnabled,
+        shortIntroduction: virtualBoothShortIntro || undefined,
+        description: virtualBoothDescription || undefined,
+        programs: programs && programs.length > 0 ? programs : undefined,
+        resources: resources && resources.length > 0 ? resources : undefined,
+        primaryCta,
+      };
+    }
+
     const draftProfile: OrganizationProfileSnapshot = {
       logo: verifiedLogo,
       coverImage: verifiedCover,
@@ -185,6 +270,7 @@ export async function savePartnerDraftAction(formData: FormData): Promise<{
           description: descriptionVi || undefined,
         },
       },
+      virtualBooth,
     };
 
     const updatedOrg = await updateDraftProfile(dbUser.organizationId, draftProfile);
@@ -361,3 +447,48 @@ export async function approveAndPublishPartnerAction(
     await session.endSession();
   }
 }
+
+/**
+ * Server Action: Fetches linked published scholarships and activities for an organization.
+ * Used by Admin review console to inspect related content without manual duplication.
+ */
+export async function getAdminPartnerRelatedContentAction(organizationId: string): Promise<{
+  success: boolean;
+  scholarships?: Array<{ id: string; title: string; type: string }>;
+  activities?: Array<{ id: string; title: string; activityType: string }>;
+  error?: string;
+}> {
+  try {
+    await requireAdmin();
+    const [scholarships, activities] = await Promise.all([
+      listPublishedScholarshipsByOrg(organizationId),
+      listApprovedActivitiesByOrg(organizationId),
+    ]);
+
+    return {
+      success: true,
+      scholarships: scholarships.map((s) => ({
+        id: String(s._id),
+        title: s.publishedSnapshot?.title.en || "Untitled Scholarship",
+        type: s.publishedSnapshot?.type || "SHORT_TERM",
+      })),
+      activities: activities.map((a) => {
+        const title =
+          a.approvedSnapshot?.title?.en ||
+          a.acceptedTopicSnapshot?.tentativeTitle?.en ||
+          "Untitled Activity";
+        return {
+          id: String(a._id),
+          title,
+          activityType: a.type,
+        };
+      }),
+    };
+  } catch (err: unknown) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Failed to load related content.",
+    };
+  }
+}
+

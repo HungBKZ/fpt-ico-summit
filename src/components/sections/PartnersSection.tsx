@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
 import {
   getConfirmedConsulates,
@@ -65,37 +65,67 @@ export function PartnersSection({ locale, dict }: PartnersSectionProps) {
   }, [locale]);
 
   // Combine static fallback data with published DB partners
-  const staticConsulates: PublicPartner[] = getConfirmedConsulates().map((c) => ({
-    id: `static-c-${c.name}`,
-    type: "CONSULATE" as const,
-    name: c.name,
-    country: "Vietnam",
-    logoUrl: null,
-    coverImage: null,
-    websiteUrl: c.website,
-    publicContact: null,
-    shortDescription: "",
-    description: null,
-  }));
+  const allPartners: PublicPartner[] = useMemo(() => {
+    const staticConsulates: PublicPartner[] = getConfirmedConsulates().map((c) => ({
+      id: `static-c-${c.name}`,
+      type: "CONSULATE" as const,
+      name: c.name,
+      country: "Vietnam",
+      logoUrl: null,
+      coverImage: null,
+      websiteUrl: c.website,
+      publicContact: null,
+      shortDescription: "",
+      description: null,
+    }));
 
-  const staticUniversities: PublicPartner[] = getConfirmedUniversities().map((u) => ({
-    id: `static-u-${u.name}`,
-    type: "UNIVERSITY" as const,
-    name: u.name,
-    country: u.country,
-    logoUrl: null,
-    coverImage: null,
-    websiteUrl: u.website,
-    publicContact: null,
-    shortDescription: "",
-    description: null,
-  }));
+    const staticUniversities: PublicPartner[] = getConfirmedUniversities().map((u) => ({
+      id: `static-u-${u.name}`,
+      type: "UNIVERSITY" as const,
+      name: u.name,
+      country: u.country,
+      logoUrl: null,
+      coverImage: null,
+      websiteUrl: u.website,
+      publicContact: null,
+      shortDescription: "",
+      description: null,
+    }));
 
-  const allPartners: PublicPartner[] = [
-    ...dbPartners,
-    ...staticConsulates.filter((sc) => !dbPartners.some((p) => p.name === sc.name)),
-    ...staticUniversities.filter((su) => !dbPartners.some((p) => p.name === su.name)),
-  ];
+    return [
+      ...dbPartners,
+      ...staticConsulates.filter((sc) => !dbPartners.some((p) => p.name === sc.name)),
+      ...staticUniversities.filter((su) => !dbPartners.some((p) => p.name === su.name)),
+    ];
+  }, [dbPartners]);
+
+  // Listen for open-virtual-booth event dispatched by showcase marquee
+  useEffect(() => {
+    const handleOpenBooth = (e: Event) => {
+      const customEvent = e as CustomEvent<{ orgId: string }>;
+      const orgId = customEvent.detail?.orgId;
+      if (!orgId) return;
+
+      const found = allPartners.find((p) => p.id === orgId);
+      if (found) {
+        setActivePartner(found);
+      } else {
+        fetch(`/api/public/partners/${orgId}?locale=${locale}`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (data?.success && data?.partner) {
+              setActivePartner(data.partner);
+            }
+          })
+          .catch(() => {});
+      }
+    };
+
+    window.addEventListener("open-virtual-booth", handleOpenBooth);
+    return () => {
+      window.removeEventListener("open-virtual-booth", handleOpenBooth);
+    };
+  }, [allPartners, locale]);
 
   const filteredPartners = allPartners.filter((p) => {
     if (activeTab === "Consulates" && p.type !== "CONSULATE") return false;
@@ -228,6 +258,14 @@ export function PartnersSection({ locale, dict }: PartnersSectionProps) {
                       <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-bold text-white bg-[rgba(11,23,54,0.85)]">
                         {p.country}
                       </span>
+
+                      {/* Virtual Booth indicator badge — top-left */}
+                      {p.hasVirtualBooth && (
+                        <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[9px] font-extrabold text-emerald-300 bg-emerald-950/85 border border-emerald-500/50 shadow-xs flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          <span>Booth</span>
+                        </span>
+                      )}
                     </div>
 
                     {/* Logo emblem — overlaps cover/body boundary */}
@@ -276,7 +314,20 @@ export function PartnersSection({ locale, dict }: PartnersSectionProps) {
                         </p>
                       )}
 
-                      {p.websiteUrl && (
+                      {p.hasVirtualBooth ? (
+                        <div className="pt-3 mt-1 border-t border-[rgba(11,23,54,0.1)] flex items-center justify-between">
+                          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-navy)] group-hover:text-[#a5711f] transition">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                            <span>
+                              {dict.virtualBooth?.exploreBooth ||
+                                (locale === "vi" ? "Khám phá Gian hàng" : "Explore Virtual Booth")}
+                            </span>
+                          </span>
+                          <span className="text-xs font-bold text-[#a5711f] group-hover:translate-x-1 transition-transform">
+                            →
+                          </span>
+                        </div>
+                      ) : p.websiteUrl ? (
                         <div className="pt-3 mt-1 border-t border-[rgba(11,23,54,0.1)]">
                           <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#12213b] group-hover:text-[#a5711f] transition">
                             <span>{visitWebsiteLabel}</span>
@@ -297,7 +348,7 @@ export function PartnersSection({ locale, dict }: PartnersSectionProps) {
                             </svg>
                           </span>
                         </div>
-                      )}
+                      ) : null}
                     </div>
                   </button>
                 );
@@ -338,6 +389,7 @@ export function PartnersSection({ locale, dict }: PartnersSectionProps) {
         partner={activePartner}
         typeLabel={activePartner ? typeLabel(activePartner.type) : ""}
         locale={locale}
+        dict={dict}
         onClose={() => setActivePartner(null)}
       />
     </section>

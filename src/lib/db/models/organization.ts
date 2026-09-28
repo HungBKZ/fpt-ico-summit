@@ -6,7 +6,13 @@
 
 import type { ObjectId } from "mongodb";
 
-export type OrganizationType = "UNIVERSITY" | "CONSULATE";
+export type OrganizationType =
+  | "UNIVERSITY"
+  | "CONSULATE"
+  | "TRAVEL"
+  | "COMPANY"
+  | "EDUCATION_ORGANIZATION"
+  | "OTHER";
 
 export type OrganizationStatus = "DRAFT" | "ACTIVE" | "ARCHIVED";
 
@@ -33,6 +39,31 @@ export type OrganizationMediaAsset = {
   bytes?: number;
 };
 
+export type VirtualBoothProgram = {
+  title: string;
+  shortDescription?: string;
+  url?: string;
+};
+
+export type VirtualBoothResource = {
+  label: string;
+  url: string;
+};
+
+export type VirtualBoothPrimaryCta = {
+  label: string;
+  url: string;
+};
+
+export type VirtualBoothConfig = {
+  enabled: boolean;
+  shortIntroduction?: string;
+  description?: string;
+  programs?: VirtualBoothProgram[];
+  resources?: VirtualBoothResource[];
+  primaryCta?: VirtualBoothPrimaryCta;
+};
+
 export type OrganizationProfileSnapshot = {
   logo?: OrganizationMediaAsset;
   coverImage?: OrganizationMediaAsset;
@@ -46,6 +77,7 @@ export type OrganizationProfileSnapshot = {
   };
 
   content: LocalizedOrganizationContent;
+  virtualBooth?: VirtualBoothConfig;
 };
 
 export interface Organization {

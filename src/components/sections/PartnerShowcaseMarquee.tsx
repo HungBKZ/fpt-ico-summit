@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/types";
 import type { PublicShowcaseEntryDto } from "@/lib/db/models/partner-showcase";
@@ -79,6 +80,26 @@ export function PartnerShowcaseMarquee({
         />
       </div>
     );
+
+    const boothTarget =
+      item.boothHref ||
+      (item.partnerId ? `/partners/${item.partnerId}` : null) ||
+      (item.linkedOrganizationId ? `/partners/${item.linkedOrganizationId}` : null);
+
+    if (boothTarget) {
+      return (
+        <Link
+          key={`${keyPrefix}-${item.id}`}
+          href={`/${locale}${boothTarget}`}
+          tabIndex={isDuplicate ? -1 : 0}
+          aria-hidden={isDuplicate ? true : undefined}
+          className="inline-flex items-center justify-center focus:outline-hidden focus:ring-2 focus:ring-[var(--color-orange)] rounded-lg transition-transform hover:scale-105 cursor-pointer"
+          title={`${item.displayName} — ${dict.virtualBooth?.viewBooth || (locale === "vi" ? "Xem Gian hàng" : "View Booth")}`}
+        >
+          {content}
+        </Link>
+      );
+    }
 
     if (item.websiteUrl) {
       return (

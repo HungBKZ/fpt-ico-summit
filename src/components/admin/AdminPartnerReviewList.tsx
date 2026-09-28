@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import type { Dictionary } from "@/i18n/types";
@@ -8,6 +8,7 @@ import type { Organization, DraftStatus } from "@/lib/db/models/organization";
 import {
   requestPartnerChangesAction,
   approveAndPublishPartnerAction,
+  getAdminPartnerRelatedContentAction,
 } from "@/app/actions/partner-actions";
 
 interface AdminPartnerReviewListProps {
@@ -44,6 +45,35 @@ export function AdminPartnerReviewList({
   const [showChangesModal, setShowChangesModal] = useState(false);
   const [loadingOrgId, setLoadingOrgId] = useState<string | null>(null);
   const [viewingTab, setViewingTab] = useState<"DRAFT" | "PUBLISHED">("DRAFT");
+
+  const [relatedContent, setRelatedContent] = useState<{
+    scholarships: Array<{ id: string; title: string; type: string }>;
+    activities: Array<{ id: string; title: string; activityType: string }>;
+    loading: boolean;
+  }>({ scholarships: [], activities: [], loading: false });
+
+  useEffect(() => {
+    if (!selectedOrg) return;
+
+    let isMounted = true;
+    getAdminPartnerRelatedContentAction(String(selectedOrg._id)).then((res) => {
+      if (isMounted) {
+        if (res.success) {
+          setRelatedContent({
+            scholarships: res.scholarships || [],
+            activities: res.activities || [],
+            loading: false,
+          });
+        } else {
+          setRelatedContent({ scholarships: [], activities: [], loading: false });
+        }
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedOrg]);
 
   const filteredOrgs = organizations.filter((org) => {
     if (activeTab === "PUBLISHED") return org.isPublished;
@@ -410,6 +440,145 @@ export function AdminPartnerReviewList({
                         <p className="text-slate-600 whitespace-pre-wrap">{snap.content.vi.description}</p>
                       </div>
                     )}
+                  </div>
+
+                  {/* Virtual Booth Review */}
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                    <div className="flex items-center justify-between border-b pb-1.5">
+                      <h4 className="font-bold text-slate-800 flex items-center gap-2">
+                        <span>Virtual Booth Content</span>
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            snap.virtualBooth?.enabled
+                              ? "bg-emerald-100 text-emerald-800"
+                              : "bg-slate-200 text-slate-600"
+                          }`}
+                        >
+                          {snap.virtualBooth?.enabled ? "Enabled" : "Disabled"}
+                        </span>
+                      </h4>
+                    </div>
+
+                    {snap.virtualBooth?.shortIntroduction && (
+                      <div>
+                        <span className="font-semibold text-slate-700 block text-xs">Booth Introduction</span>
+                        <p className="text-slate-600 text-xs">{snap.virtualBooth.shortIntroduction}</p>
+                      </div>
+                    )}
+
+                    {snap.virtualBooth?.description && (
+                      <div>
+                        <span className="font-semibold text-slate-700 block text-xs">Booth Description</span>
+                        <p className="text-slate-600 text-xs whitespace-pre-wrap">{snap.virtualBooth.description}</p>
+                      </div>
+                    )}
+
+                    {snap.virtualBooth?.programs && snap.virtualBooth.programs.length > 0 && (
+                      <div className="space-y-1.5 pt-1">
+                        <span className="font-semibold text-slate-700 block text-xs">
+                          Programs & Opportunities ({snap.virtualBooth.programs.length})
+                        </span>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          {snap.virtualBooth.programs.map((p, idx) => (
+                            <div key={idx} className="p-2 bg-white rounded-lg border border-slate-200 text-xs space-y-0.5">
+                              <div className="font-bold text-slate-800">{p.title}</div>
+                              {p.shortDescription && <div className="text-slate-600">{p.shortDescription}</div>}
+                              {p.url && (
+                                <a href={p.url} target="_blank" rel="noreferrer" className="text-blue-600 underline text-[11px] block truncate">
+                                  {p.url} ↗
+                                </a>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {snap.virtualBooth?.resources && snap.virtualBooth.resources.length > 0 && (
+                      <div className="space-y-1.5 pt-1">
+                        <span className="font-semibold text-slate-700 block text-xs">
+                          Resources & Links ({snap.virtualBooth.resources.length})
+                        </span>
+                        <div className="flex flex-wrap gap-2">
+                          {snap.virtualBooth.resources.map((r, idx) => (
+                            <a
+                              key={idx}
+                              href={r.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-white border border-slate-200 rounded text-xs text-blue-700 hover:underline"
+                            >
+                              <span>{r.label}</span>
+                              <span>↗</span>
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {snap.virtualBooth?.primaryCta && (
+                      <div className="pt-1">
+                        <span className="font-semibold text-slate-700 block text-xs">Primary Call to Action</span>
+                        <a
+                          href={snap.virtualBooth.primaryCta.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-block mt-1 px-3 py-1 bg-slate-800 text-white rounded text-xs font-semibold hover:bg-slate-900"
+                        >
+                          {snap.virtualBooth.primaryCta.label} ↗
+                        </a>
+                      </div>
+                    )}
+
+                    {!snap.virtualBooth && (
+                      <p className="text-xs text-slate-400 italic">No Virtual Booth configured for this organization.</p>
+                    )}
+                  </div>
+
+                  {/* Linked Published Content */}
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                    <h4 className="font-bold text-slate-800 border-b pb-1">Linked Summit Content (Automatic)</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <span className="font-semibold text-slate-700 block text-xs mb-1">
+                          Published Scholarships ({relatedContent.scholarships.length})
+                        </span>
+                        {relatedContent.loading ? (
+                          <span className="text-xs text-slate-400">Loading...</span>
+                        ) : relatedContent.scholarships.length > 0 ? (
+                          <ul className="space-y-1 text-xs text-slate-600">
+                            {relatedContent.scholarships.map((s) => (
+                              <li key={s.id} className="p-1.5 bg-white border border-slate-200 rounded flex items-center justify-between">
+                                <span className="font-medium truncate">{s.title}</span>
+                                <span className="text-[10px] text-slate-400 shrink-0 ml-1">{s.type}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <span className="text-xs text-slate-400 italic">No published scholarships</span>
+                        )}
+                      </div>
+
+                      <div>
+                        <span className="font-semibold text-slate-700 block text-xs mb-1">
+                          Published Activities ({relatedContent.activities.length})
+                        </span>
+                        {relatedContent.loading ? (
+                          <span className="text-xs text-slate-400">Loading...</span>
+                        ) : relatedContent.activities.length > 0 ? (
+                          <ul className="space-y-1 text-xs text-slate-600">
+                            {relatedContent.activities.map((a) => (
+                              <li key={a.id} className="p-1.5 bg-white border border-slate-200 rounded flex items-center justify-between">
+                                <span className="font-medium truncate">{a.title}</span>
+                                <span className="text-[10px] text-slate-400 shrink-0 ml-1">{a.activityType}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <span className="text-xs text-slate-400 italic">No published activities</span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               );

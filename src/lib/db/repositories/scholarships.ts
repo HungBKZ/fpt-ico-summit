@@ -184,6 +184,25 @@ export async function listScholarshipsByOrg(
 }
 
 /**
+ * Lists only approved and published Scholarships belonging to a specific Organization (for Virtual Booth).
+ */
+export async function listPublishedScholarshipsByOrg(
+  organizationId: string | ObjectId
+): Promise<Scholarship[]> {
+  const db = await getDb();
+  const orgId = typeof organizationId === "string" ? new ObjectId(organizationId) : organizationId;
+  return db
+    .collection<Scholarship>(COLLECTIONS.SCHOLARSHIPS)
+    .find({
+      organizationId: orgId,
+      isPublished: true,
+      publishedSnapshot: { $exists: true },
+    })
+    .sort({ createdAt: -1 })
+    .toArray();
+}
+
+/**
  * Lists Scholarships for Admin console with optional draftStatus filter.
  */
 export async function listScholarshipsForAdmin(
@@ -265,3 +284,5 @@ export async function listPublishedScholarshipsForPublic(options?: {
 
   return rawScholarships;
 }
+
+

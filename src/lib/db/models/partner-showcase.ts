@@ -81,4 +81,11 @@ export interface PublicShowcaseEntryDto {
     height?: number;
   };
   displayOrder: number;
+  /** Public partner identifier when linked organization has an active published Virtual Booth */
+  partnerId?: string;
+  /** Direct public Virtual Booth path relative to locale (e.g. "/partners/...") */
+  boothHref?: string;
+  /** @deprecated Preserved for backward compatibility, prefer partnerId or boothHref */
+  linkedOrganizationId?: string;
 }
+

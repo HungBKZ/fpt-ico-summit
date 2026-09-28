@@ -68,6 +68,47 @@ export async function findActivityById(
 }
 
 /**
+ * Lists publicly scheduled & approved activities (Workshops & Stage Performances)
+ * for an organization (for Public Virtual Booth).
+ * Invariant: Must have Admin content approval (isContentApproved === true AND approvedSnapshot exists)
+ * AND must be published to the public operational schedule (publishedSchedule exists).
+ */
+export async function listPublishedActivitiesByOrg(
+  organizationId: string | ObjectId
+): Promise<SummitActivity[]> {
+  const coll = await getCollection();
+  const orgId = typeof organizationId === "string" ? new ObjectId(organizationId) : organizationId;
+  return coll
+    .find({
+      organizationId: orgId,
+      isContentApproved: true,
+      approvedSnapshot: { $exists: true },
+      publishedSchedule: { $exists: true },
+    })
+    .sort({ "publishedSchedule.dateKey": 1, "publishedSchedule.startTime": 1 })
+    .toArray();
+}
+
+/**
+ * Lists all content-approved activities for an organization (for Admin Partner Content Review).
+ * Allows Admin to inspect approved content proposals even before operational timetable publishing.
+ */
+export async function listApprovedActivitiesByOrg(
+  organizationId: string | ObjectId
+): Promise<SummitActivity[]> {
+  const coll = await getCollection();
+  const orgId = typeof organizationId === "string" ? new ObjectId(organizationId) : organizationId;
+  return coll
+    .find({
+      organizationId: orgId,
+      isContentApproved: true,
+      approvedSnapshot: { $exists: true },
+    })
+    .sort({ createdAt: -1 })
+    .toArray();
+}
+
+/**
  * Submits Stage A Workshop Topic Proposal for Admin review.
  */
 export async function submitTopicProposal(

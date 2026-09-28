@@ -50,6 +50,56 @@ export function OrganizationEditorForm({
 
   const isInReview = organization.draftStatus === "IN_REVIEW";
 
+  // Virtual Booth state initialization
+  const [activeTab, setActiveTab] = useState<"profile" | "booth">("profile");
+  const [boothEnabled, setBoothEnabled] = useState<boolean>(
+    Boolean(draft?.virtualBooth?.enabled)
+  );
+  const [programs, setPrograms] = useState<
+    Array<{ title: string; shortDescription?: string; url?: string }>
+  >(draft?.virtualBooth?.programs || []);
+  const [resources, setResources] = useState<
+    Array<{ label: string; url: string }>
+  >(draft?.virtualBooth?.resources || []);
+
+  const handleAddProgram = () => {
+    if (programs.length >= 10) return;
+    setPrograms([...programs, { title: "", shortDescription: "", url: "" }]);
+  };
+
+  const handleUpdateProgram = (
+    index: number,
+    field: "title" | "shortDescription" | "url",
+    value: string
+  ) => {
+    const next = [...programs];
+    next[index] = { ...next[index], [field]: value };
+    setPrograms(next);
+  };
+
+  const handleRemoveProgram = (index: number) => {
+    setPrograms(programs.filter((_, i) => i !== index));
+  };
+
+  const handleAddResource = () => {
+    if (resources.length >= 10) return;
+    setResources([...resources, { label: "", url: "" }]);
+  };
+
+  const handleUpdateResource = (
+    index: number,
+    field: "label" | "url",
+    value: string
+  ) => {
+    const next = [...resources];
+    next[index] = { ...next[index], [field]: value };
+    setResources(next);
+  };
+
+  const handleRemoveResource = (index: number) => {
+    setResources(resources.filter((_, i) => i !== index));
+  };
+
   // Calculate profile completion out of 6 sections
   const completionSections = [
     { key: "identity", isComplete: true },
@@ -287,6 +337,9 @@ export function OrganizationEditorForm({
       <input type="hidden" name="logoPublicId" value={logoPublicId} />
       <input type="hidden" name="coverUrl" value={coverUrl} />
       <input type="hidden" name="coverPublicId" value={coverPublicId} />
+      <input type="hidden" name="virtualBoothEnabled" value={boothEnabled ? "true" : "false"} />
+      <input type="hidden" name="virtualBoothProgramsJson" value={JSON.stringify(programs)} />
+      <input type="hidden" name="virtualBoothResourcesJson" value={JSON.stringify(resources)} />
       {/* Top Title & Single Localized Status Pill */}
       <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div className="space-y-1">
@@ -391,11 +444,39 @@ export function OrganizationEditorForm({
         </div>
       )}
 
-      {/* Hidden input for logoUrl form submission */}
-      <input type="hidden" name="logoUrl" value={logoUrl} />
+      {/* Tab Switcher */}
+      <div className="flex border-b border-slate-200 gap-3">
+        <button
+          type="button"
+          onClick={() => setActiveTab("profile")}
+          className={`pb-3 px-4 text-xs font-bold border-b-2 transition ${
+            activeTab === "profile"
+              ? "border-[var(--color-navy)] text-[var(--color-navy)]"
+              : "border-transparent text-slate-500 hover:text-slate-700"
+          }`}
+        >
+          {cms.tabProfile || "General Profile"}
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("booth")}
+          className={`pb-3 px-4 text-xs font-bold border-b-2 transition flex items-center gap-2 ${
+            activeTab === "booth"
+              ? "border-[var(--color-navy)] text-[var(--color-navy)]"
+              : "border-transparent text-slate-500 hover:text-slate-700"
+          }`}
+        >
+          <span>{cms.tabBooth || "Virtual Booth"}</span>
+          {boothEnabled && (
+            <span className="w-2 h-2 rounded-full bg-emerald-500" title="Booth enabled" />
+          )}
+        </button>
+      </div>
 
-      {/* Official Identity Section (Read-Only) */}
-      <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-3">
+      {/* Profile Tab Content */}
+      <div className={activeTab === "profile" ? "space-y-8" : "hidden"}>
+        {/* Official Identity Section (Read-Only) */}
+        <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-3">
         <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
           Official Identity (Read-Only)
         </h3>
@@ -767,6 +848,262 @@ export function OrganizationEditorForm({
             placeholder="Thông tin tổng quan về các khoa đào tạo và chương trình hợp tác quốc tế..."
             className="w-full text-xs p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100"
           />
+        </div>
+      </div>
+    </div>
+
+      {/* Virtual Booth Tab Content */}
+      <div className={activeTab === "booth" ? "space-y-8" : "hidden"}>
+        {/* Booth Overview */}
+        <div className="space-y-4">
+          <div className="border-b pb-2">
+            <h3 className="text-sm font-bold text-[var(--color-navy)]">
+              {cms.boothHeading}
+            </h3>
+            <p className="text-[11px] text-slate-500 mt-0.5">{cms.boothSubheading}</p>
+          </div>
+
+          {/* Enable Toggle Card */}
+          <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-3">
+            <input
+              type="checkbox"
+              id="virtualBoothEnabledCheckbox"
+              disabled={isInReview}
+              checked={boothEnabled}
+              onChange={(e) => setBoothEnabled(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+            />
+            <label htmlFor="virtualBoothEnabledCheckbox" className="cursor-pointer select-none">
+              <span className="block text-xs font-bold text-slate-900">{cms.boothEnableLabel}</span>
+              <span className="block text-[11px] text-slate-500 mt-0.5">{cms.boothEnableHelp}</span>
+            </label>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              {cms.boothIntroLabel}
+            </label>
+            <p className="text-[11px] text-slate-500 mb-1.5">{cms.boothIntroHelp}</p>
+            <input
+              type="text"
+              name="virtualBoothShortIntro"
+              maxLength={400}
+              disabled={isInReview}
+              defaultValue={draft?.virtualBooth?.shortIntroduction || ""}
+              placeholder="e.g. Welcome to our virtual admissions and academic collaboration pavilion..."
+              className="w-full text-xs p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              {cms.boothDescLabel}
+            </label>
+            <p className="text-[11px] text-slate-500 mb-1.5">{cms.boothDescHelp}</p>
+            <textarea
+              name="virtualBoothDescription"
+              rows={5}
+              maxLength={4000}
+              disabled={isInReview}
+              defaultValue={draft?.virtualBooth?.description || ""}
+              placeholder="Detailed description of your institution's summit offerings, academic programs, and international collaboration..."
+              className="w-full text-xs p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100"
+            />
+          </div>
+        </div>
+
+        {/* Programs & Opportunities */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between border-b pb-2">
+            <div>
+              <h3 className="text-sm font-bold text-[var(--color-navy)]">{cms.programsHeading}</h3>
+              <p className="text-[11px] text-slate-500 mt-0.5">{cms.programsSubheading}</p>
+            </div>
+            {!isInReview && programs.length < 10 && (
+              <button
+                type="button"
+                onClick={handleAddProgram}
+                className="py-1.5 px-3 bg-blue-50 text-blue-700 hover:bg-blue-100 font-semibold text-xs rounded-lg transition"
+              >
+                {cms.addProgramBtn}
+              </button>
+            )}
+          </div>
+
+          {programs.length === 0 ? (
+            <div className="p-4 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-center text-xs text-slate-500">
+              No programs or services added yet. Click &quot;{cms.addProgramBtn}&quot; to add up to 10 entries.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {programs.map((prog, index) => (
+                <div key={index} className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-bold text-slate-700">#{index + 1}</span>
+                    {!isInReview && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveProgram(index)}
+                        className="text-xs text-rose-600 hover:text-rose-800 font-semibold transition"
+                      >
+                        {cms.removeProgramBtn}
+                      </button>
+                    )}
+                  </div>
+                  <input
+                    type="text"
+                    disabled={isInReview}
+                    value={prog.title}
+                    onChange={(e) => handleUpdateProgram(index, "title", e.target.value)}
+                    placeholder={cms.programTitlePlaceholder}
+                    maxLength={150}
+                    className="w-full text-xs p-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100 font-medium"
+                  />
+                  <input
+                    type="text"
+                    disabled={isInReview}
+                    value={prog.shortDescription || ""}
+                    onChange={(e) => handleUpdateProgram(index, "shortDescription", e.target.value)}
+                    placeholder={cms.programDescPlaceholder}
+                    maxLength={500}
+                    className="w-full text-xs p-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100"
+                  />
+                  <input
+                    type="url"
+                    disabled={isInReview}
+                    value={prog.url || ""}
+                    onChange={(e) => handleUpdateProgram(index, "url", e.target.value)}
+                    placeholder={cms.programUrlPlaceholder}
+                    className="w-full text-xs p-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Resources & Useful Links */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between border-b pb-2">
+            <div>
+              <h3 className="text-sm font-bold text-[var(--color-navy)]">{cms.resourcesHeading}</h3>
+              <p className="text-[11px] text-slate-500 mt-0.5">{cms.resourcesSubheading}</p>
+            </div>
+            {!isInReview && resources.length < 10 && (
+              <button
+                type="button"
+                onClick={handleAddResource}
+                className="py-1.5 px-3 bg-blue-50 text-blue-700 hover:bg-blue-100 font-semibold text-xs rounded-lg transition"
+              >
+                {cms.addResourceBtn}
+              </button>
+            )}
+          </div>
+
+          {resources.length === 0 ? (
+            <div className="p-4 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-center text-xs text-slate-500">
+              No external resources added yet. Click &quot;{cms.addResourceBtn}&quot; to add brochures or guides.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {resources.map((res, index) => (
+                <div key={index} className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-bold text-slate-700">#{index + 1}</span>
+                    {!isInReview && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveResource(index)}
+                        className="text-xs text-rose-600 hover:text-rose-800 font-semibold transition"
+                      >
+                        {cms.removeResourceBtn}
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      disabled={isInReview}
+                      value={res.label}
+                      onChange={(e) => handleUpdateResource(index, "label", e.target.value)}
+                      placeholder={cms.resourceLabelPlaceholder}
+                      maxLength={100}
+                      className="w-full text-xs p-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100 font-medium"
+                    />
+                    <input
+                      type="url"
+                      disabled={isInReview}
+                      value={res.url}
+                      onChange={(e) => handleUpdateResource(index, "url", e.target.value)}
+                      placeholder={cms.resourceUrlPlaceholder}
+                      className="w-full text-xs p-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Primary Call to Action */}
+        <div className="space-y-4">
+          <div className="border-b pb-2">
+            <h3 className="text-sm font-bold text-[var(--color-navy)]">{cms.ctaHeading}</h3>
+            <p className="text-[11px] text-slate-500 mt-0.5">{cms.ctaSubheading}</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Button Label
+              </label>
+              <input
+                type="text"
+                name="virtualBoothPrimaryCtaLabel"
+                maxLength={60}
+                disabled={isInReview}
+                defaultValue={draft?.virtualBooth?.primaryCta?.label || ""}
+                placeholder={cms.ctaLabelPlaceholder}
+                className="w-full text-xs p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Button URL (HTTPS)
+              </label>
+              <input
+                type="url"
+                name="virtualBoothPrimaryCtaUrl"
+                disabled={isInReview}
+                defaultValue={draft?.virtualBooth?.primaryCta?.url || ""}
+                placeholder={cms.ctaUrlPlaceholder}
+                className="w-full text-xs p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Related Summit Content Notice */}
+        <div className="p-4 bg-blue-50/70 border border-blue-200 rounded-xl space-y-2">
+          <h4 className="text-xs font-bold text-blue-950 flex items-center gap-1.5">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            <span>Related Summit Content</span>
+          </h4>
+          <p className="text-[11px] text-blue-900 leading-relaxed">
+            {cms.relatedNotice}
+          </p>
+          <div className="flex items-center gap-3 pt-1 text-xs font-bold">
+            <Link href={`/${locale}/dashboard/scholarships`} className="text-blue-700 hover:text-blue-900 underline">
+              Manage Scholarships →
+            </Link>
+            <Link href={`/${locale}/dashboard/activities`} className="text-blue-700 hover:text-blue-900 underline">
+              Manage Activities →
+            </Link>
+          </div>
         </div>
       </div>
 

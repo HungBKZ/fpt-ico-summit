@@ -300,7 +300,7 @@ async function run() {
         bsonType: "object",
         required: ["type", "name", "nameNormalized", "country", "countryNormalized", "status", "createdAt", "updatedAt"],
         properties: {
-          type: { enum: ["UNIVERSITY", "CONSULATE"] },
+          type: { enum: ["UNIVERSITY", "CONSULATE", "TRAVEL", "COMPANY", "EDUCATION_ORGANIZATION", "OTHER"] },
           name: { bsonType: "string", minLength: 1 },
           nameNormalized: { bsonType: "string", minLength: 1 },
           country: { bsonType: "string", minLength: 1 },

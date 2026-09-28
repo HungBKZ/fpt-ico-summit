@@ -316,6 +316,23 @@ export async function listPublishedOrganizationsForPublic(options?: {
 }
 
 /**
+ * Public query: Retrieves a published organization by ID.
+ */
+export async function getPublishedOrganizationById(
+  id: string | ObjectId
+): Promise<Organization | null> {
+  const db = await getDb();
+  const objId = typeof id === "string" ? new ObjectId(id) : id;
+  return db
+    .collection<Organization>(COLLECTIONS.ORGANIZATIONS)
+    .findOne({
+      _id: objId,
+      isPublished: true,
+      publishedProfile: { $exists: true },
+    });
+}
+
+/**
  * Fast DB counts for Admin Overview metrics.
  */
 export async function getAdminOverviewMetrics() {

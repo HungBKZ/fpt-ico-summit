@@ -9,8 +9,16 @@ export async function GET(request: Request) {
     const countryParam = searchParams.get("country");
     const localeParam = searchParams.get("locale") || "en";
 
+    const validTypes: OrganizationType[] = [
+      "UNIVERSITY",
+      "CONSULATE",
+      "TRAVEL",
+      "COMPANY",
+      "EDUCATION_ORGANIZATION",
+      "OTHER",
+    ];
     const typeFilter =
-      typeParam === "UNIVERSITY" || typeParam === "CONSULATE"
+      typeParam && validTypes.includes(typeParam as OrganizationType)
         ? (typeParam as OrganizationType)
         : undefined;
 
@@ -26,10 +34,7 @@ export async function GET(request: Request) {
         (isVi ? pub.content?.vi?.shortDescription : pub.content?.en?.shortDescription) ||
         pub.content?.en?.shortDescription ||
         "";
-      const fullDesc =
-        (isVi ? pub.content?.vi?.description : pub.content?.en?.description) ||
-        pub.content?.en?.description ||
-        "";
+      const hasVirtualBooth = Boolean(pub.virtualBooth?.enabled);
 
       return {
         id: String(org._id),
@@ -45,9 +50,8 @@ export async function GET(request: Request) {
             }
           : null,
         websiteUrl: pub.websiteUrl || null,
-        publicContact: pub.publicContact || null,
         shortDescription: shortDesc,
-        description: fullDesc || null,
+        hasVirtualBooth,
       };
     });
 
